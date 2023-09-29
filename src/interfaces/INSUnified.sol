@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import {ModifyingIndicator} from "@rns-contracts/types/ModifyingIndicator.sol";
+import { IERC721Metadata } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import { ModifyingIndicator } from "../types/ModifyingIndicator.sol";
 
 interface INSUnified is IERC721Metadata {
   /// @dev Error: The provided name is unavailable for registration.
@@ -64,6 +64,8 @@ interface INSUnified is IERC721Metadata {
     MutableRecord mut;
   }
 
+  /// @dev Emitted when a base URI is updated.
+  event BaseURIUpdated(address indexed operator, string newURI);
   event GracePeriodUpdated(address indexed operator, uint64 newGracePeriod);
 
   /**
@@ -119,6 +121,15 @@ interface INSUnified is IERC721Metadata {
    * Note: This period affects the availability of the domain.
    */
   function setGracePeriod(uint64) external;
+
+  /**
+   * @dev Sets the base uri.
+   *
+   * Requirements:
+   * - The method caller must be contract owner.
+   *
+   */
+  function setBaseURI(string calldata baseTokenURI) external;
 
   /**
    * @dev Mints token for subnode.
