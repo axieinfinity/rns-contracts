@@ -1,6 +1,18 @@
 name: test
 
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - mainnet
+      - testnet
+      - 'feature/*'
+      - 'features/*'
+  pull_request:
+    branches:
+      - mainnet
+      - testnet
+      - 'feature/*'
+      - 'features/*'
 
 env:
   FOUNDRY_PROFILE: ci
