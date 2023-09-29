@@ -5,27 +5,20 @@ import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/I
 import {ModifyingIndicator} from "@rns-contracts/types/ModifyingIndicator.sol";
 
 interface INSUnified is IERC721Metadata {
+  /// @dev Error: The provided name is unavailable for registration.
   error Unavailable();
+  /// @dev Error: The sender lacks the necessary permissions.
   error Unauthorized();
+  /// @dev Error: Missing controller role required for modification.
   error MissingControllerRole();
+  /// @dev Error: Attempting to set an immutable field, which cannot be modified.
   error CannotSetImmutableField();
+  /// @dev Error: Missing protected settler role required for modification.
   error MissingProtectedSettlerRole();
+  /// @dev Error: Attempting to set an expiry time that is not larger than the previous one.
   error ExpiryTimeMustBeLargerThanTheOldOne();
+  /// @dev Error: The provided name must be registered or is in a grace period.
   error NameMustBeRegisteredOrInGracePeriod();
-
-  enum ModifyRecordError
-  // No error occurred.
-  {
-    NoError,
-    // The sender lacks the necessary permissions.
-    Unauthorized,
-    // Attempted to set an immutable field, which cannot be modified.
-    CannotSetImmutableField,
-    // Missing controller role required for modification.
-    MissingControllerRole,
-    // Missing protected settler role required for modification.
-    MissingProtectedSettlerRole
-  }
 
   /**
    * | Fields\Idc | Modifying Indicator |
