@@ -52,7 +52,7 @@ contract RNSUnified is Initializable, RNSToken {
 
   /// @inheritdoc INSUnified
   function available(uint256 id) public view returns (bool) {
-    return block.timestamp > LibSafeRange.add(_recordOf[id].mut.expiry, _gracePeriod);
+    return block.timestamp > LibSafeRange.add(_expiry(id), _gracePeriod);
   }
 
   /// @inheritdoc INSUnified
