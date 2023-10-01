@@ -99,7 +99,7 @@ abstract contract RNSToken is
    * @inheritdoc IERC721State
    */
   function stateOf(uint256 tokenId) external view virtual override onlyMinted(tokenId) returns (bytes memory) {
-    return abi.encodePacked(ownerOf(tokenId), nonces[tokenId], tokenId);
+    return abi.encode(_recordOf[tokenId], nonces[tokenId], tokenId);
   }
 
   /// @dev Override {ERC165-supportsInterface}.
