@@ -218,9 +218,7 @@ contract RNSUnified is Initializable, RNSToken {
    * Returns true only if the spender is owner, or approved spender, or owner of parent token.
    */
   function _checkOwnerRules(address spender, uint256 id) internal view returns (bool) {
-    address owner = ownerOf(id);
-    return spender == owner || _isApprovedOrOwner(spender, id) || getApproved(id) == spender
-      || _isHierarchyOwner(spender, id);
+    return _isApprovedOrOwner(spender, id) || _isHierarchyOwner(spender, id);
   }
 
   /**
