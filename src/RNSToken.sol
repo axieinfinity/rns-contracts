@@ -27,7 +27,7 @@ abstract contract RNSToken is
   /// @dev Gap for upgradeability.
   uint256[50] private ____gap;
 
-  uint256 internal _tokenIdTracker;
+  uint256 internal _idCounter;
   string internal _baseTokenURI;
 
   modifier onlyMinted(uint256 tokenId) {
@@ -35,8 +35,7 @@ abstract contract RNSToken is
     _;
   }
 
-  constructor() payable ERC721("", "") {}
-  
+  /// @inheritdoc INSUnified
   function setBaseURI(string calldata baseTokenURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
     _setBaseURI(baseTokenURI);
   }
@@ -79,7 +78,7 @@ abstract contract RNSToken is
 
   /// @inheritdoc INSUnified
   function totalMinted() external view virtual returns (uint256) {
-    return _tokenIdTracker;
+    return _idCounter;
   }
 
   /// @dev Override {IERC721Metadata-tokenURI}.
@@ -93,13 +92,6 @@ abstract contract RNSToken is
   {
     string memory baseURI = _baseURI();
     return bytes(baseURI).length > 0 ? string.concat(baseURI, address(this).toHexString(), "/", tokenId.toString()) : "";
-  }
-
-  /**
-   * @inheritdoc IERC721State
-   */
-  function stateOf(uint256 tokenId) external view virtual override onlyMinted(tokenId) returns (bytes memory) {
-    return abi.encode(_recordOf[tokenId], nonces[tokenId], tokenId);
   }
 
   /// @dev Override {ERC165-supportsInterface}.
@@ -116,7 +108,7 @@ abstract contract RNSToken is
   /// @dev Override {ERC721-_mint}.
   function _mint(address to, uint256 tokenId) internal virtual override {
     unchecked {
-      ++_tokenIdTracker;
+      ++_idCounter;
     }
     super._mint(to, tokenId);
   }

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import { IERC721, ERC721, INSUnified, RNSToken } from "./RNSToken.sol";
+import { IERC721State, IERC721, ERC721, INSUnified, RNSToken } from "./RNSToken.sol";
 import { LibSafeRange } from "./libraries/math/LibSafeRange.sol";
 import { ModifyingField, LibModifyingField } from "./libraries/LibModifyingField.sol";
 import { ALL_FIELDS_INDICATOR, IMMUTABLE_FIELDS_INDICATOR, ModifyingIndicator } from "./types/ModifyingIndicator.sol";
@@ -27,7 +27,7 @@ contract RNSUnified is Initializable, RNSToken {
     _;
   }
 
-  constructor() payable {
+  constructor() payable ERC721("", "") {
     _disableInitializers();
   }
 
@@ -118,13 +118,14 @@ contract RNSUnified is Initializable, RNSToken {
   /// @inheritdoc INSUnified
   function bulkSetProtected(uint256[] calldata ids, bool protected) external onlyRole(PROTECTED_SETTLER_ROLE) {
     ModifyingIndicator indicator = ModifyingField.Protected.indicator();
-    Record memory record;
     uint256 id;
+    Record memory record;
+    record.mut.protected = protected;
 
     for (uint256 i; i < ids.length;) {
       id = ids[i];
       if (_recordOf[id].mut.protected != protected) {
-        _recordOf[id].mut.protected = record.mut.protected = protected;
+        _recordOf[id].mut.protected = protected;
         emit RecordsUpdated(id, indicator, record);
       }
 
@@ -145,6 +146,13 @@ contract RNSUnified is Initializable, RNSToken {
     emit RecordsUpdated(id, indicator, record);
   }
 
+  /**
+   * @inheritdoc IERC721State
+   */
+  function stateOf(uint256 tokenId) external view virtual override onlyMinted(tokenId) returns (bytes memory) {
+    return abi.encode(_recordOf[tokenId], nonces[tokenId], tokenId);
+  }
+
   /// @inheritdoc INSUnified
   function canSetRecords(address requester, uint256 id, ModifyingIndicator indicator)
     public
@@ -154,7 +162,8 @@ contract RNSUnified is Initializable, RNSToken {
     if (indicator.hasAny(IMMUTABLE_FIELDS_INDICATOR)) {
       return (false, CannotSetImmutableField.selector);
     }
-    if (indicator.hasAny(ModifyingField.Expiry.indicator()) && !hasRole(CONTROLLER_ROLE, requester)) {
+    bool hasControllerRole = hasRole(CONTROLLER_ROLE, requester);
+    if (indicator.hasAny(ModifyingField.Expiry.indicator()) && !hasControllerRole) {
       return (false, MissingControllerRole.selector);
     }
     if (indicator.hasAny(ModifyingField.Protected.indicator()) && !hasRole(PROTECTED_SETTLER_ROLE, requester)) {
@@ -163,7 +172,7 @@ contract RNSUnified is Initializable, RNSToken {
     if (
       indicator.hasAny(
         ModifyingField.Resolver.indicator() | ModifyingField.Ttl.indicator() | ModifyingField.Owner.indicator()
-      ) && !(hasRole(CONTROLLER_ROLE, requester) || _checkOwnerRules(requester, id))
+      ) && !(hasControllerRole || _checkOwnerRules(requester, id))
     ) {
       return (false, Unauthorized.selector);
     }
@@ -288,16 +297,14 @@ contract RNSUnified is Initializable, RNSToken {
     Record memory record;
     ModifyingIndicator indicator = ModifyingField.Owner.indicator();
     bool shouldUpdateProtected = !hasRole(PROTECTED_SETTLER_ROLE, _msgSender());
-    if (shouldUpdateProtected) {
-      indicator = indicator | ModifyingField.Protected.indicator();
-    }
+    if (shouldUpdateProtected) indicator = indicator | ModifyingField.Protected.indicator();
 
     for (uint256 id = firstTokenId; id < firstTokenId + batchSize;) {
       _recordOf[id].mut.owner = record.mut.owner = to;
       if (shouldUpdateProtected) {
-        _recordOf[id].mut.protected = record.mut.protected = false;
+        _recordOf[id].mut.protected = false;
+        emit RecordsUpdated(id, indicator, record);
       }
-      emit RecordsUpdated(id, indicator, record);
 
       unchecked {
         id++;
