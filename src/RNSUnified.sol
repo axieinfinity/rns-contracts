@@ -162,12 +162,12 @@ contract RNSUnified is Initializable, RNSToken {
     if (indicator.hasAny(IMMUTABLE_FIELDS_INDICATOR)) {
       return (false, CannotSetImmutableField.selector);
     }
+    if (indicator.hasAny(ModifyingField.Protected.indicator()) && !hasRole(PROTECTED_SETTLER_ROLE, requester)) {
+      return (false, MissingProtectedSettlerRole.selector);
+    }
     bool hasControllerRole = hasRole(CONTROLLER_ROLE, requester);
     if (indicator.hasAny(ModifyingField.Expiry.indicator()) && !hasControllerRole) {
       return (false, MissingControllerRole.selector);
-    }
-    if (indicator.hasAny(ModifyingField.Protected.indicator()) && !hasRole(PROTECTED_SETTLER_ROLE, requester)) {
-      return (false, MissingProtectedSettlerRole.selector);
     }
     if (
       indicator.hasAny(
