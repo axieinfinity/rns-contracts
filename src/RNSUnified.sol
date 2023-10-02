@@ -182,7 +182,7 @@ contract RNSUnified is Initializable, RNSToken {
 
   /// @dev Override {ERC721-ownerOf}.
   function ownerOf(uint256 tokenId) public view override(ERC721, IERC721) returns (address) {
-    if (_isExpired(tokenId)) return address(0x00);
+    if (_isExpired(tokenId)) revert Expired();
     return super.ownerOf(tokenId);
   }
 
