@@ -51,6 +51,11 @@ contract RNSUnified is Initializable, RNSToken {
   }
 
   /// @inheritdoc INSUnified
+  function namehash(string memory) external pure returns (uint256) {
+    revert("TODO");
+  }
+
+  /// @inheritdoc INSUnified
   function available(uint256 id) public view returns (bool) {
     return block.timestamp > LibSafeRange.add(_expiry(id), _gracePeriod);
   }
@@ -182,7 +187,7 @@ contract RNSUnified is Initializable, RNSToken {
 
   /// @dev Override {ERC721-ownerOf}.
   function ownerOf(uint256 tokenId) public view override(ERC721, IERC721) returns (address) {
-    if (_isExpired(tokenId)) revert Expired();
+    if (_isExpired(tokenId)) return address(0);
     return super.ownerOf(tokenId);
   }
 
