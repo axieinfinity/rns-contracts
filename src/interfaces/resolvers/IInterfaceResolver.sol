@@ -10,7 +10,8 @@ interface IInterfaceResolver {
    * Setting the address to 0 restores the default behaviour of querying the contract at `addr()` for interface support.
    *
    * Requirements:
-   * - The method caller must be a controller, a registrar, the owner in registry contract, or an operator.
+   * - The method caller must be authorized to change user fields of RNS Token `node`. See indicator
+   * {ModifyingIndicator.USER_FIELDS_INDICATOR}.
    *
    * @param node The node to update.
    * @param interfaceID The EIP 165 interface ID.
@@ -25,7 +26,7 @@ interface IInterfaceResolver {
    * If `addr()` is set, a contract exists at that address, and that contract implements EIP165 and returns `true` for
    * the specified interfaceID, its address will be returned.
    *
-   * @param node The ENS node to query.
+   * @param node The INS node to query.
    * @param interfaceID The EIP 165 interface ID to check for.
    * @return The address that implements this interface, or 0 if the interface is unsupported.
    */

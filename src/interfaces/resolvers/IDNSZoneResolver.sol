@@ -9,7 +9,8 @@ interface IDNSZoneResolver {
    * @dev Sets the hash for the zone.
    *
    * Requirements:
-   * - The method caller must be a controller, a registrar, the owner in registry contract, or an operator.
+   * - The method caller must be authorized to change user fields of RNS Token `node`. See indicator
+   * {ModifyingIndicator.USER_FIELDS_INDICATOR}.
    *
    * Emits an event {DNSZonehashChanged}.
    *
@@ -20,7 +21,7 @@ interface IDNSZoneResolver {
 
   /**
    * @dev Obtains the hash for the zone.
-   * @param node The ENS node to query.
+   * @param node The INS node to query.
    * @return The associated contenthash.
    */
   function zonehash(bytes32 node) external view returns (bytes memory);

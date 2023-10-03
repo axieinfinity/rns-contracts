@@ -22,7 +22,8 @@ interface IDNSRecordResolver {
    * then this would store the first A record, the CNAME, then the second A record which would overwrite the first.
    *
    * Requirements:
-   * - The method caller must be a controller, a registrar, the owner in registry contract, or an operator.
+   * - The method caller must be authorized to change user fields of RNS Token `node`. See indicator
+   * {ModifyingIndicator.USER_FIELDS_INDICATOR}.
    *
    * @param node the namehash of the node for which to set the records
    * @param data the DNS wire format records to set

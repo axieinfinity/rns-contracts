@@ -6,10 +6,11 @@ interface IVersionResolver {
   event VersionChanged(bytes32 indexed node, uint64 newVersion);
 
   /**
-   * @dev Increments the record version associated with an ENS node.
+   * @dev Increments the record version associated with an INS node.
    *
    * Requirements:
-   * - The method caller must be a controller, a registrar, the owner in registry contract, or an operator.
+   * - The method caller must be authorized to change user fields of RNS Token `node`. See indicator
+   * {ModifyingIndicator.USER_FIELDS_INDICATOR}.
    *
    * Emits an event {VersionChanged}.
    *

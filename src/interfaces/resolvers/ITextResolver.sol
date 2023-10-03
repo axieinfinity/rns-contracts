@@ -6,10 +6,11 @@ interface ITextResolver {
   event TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value);
 
   /**
-   * @dev Sets the text data associated with an ENS node and key.
+   * @dev Sets the text data associated with an INS node and key.
    *
    * Requirements:
-   * - The method caller must be a controller, a registrar, the owner in registry contract, or an operator.
+   * - The method caller must be authorized to change user fields of RNS Token `node`. See indicator
+   * {ModifyingIndicator.USER_FIELDS_INDICATOR}.
    *
    * Emits an event {TextChanged}.
    *
@@ -20,8 +21,8 @@ interface ITextResolver {
   function setText(bytes32 node, string calldata key, string calldata value) external;
 
   /**
-   * Returns the text data associated with an ENS node and key.
-   * @param node The ENS node to query.
+   * Returns the text data associated with an INS node and key.
+   * @param node The INS node to query.
    * @param key The text data key to query.
    * @return The associated text data.
    */

@@ -6,10 +6,11 @@ interface IAddressResolver {
   event AddrChanged(bytes32 indexed node, address addr);
 
   /**
-   * @dev Sets the address associated with an ENS node.
+   * @dev Sets the address associated with an INS node.
    *
    * Requirement:
-   * - The method caller must be a controller, a registrar, the owner in registry contract, or an operator.
+   * - The method caller must be authorized to change user fields of RNS Token `node`. See indicator
+   * {ModifyingIndicator.USER_FIELDS_INDICATOR}.
    *
    * Emits an event {AddrChanged}.
    *
@@ -19,8 +20,8 @@ interface IAddressResolver {
   function setAddr(bytes32 node, address addr) external;
 
   /**
-   * @dev Returns the address associated with an ENS node.
-   * @param node The ENS node to query.
+   * @dev Returns the address associated with an INS node.
+   * @param node The INS node to query.
    * @return The associated address.
    */
   function addr(bytes32 node) external view returns (address payable);
