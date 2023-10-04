@@ -17,6 +17,7 @@ contract RNSUnified_Mint_Test is RNSUnifiedTest {
     validAccount(approved)
     mintAs(approved)
   {
+    vm.assume(_admin != approved);
     vm.prank(_admin);
     _rns.approve(approved, _ronId);
     _mint(_ronId, mintParam, _noError);
@@ -26,14 +27,14 @@ contract RNSUnified_Mint_Test is RNSUnifiedTest {
     vm.prank(_pauser);
     _rns.pause();
     _mint(_ronId, mintParam, Error(true, "Pausable: paused"));
-   }
+  }
 
   function testFuzz_RevertWhen_RonIdTransfered_AsController_mint(address newAdmin, MintParam calldata mintParam)
     external
     mintAs(_controller)
     validAccount(newAdmin)
   {
-    vm.assume(_admin != newAdmin);
+    vm.assume(_admin != newAdmin && newAdmin != _controller);
     vm.prank(_admin);
     _rns.safeTransferFrom(_admin, newAdmin, _ronId);
     _mint(_ronId, mintParam, Error(true, abi.encodeWithSelector(INSUnified.Unauthorized.selector)));

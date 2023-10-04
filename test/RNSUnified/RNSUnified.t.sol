@@ -86,11 +86,12 @@ contract RNSUnifiedTest is Test {
     validAccount(mintParam.owner)
     returns (uint64 expiry, uint256 id)
   {
+    vm.assume(block.timestamp + mintParam.duration < _ronExpiry);
+
     if (error.shouldThrow) vm.expectRevert(error.revertMessage);
     vm.prank($minter);
     vm.resumeGasMetering();
-    (expiry, id) =
-      _rns.mint(parentId, mintParam.name, mintParam.resolver, mintParam.owner, mintParam.duration);
+    (expiry, id) = _rns.mint(parentId, mintParam.name, mintParam.resolver, mintParam.owner, mintParam.duration);
     vm.pauseGasMetering();
     if (!error.shouldThrow) _assert(parentId, id, mintParam);
   }
