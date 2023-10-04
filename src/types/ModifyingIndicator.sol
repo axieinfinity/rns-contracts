@@ -9,6 +9,9 @@ using { or as | } for ModifyingIndicator global;
 /// @dev Indicator for modifying immutable fields: Depth, ParentId, Label. See struct {INSUnified.ImmutableRecord}.
 ModifyingIndicator constant IMMUTABLE_FIELDS_INDICATOR = ModifyingIndicator.wrap(0x7);
 
+/// @dev Indicator for modifying user fields: Resolver, Owner. See struct {INSUnified.MutableRecord}.
+ModifyingIndicator constant USER_FIELDS_INDICATOR = ModifyingIndicator.wrap(0x18);
+
 /// @dev Indicator when modifying all of the fields in {ModifyingField}.
 ModifyingIndicator constant ALL_FIELDS_INDICATOR = ModifyingIndicator.wrap(type(uint256).max);
 

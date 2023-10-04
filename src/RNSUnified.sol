@@ -5,7 +5,12 @@ import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable
 import { IERC721State, IERC721, ERC721, INSUnified, RNSToken } from "./RNSToken.sol";
 import { LibSafeRange } from "./libraries/math/LibSafeRange.sol";
 import { ModifyingField, LibModifyingField } from "./libraries/LibModifyingField.sol";
-import { ALL_FIELDS_INDICATOR, IMMUTABLE_FIELDS_INDICATOR, ModifyingIndicator } from "./types/ModifyingIndicator.sol";
+import {
+  ALL_FIELDS_INDICATOR,
+  IMMUTABLE_FIELDS_INDICATOR,
+  USER_FIELDS_INDICATOR,
+  ModifyingIndicator
+} from "./types/ModifyingIndicator.sol";
 
 contract RNSUnified is Initializable, RNSToken {
   using LibModifyingField for ModifyingField;
@@ -19,7 +24,7 @@ contract RNSUnified is Initializable, RNSToken {
   uint256[50] private ____gap;
 
   uint64 internal _gracePeriod;
-  /// @dev Mapping from token id => records
+  /// @dev Mapping from token id => record
   mapping(uint256 => Record) internal _recordOf;
 
   modifier onlyAuthorized(uint256 id, ModifyingIndicator indicator) {
@@ -66,7 +71,7 @@ contract RNSUnified is Initializable, RNSToken {
   }
 
   /// @inheritdoc INSUnified
-  function mint(uint256 parentId, string calldata label, address resolver, uint64 ttl, address owner, uint64 duration)
+  function mint(uint256 parentId, string calldata label, address resolver, address owner, uint64 duration)
     external
     whenNotPaused
     returns (uint64 expiryTime, uint256 id)
@@ -83,18 +88,31 @@ contract RNSUnified is Initializable, RNSToken {
     expiryTime = uint64(LibSafeRange.addWithUpperbound(block.timestamp, duration, MAX_EXPIRY));
     _requireValidExpiry(parentId, expiryTime);
     Record memory record;
-    record.mut = MutableRecord({ resolver: resolver, ttl: ttl, owner: owner, expiry: expiryTime, protected: false });
+    record.mut = MutableRecord({ resolver: resolver, owner: owner, expiry: expiryTime, protected: false });
     record.immut = ImmutableRecord({ depth: _recordOf[parentId].immut.depth + 1, parentId: parentId, label: label });
 
     _recordOf[id] = record;
-    emit RecordsUpdated(id, ALL_FIELDS_INDICATOR, record);
+    emit RecordUpdated(id, ALL_FIELDS_INDICATOR, record);
   }
 
   /// @inheritdoc INSUnified
-  function getRecords(uint256 id) external view returns (Record memory records, string memory domain) {
-    records = _recordOf[id];
-    records.mut.expiry = _expiry(id);
-    domain = _getDomain(records.immut.parentId, records.immut.label);
+  function getRecord(uint256 id) external view returns (Record memory record) {
+    record = _recordOf[id];
+    record.mut.expiry = _expiry(id);
+  }
+
+  /// @inheritdoc INSUnified
+  function getDomain(uint256 id) external view returns (string memory domain) {
+    if (id == 0) return "";
+
+    ImmutableRecord storage sRecord = _recordOf[id].immut;
+    domain = sRecord.label;
+    id = sRecord.parentId;
+    while (id != 0) {
+      sRecord = _recordOf[id].immut;
+      domain = string.concat(domain, ".", sRecord.label);
+      id = sRecord.parentId;
+    }
   }
 
   /// @inheritdoc INSUnified
@@ -127,7 +145,7 @@ contract RNSUnified is Initializable, RNSToken {
       id = ids[i];
       if (_recordOf[id].mut.protected != protected) {
         _recordOf[id].mut.protected = protected;
-        emit RecordsUpdated(id, indicator, record);
+        emit RecordUpdated(id, indicator, record);
       }
 
       unchecked {
@@ -137,14 +155,14 @@ contract RNSUnified is Initializable, RNSToken {
   }
 
   /// @inheritdoc INSUnified
-  function setRecords(uint256 id, ModifyingIndicator indicator, MutableRecord calldata mutRecord)
+  function setRecord(uint256 id, ModifyingIndicator indicator, MutableRecord calldata mutRecord)
     external
     whenNotPaused
     onlyAuthorized(id, indicator)
   {
     Record memory record;
     _recordOf[id].mut = record.mut = mutRecord;
-    emit RecordsUpdated(id, indicator, record);
+    emit RecordUpdated(id, indicator, record);
   }
 
   /**
@@ -155,7 +173,7 @@ contract RNSUnified is Initializable, RNSToken {
   }
 
   /// @inheritdoc INSUnified
-  function canSetRecords(address requester, uint256 id, ModifyingIndicator indicator)
+  function canSetRecord(address requester, uint256 id, ModifyingIndicator indicator)
     public
     view
     returns (bool allowed, bytes4)
@@ -170,11 +188,7 @@ contract RNSUnified is Initializable, RNSToken {
     if (indicator.hasAny(ModifyingField.Expiry.indicator()) && !hasControllerRole) {
       return (false, MissingControllerRole.selector);
     }
-    if (
-      indicator.hasAny(
-        ModifyingField.Resolver.indicator() | ModifyingField.Ttl.indicator() | ModifyingField.Owner.indicator()
-      ) && !(hasControllerRole || _checkOwnerRules(requester, id))
-    ) {
+    if (indicator.hasAny(USER_FIELDS_INDICATOR) && !(hasControllerRole || _checkOwnerRules(requester, id))) {
       return (false, Unauthorized.selector);
     }
 
@@ -232,10 +246,10 @@ contract RNSUnified is Initializable, RNSToken {
   }
 
   /**
-   * @dev Helper method to ensure msg.sender is authorized to modify records of the token id.
+   * @dev Helper method to ensure msg.sender is authorized to modify record of the token id.
    */
   function _requireAuthorized(uint256 id, ModifyingIndicator indicator) internal view {
-    (bool allowed, bytes4 errorCode) = canSetRecords(_msgSender(), id, indicator);
+    (bool allowed, bytes4 errorCode) = canSetRecord(_msgSender(), id, indicator);
     if (!allowed) {
       assembly ("memory-safe") {
         mstore(0x00, errorCode)
@@ -271,7 +285,7 @@ contract RNSUnified is Initializable, RNSToken {
    * - The token must be registered or in grace period.
    * - Expiry time must be larger than the old one.
    *
-   * Emits an event {RecordsUpdated}.
+   * Emits an event {RecordUpdated}.
    */
   function _setExpiry(uint256 id, uint64 expiry) internal {
     _requireValidExpiry(_recordOf[id].immut.parentId, expiry);
@@ -280,7 +294,7 @@ contract RNSUnified is Initializable, RNSToken {
 
     Record memory record;
     _recordOf[id].mut.expiry = record.mut.expiry = expiry;
-    emit RecordsUpdated(id, ModifyingField.Expiry.indicator(), record);
+    emit RecordUpdated(id, ModifyingField.Expiry.indicator(), record);
   }
 
   /**
@@ -302,15 +316,16 @@ contract RNSUnified is Initializable, RNSToken {
     super._afterTokenTransfer(from, to, firstTokenId, batchSize);
 
     Record memory record;
+    record.mut.owner = to;
     ModifyingIndicator indicator = ModifyingField.Owner.indicator();
     bool shouldUpdateProtected = !hasRole(PROTECTED_SETTLER_ROLE, _msgSender());
     if (shouldUpdateProtected) indicator = indicator | ModifyingField.Protected.indicator();
 
     for (uint256 id = firstTokenId; id < firstTokenId + batchSize;) {
-      _recordOf[id].mut.owner = record.mut.owner = to;
+      _recordOf[id].mut.owner = to;
       if (shouldUpdateProtected) {
         _recordOf[id].mut.protected = false;
-        emit RecordsUpdated(id, indicator, record);
+        emit RecordUpdated(id, indicator, record);
       }
 
       unchecked {
