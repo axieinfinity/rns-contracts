@@ -81,6 +81,7 @@ contract RNSUnified is Initializable, RNSToken {
     _mint(owner, id);
 
     expiryTime = uint64(LibSafeRange.addWithUpperbound(block.timestamp, duration, MAX_EXPIRY));
+    _requireValidExpiry(parentId, expiryTime);
     Record memory record;
     record.mut = MutableRecord({ resolver: resolver, ttl: ttl, owner: owner, expiry: expiryTime, protected: false });
     record.immut = ImmutableRecord({ depth: _recordOf[parentId].immut.depth + 1, parentId: parentId, label: label });
@@ -244,6 +245,13 @@ contract RNSUnified is Initializable, RNSToken {
   }
 
   /**
+   * @dev Helper method to ensure expiry of an id is lower or equal expiry of parent id.
+   */
+  function _requireValidExpiry(uint256 parentId, uint64 expiry) internal view {
+    if (expiry > _recordOf[parentId].mut.expiry) revert ExceedParentExpiry();
+  }
+
+  /**
    * @dev Helper method to get full domain name from parent id and current label.
    */
   function _getDomain(uint256 parentId, string memory label) internal view returns (string memory domain) {
@@ -266,12 +274,11 @@ contract RNSUnified is Initializable, RNSToken {
    * Emits an event {RecordsUpdated}.
    */
   function _setExpiry(uint256 id, uint64 expiry) internal {
+    _requireValidExpiry(_recordOf[id].immut.parentId, expiry);
     if (available(id)) revert NameMustBeRegisteredOrInGracePeriod();
-    if (expiry <= _recordOf[id].mut.expiry) {
-      revert ExpiryTimeMustBeLargerThanTheOldOne();
-    }
-    Record memory record;
+    if (expiry <= _recordOf[id].mut.expiry) revert ExpiryTimeMustBeLargerThanTheOldOne();
 
+    Record memory record;
     _recordOf[id].mut.expiry = record.mut.expiry = expiry;
     emit RecordsUpdated(id, ModifyingField.Expiry.indicator(), record);
   }
