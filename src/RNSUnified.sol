@@ -244,6 +244,9 @@ contract RNSUnified is Initializable, RNSToken {
     }
   }
 
+  /**
+   * @dev Helper method to ensure expiry of an id is lower or equal expiry of parent id.
+   */
   function _requireValidExpiry(uint256 parentId, uint64 expiry) internal view {
     if (expiry > _recordOf[parentId].mut.expiry) revert ExceedParentExpiry();
   }
