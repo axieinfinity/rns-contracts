@@ -13,7 +13,6 @@ contract RNSUnifiedTest is Test {
     address owner;
     string name;
     address resolver;
-    uint64 ttl;
     uint64 duration;
   }
 
@@ -69,7 +68,7 @@ contract RNSUnifiedTest is Test {
 
     vm.warp(block.timestamp + GRACE_PERIOD + 1 seconds);
     vm.startPrank(_admin);
-    (_ronExpiry, _ronId) = _rns.mint(0x00, "ron", address(0), type(uint64).max, _admin, _rns.MAX_EXPIRY());
+    (_ronExpiry, _ronId) = _rns.mint(0x00, "ron", address(0), _admin, _rns.MAX_EXPIRY());
     _rns.setApprovalForAll(_controller, true);
     vm.stopPrank();
   }
@@ -91,7 +90,7 @@ contract RNSUnifiedTest is Test {
     vm.prank($minter);
     vm.resumeGasMetering();
     (expiry, id) =
-      _rns.mint(parentId, mintParam.name, mintParam.resolver, mintParam.ttl, mintParam.owner, mintParam.duration);
+      _rns.mint(parentId, mintParam.name, mintParam.resolver, mintParam.owner, mintParam.duration);
     vm.pauseGasMetering();
     if (!error.shouldThrow) _assert(parentId, id, mintParam);
   }
@@ -102,11 +101,12 @@ contract RNSUnifiedTest is Test {
   }
 
   function _assert(uint256 parentId, uint256 id, MintParam memory mintParam) internal {
-    (INSUnified.Record memory record, string memory domain) = _rns.getRecords(id);
-    (INSUnified.Record memory parentRecord, string memory parentDomain) = _rns.getRecords(parentId);
+    string memory domain = _rns.getDomain(id);
+    string memory parentDomain = _rns.getDomain(parentId);
+    INSUnified.Record memory record = _rns.getRecord(id);
+    INSUnified.Record memory parentRecord = _rns.getRecord(parentId);
 
     string memory name = mintParam.name;
-    assertEq(record.mut.ttl, mintParam.ttl);
     assertEq(_rns.ownerOf(id), mintParam.owner);
     assertEq(record.immut.label, name);
     assertEq(record.mut.protected, false);
