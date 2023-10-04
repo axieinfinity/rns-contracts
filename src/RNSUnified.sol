@@ -266,19 +266,6 @@ contract RNSUnified is Initializable, RNSToken {
   }
 
   /**
-   * @dev Helper method to get full domain name from parent id and current label.
-   */
-  function _getDomain(uint256 parentId, string memory label) internal view returns (string memory domain) {
-    if (parentId == 0) return "";
-    domain = label;
-
-    while (parentId != 0) {
-      domain = string.concat(domain, ".", _recordOf[parentId].immut.label);
-      parentId = _recordOf[parentId].immut.parentId;
-    }
-  }
-
-  /**
    * @dev Helper method to set expiry time of a token.
    *
    * Requirement:
