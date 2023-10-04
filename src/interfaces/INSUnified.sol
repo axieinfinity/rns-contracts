@@ -97,6 +97,11 @@ interface INSUnified is IERC721Metadata {
   function RESERVATION_ROLE() external pure returns (bytes32);
 
   /**
+   * @dev Returns the max expiry value.
+   */
+  function MAX_EXPIRY() external pure returns (uint64);
+
+  /**
    * @dev Returns true if the specified name is available for registration.
    * Note: Only available after passing the grace period.
    */

@@ -53,6 +53,7 @@ contract RNSUnified is Initializable, RNSToken {
     _setGracePeriod(gracePeriod);
 
     _mint(admin, 0x00);
+    _recordOf[0x00].mut.expiry = MAX_EXPIRY;
   }
 
   /// @inheritdoc INSUnified
