@@ -21,7 +21,7 @@ abstract contract NameResolvable is INameResolver, BaseVersion {
   /**
    * @inheritdoc INameResolver
    */
-  function name(bytes32 node) external view virtual override returns (string memory) {
+  function name(bytes32 node) public view virtual override returns (string memory) {
     return _versionName[_recordVersion[node]][node];
   }
 
