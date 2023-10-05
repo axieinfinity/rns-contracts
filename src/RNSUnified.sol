@@ -144,6 +144,7 @@ contract RNSUnified is Initializable, RNSToken {
 
     for (uint256 i; i < ids.length;) {
       id = ids[i];
+      if (!_exists(id)) revert Unexists(id);
       if (_recordOf[id].mut.protected != protected) {
         _recordOf[id].mut.protected = protected;
         emit RecordUpdated(id, indicator, record);
@@ -182,6 +183,7 @@ contract RNSUnified is Initializable, RNSToken {
     if (indicator.hasAny(IMMUTABLE_FIELDS_INDICATOR)) {
       return (false, CannotSetImmutableField.selector);
     }
+    if (!_exists(id)) return (false, Unexists.selector);
     if (indicator.hasAny(ModifyingField.Protected.indicator()) && !hasRole(PROTECTED_SETTLER_ROLE, requester)) {
       return (false, MissingProtectedSettlerRole.selector);
     }

@@ -75,6 +75,7 @@ abstract contract RNSUnifiedTest is Test {
     vm.label(logic, "RNSUnfied::Logic");
     vm.label(address(_rns), "RNSUnfied::Proxy");
 
+    _errorIndentifier[INSUnified.Unexists.selector] = "Unexists";
     _errorIndentifier[INSUnified.Unauthorized.selector] = "Unauthorized";
     _errorIndentifier[INSUnified.MissingControllerRole.selector] = "MissingControllerRole";
     _errorIndentifier[INSUnified.CannotSetImmutableField.selector] = "CannotSetImmutableField";
