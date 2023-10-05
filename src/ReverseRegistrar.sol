@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@rns-contracts/interfaces/resolvers/INameResolver.sol";
 import "@rns-contracts/interfaces/IReverseRegistrar.sol";
 import "@rns-contracts/interfaces/INSUnified.sol";
