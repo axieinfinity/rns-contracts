@@ -41,6 +41,7 @@ contract RNSUnified_Mint_Test is RNSUnifiedTest {
   }
 
   function testFuzz_RevertIfUnauthorized_mint(address any, MintParam calldata mintParam) external mintAs(any) {
+    vm.assume(any != _admin && any != _controller);
     _mint(_ronId, mintParam, Error(true, abi.encodeWithSelector(INSUnified.Unauthorized.selector)));
   }
 
@@ -57,7 +58,7 @@ contract RNSUnified_Mint_Test is RNSUnifiedTest {
     vm.assume(block.timestamp + mintParam.duration < _ronExpiry);
     (uint64 expiry, uint256 id) = _mint(_ronId, mintParam, _noError);
     assertFalse(_rns.available(id));
-    vm.warp(block.timestamp + expiry + 1 seconds);
+    _warpToExpire(expiry);
     assertTrue(_rns.available(id));
     _mint(_ronId, mintParam, _noError);
   }
@@ -69,5 +70,19 @@ contract RNSUnified_Mint_Test is RNSUnifiedTest {
     vm.prank(_admin);
     _rns.setApprovalForAll(_controller, false);
     _mint(_ronId, mintParam, Error(true, abi.encodeWithSelector(INSUnified.Unauthorized.selector)));
+  }
+
+  function testFuzz_WhenRemint_LostProtected(MintParam calldata mintParam) external mintAs(_controller) {
+    (uint64 expiry, uint256 id) = _mint(_ronId, mintParam, _noError);
+    uint256[] memory ids = new uint256[](1);
+    ids[0] = id;
+
+    vm.prank(_protectedSettler);
+    _rns.bulkSetProtected(ids, true);
+
+    _warpToExpire(expiry);
+    _mint(_ronId, mintParam, _noError);
+
+    assertFalse(_rns.getRecord(id).mut.protected);
   }
 }

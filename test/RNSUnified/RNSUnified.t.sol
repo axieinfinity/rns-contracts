@@ -6,7 +6,7 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { console2, Test } from "forge-std/Test.sol";
 import "@rns-contracts/RNSUnified.sol";
 
-contract RNSUnifiedTest is Test {
+abstract contract RNSUnifiedTest is Test {
   using Strings for *;
 
   struct MintParam {
@@ -37,6 +37,10 @@ contract RNSUnifiedTest is Test {
 
   /// @dev state changes variables
   address internal $minter;
+  bool internal $mintGasOff;
+
+  mapping(string name => bool used) internal _usedName;
+  mapping(bytes4 errorCode => string indentifier) internal _errorIndentifier;
 
   modifier validAccount(address addr) {
     _assumeValidAccount(addr);
@@ -49,12 +53,17 @@ contract RNSUnifiedTest is Test {
     _;
   }
 
+  modifier mintGasOff() {
+    $mintGasOff = true;
+    _;
+  }
+
   function setUp() external {
     _admin = makeAddr("admin");
     _pauser = makeAddr("pauser");
     _controller = makeAddr("controller");
     _proxyAdmin = makeAddr("proxyAdmin");
-    _protectedSettler = makeAddr("protectedSettle");
+    _protectedSettler = makeAddr("protectedSettler");
 
     address logic = address(new RNSUnified());
     _rns = RNSUnified(
@@ -65,6 +74,11 @@ contract RNSUnifiedTest is Test {
 
     vm.label(logic, "RNSUnfied::Logic");
     vm.label(address(_rns), "RNSUnfied::Proxy");
+
+    _errorIndentifier[INSUnified.Unauthorized.selector] = "Unauthorized";
+    _errorIndentifier[INSUnified.MissingControllerRole.selector] = "MissingControllerRole";
+    _errorIndentifier[INSUnified.CannotSetImmutableField.selector] = "CannotSetImmutableField";
+    _errorIndentifier[INSUnified.MissingProtectedSettlerRole.selector] = "MissingProtectedSettlerRole";
 
     vm.warp(block.timestamp + GRACE_PERIOD + 1 seconds);
     vm.startPrank(_admin);
@@ -89,11 +103,36 @@ contract RNSUnifiedTest is Test {
     vm.assume(block.timestamp + mintParam.duration < _ronExpiry);
 
     if (error.shouldThrow) vm.expectRevert(error.revertMessage);
+
+    if (!$mintGasOff) vm.resumeGasMetering();
     vm.prank($minter);
-    vm.resumeGasMetering();
     (expiry, id) = _rns.mint(parentId, mintParam.name, mintParam.resolver, mintParam.owner, mintParam.duration);
-    vm.pauseGasMetering();
+    if (!$mintGasOff) vm.pauseGasMetering();
+
     if (!error.shouldThrow) _assert(parentId, id, mintParam);
+  }
+
+  function _mintBulk(MintParam[] calldata mintParams) internal mintGasOff noGasMetering returns (uint256[] memory ids) {
+    uint256 ronId = _ronId;
+    MintParam memory mintParam;
+    Error memory noError = _noError;
+    uint256 length = mintParams.length;
+    ids = new uint256[](length);
+
+    for (uint256 i; i < length;) {
+      mintParam = mintParams[i];
+      vm.assume(!_usedName[mintParam.name]);
+      (, ids[i]) = _mint(ronId, mintParam, noError);
+      _usedName[mintParam.name] = true;
+
+      unchecked {
+        ++i;
+      }
+    }
+  }
+
+  function _warpToExpire(uint64 expiry) internal {
+    vm.warp(block.timestamp + expiry + 1 seconds);
   }
 
   function _toId(uint256 parentId, string memory label) internal pure returns (uint256 id) {
