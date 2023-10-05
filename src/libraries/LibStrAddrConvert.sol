@@ -13,7 +13,7 @@ library LibStrAddrConvert {
    * @dev Converts an address to string.
    */
   function toString(address addr) internal pure returns (string memory stringifiedAddr) {
-    assembly {
+    assembly ("memory-safe") {
       mstore(stringifiedAddr, 40)
       let ptr := add(stringifiedAddr, 0x20)
       for { let i := 40 } gt(i, 0) { } {
