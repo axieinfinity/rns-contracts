@@ -61,7 +61,7 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
   /**
    * @inheritdoc IReverseRegistrar
    */
-  function setDefaultResolver(INameResolver resolver) public override onlyOwner {
+  function setDefaultResolver(INameResolver resolver) external override onlyOwner {
     require(address(resolver) != address(0), "RNSReverseRegistrar: null assignment");
     _defaultResolver = resolver;
     emit DefaultResolverChanged(resolver);
@@ -70,8 +70,24 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
   /**
    * @inheritdoc IERC181
    */
-  function claim(address addr) public override returns (bytes32) {
+  function claim(address addr) external override returns (bytes32) {
     return claimWithResolver(addr, address(_defaultResolver));
+  }
+
+  /**
+   * @inheritdoc IERC181
+   */
+  function setName(string memory name) external override returns (bytes32 node) {
+    return setNameForAddr(_msgSender(), name);
+  }
+
+  /**
+   * @inheritdoc IReverseRegistrar
+   */
+  function getAddress(bytes32 node) external view returns (address) {
+    INSUnified.Record memory record = _rnsUnified.getRecord(uint256(node));
+    require(record.immut.parentId == uint256(ADDR_REVERSE_NODE), "RNSReverseRegistrar: invalid node");
+    return LibStrAddrConvert.parseAddr(record.immut.label);
   }
 
   /**
@@ -89,13 +105,6 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
       _rnsUnified.mint(uint256(ADDR_REVERSE_NODE), stringifiedAddr, resolver, address(this), type(uint64).max);
     node = bytes32(id);
     emit ReverseClaimed(addr, node);
-  }
-
-  /**
-   * @inheritdoc IERC181
-   */
-  function setName(string memory name) public override returns (bytes32 node) {
-    return setNameForAddr(_msgSender(), name);
   }
 
   /**
@@ -119,6 +128,13 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
   }
 
   /**
+   * @inheritdoc IReverseRegistrar
+   */
+  function computeNode(address addr) public pure override returns (bytes32) {
+    return keccak256(abi.encodePacked(ADDR_REVERSE_NODE, keccak256(bytes(LibStrAddrConvert.toString(addr)))));
+  }
+
+  /**
    * @dev Helper method to claim domain hex(addr) + '.addr.reverse' for addr.
    * Emits an event {ReverseClaimed}.
    */
@@ -128,12 +144,5 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
       _rnsUnified.mint(uint256(ADDR_REVERSE_NODE), stringifiedAddr, resolver, address(this), type(uint64).max);
     node = bytes32(id);
     emit ReverseClaimed(addr, node);
-  }
-
-  /**
-   * @inheritdoc IReverseRegistrar
-   */
-  function computeNode(address addr) public pure override returns (bytes32) {
-    return keccak256(abi.encodePacked(ADDR_REVERSE_NODE, keccak256(bytes(LibStrAddrConvert.toString(addr)))));
   }
 }
