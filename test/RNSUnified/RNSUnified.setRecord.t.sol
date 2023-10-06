@@ -29,6 +29,9 @@ contract RNSUnified_SetRecord_Test is RNSUnifiedTest {
     if (indicator.hasAny(ModifyingField.Owner.indicator())) {
       _assumeValidAccount(mutRecord.owner);
     }
+    if (indicator.hasAny(ModifyingField.Expiry.indicator())) {
+      vm.assume(mutRecord.expiry > block.timestamp + mintParam.duration);
+    }
     (, uint256 id) = _mint(_ronId, mintParam, _noError);
     (bool allowed, bytes4 error) = _rns.canSetRecord(_controller, id, indicator);
     assertTrue(allowed, _errorIndentifier[error]);

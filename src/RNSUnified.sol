@@ -169,7 +169,7 @@ contract RNSUnified is Initializable, RNSToken {
       sMutRecord.protected = record.mut.protected = mutRecord.protected;
     }
     if (indicator.hasAny(ModifyingField.Expiry.indicator())) {
-      sMutRecord.expiry = record.mut.expiry = mutRecord.expiry;
+      _setExpiry(id, record.mut.expiry = mutRecord.expiry);
     }
     if (indicator.hasAny(ModifyingField.Resolver.indicator())) {
       sMutRecord.resolver = record.mut.resolver = mutRecord.resolver;
@@ -299,7 +299,10 @@ contract RNSUnified is Initializable, RNSToken {
 
     Record memory record;
     _recordOf[id].mut.expiry = record.mut.expiry = expiry;
-    emit RecordUpdated(id, ModifyingField.Expiry.indicator(), record);
+    // check if top level function is modifying record with `setRecord`
+    if (msg.sig != this.setRecord.selector) {
+      emit RecordUpdated(id, ModifyingField.Expiry.indicator(), record);
+    }
   }
 
   /**
