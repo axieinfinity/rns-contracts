@@ -271,7 +271,7 @@ contract RNSUnified is Initializable, RNSToken {
     if (!allowed) {
       assembly ("memory-safe") {
         mstore(0x00, errorCode)
-        revert(0x1c, 0x04)
+        revert(0x00, 0x04)
       }
     }
   }
@@ -331,9 +331,7 @@ contract RNSUnified is Initializable, RNSToken {
       if (indicator.hasAny(ModifyingField.Resolver.indicator())) record.mut.resolver = mutRecord.resolver;
     }
     bool shouldUpdateProtected = !hasRole(PROTECTED_SETTLER_ROLE, _msgSender());
-    if (shouldUpdateProtected) {
-      record.mut.protected = false;
-    }
+    if (shouldUpdateProtected) record.mut.protected = false;
     ModifyingIndicator protectedIndicator = ModifyingField.Protected.indicator();
 
     for (uint256 id = firstTokenId; id < firstTokenId + batchSize;) {

@@ -8,6 +8,7 @@ import "@rns-contracts/RNSUnified.sol";
 
 abstract contract RNSUnifiedTest is Test {
   using Strings for *;
+  using LibModifyingField for *;
 
   /// @dev Emitted when a base URI is updated.
   event BaseURIUpdated(address indexed operator, string newURI);
@@ -50,6 +51,7 @@ abstract contract RNSUnifiedTest is Test {
 
   /// @dev state changes variables
   address internal $minter;
+  address internal $reclaimer;
   bool internal $mintGasOff;
 
   mapping(string name => bool used) internal _usedName;
@@ -63,6 +65,12 @@ abstract contract RNSUnifiedTest is Test {
   modifier mintAs(address addr) {
     _assumeValidAccount(addr);
     $minter = addr;
+    _;
+  }
+
+  modifier reclaimAs(address addr) {
+    _assumeValidAccount(addr);
+    $reclaimer = addr;
     _;
   }
 
@@ -114,8 +122,8 @@ abstract contract RNSUnifiedTest is Test {
     validAccount(mintParam.owner)
     returns (uint64 expiry, uint256 id)
   {
+    require($minter != address(0), "Minter for RNSUnified::mint not set!");
     vm.assume(block.timestamp + mintParam.duration < _ronExpiry);
-
     if (error.shouldThrow) vm.expectRevert(error.revertMessage);
 
     if (!$mintGasOff) vm.resumeGasMetering();
@@ -123,7 +131,7 @@ abstract contract RNSUnifiedTest is Test {
     (expiry, id) = _rns.mint(parentId, mintParam.name, mintParam.resolver, mintParam.owner, mintParam.duration);
     if (!$mintGasOff) vm.pauseGasMetering();
 
-    if (!error.shouldThrow) _assert(parentId, id, mintParam);
+    if (!error.shouldThrow) _assertMint(parentId, id, mintParam);
   }
 
   function _mintBulk(MintParam[] calldata mintParams) internal mintGasOff noGasMetering returns (uint256[] memory ids) {
@@ -145,6 +153,20 @@ abstract contract RNSUnifiedTest is Test {
     }
   }
 
+  function _reclaim(uint256 id, address owner) internal {
+    require($reclaimer != address(0), "Reclaimer for RNSUnified::reclaim not set!");
+    INSUnified.Record memory emittedRecord;
+    emittedRecord.mut.owner = owner;
+
+    vm.expectEmit(address(_rns));
+    emit RecordUpdated(id, ModifyingField.Owner.indicator(), emittedRecord);
+    vm.prank($reclaimer);
+    _rns.reclaim(id, owner);
+
+    assertEq(owner, _rns.ownerOf(id));
+    assertEq(owner, _rns.getRecord(id).mut.owner);
+  }
+
   function _warpToExpire(uint64 expiry) internal {
     vm.warp(block.timestamp + expiry + 1 seconds);
   }
@@ -154,7 +176,26 @@ abstract contract RNSUnifiedTest is Test {
     id = uint256(keccak256(abi.encode(parentId, labelHash)));
   }
 
-  function _assert(uint256 parentId, uint256 id, MintParam memory mintParam) internal {
+  function _fillMutRecord(ModifyingIndicator indicator, INSUnified.Record memory record)
+    internal
+    pure
+    returns (INSUnified.Record memory filledRecord)
+  {
+    if (indicator.hasAny(ModifyingField.Owner.indicator())) {
+      filledRecord.mut.owner = record.mut.owner;
+    }
+    if (indicator.hasAny(ModifyingField.Resolver.indicator())) {
+      filledRecord.mut.resolver = record.mut.resolver;
+    }
+    if (indicator.hasAny(ModifyingField.Expiry.indicator())) {
+      filledRecord.mut.expiry = record.mut.expiry;
+    }
+    if (indicator.hasAny(ModifyingField.Protected.indicator())) {
+      filledRecord.mut.protected = record.mut.protected;
+    }
+  }
+
+  function _assertMint(uint256 parentId, uint256 id, MintParam memory mintParam) internal {
     string memory domain = _rns.getDomain(id);
     string memory parentDomain = _rns.getDomain(parentId);
     INSUnified.Record memory record = _rns.getRecord(id);

@@ -83,6 +83,11 @@ contract RNSUnified_SetRecord_Test is RNSUnifiedTest {
     (, uint256 id) = _mint(_ronId, mintParam, _noError);
     (bool allowed, bytes4 error) = _rns.canSetRecord(_controller, id, indicator);
     assertFalse(allowed, _errorIndentifier[error]);
+
+    INSUnified.MutableRecord memory mutRecord;
+    vm.expectRevert(error);
+    vm.prank(_controller);
+    _rns.setRecord(id, indicator, mutRecord);
   }
 
   function testFuzz_WhenMinted_AsProtectedSettler_CannotSetImmutableField_canSetRecord(
@@ -95,6 +100,11 @@ contract RNSUnified_SetRecord_Test is RNSUnifiedTest {
     (, uint256 id) = _mint(_ronId, mintParam, _noError);
     (bool allowed, bytes4 error) = _rns.canSetRecord(_protectedSettler, id, indicator);
     assertFalse(allowed, _errorIndentifier[error]);
+
+    INSUnified.MutableRecord memory mutRecord;
+    vm.expectRevert(error);
+    vm.prank(_protectedSettler);
+    _rns.setRecord(id, indicator, mutRecord);
   }
 
   function testFuzz_WhenMinted_AsProtectedSettler_CannotSetOtherMutableField_canSetRecord(
@@ -108,6 +118,11 @@ contract RNSUnified_SetRecord_Test is RNSUnifiedTest {
     (, uint256 id) = _mint(_ronId, mintParam, _noError);
     (bool allowed, bytes4 error) = _rns.canSetRecord(_protectedSettler, id, indicator);
     assertFalse(allowed, _errorIndentifier[error]);
+
+    INSUnified.MutableRecord memory mutRecord;
+    vm.expectRevert(error);
+    vm.prank(_protectedSettler);
+    _rns.setRecord(id, indicator, mutRecord);
   }
 
   function testFuzz_WhenNotMinted_AsProtectedSettler_CannotSetProtectedField_canSetRecord(
@@ -120,6 +135,11 @@ contract RNSUnified_SetRecord_Test is RNSUnifiedTest {
     (bool allowed, bytes4 error) = _rns.canSetRecord(_protectedSettler, id, indicator);
     assertFalse(allowed, _errorIndentifier[error]);
     assertEq(error, INSUnified.Unexists.selector, _errorIndentifier[error]);
+
+    INSUnified.MutableRecord memory mutRecord;
+    vm.expectRevert(error);
+    vm.prank(_protectedSettler);
+    _rns.setRecord(id, indicator, mutRecord);
   }
 
   function testFuzz_WhenNotMinted_AsProtectedSettler_CannotSetImmutableField_canSetRecord(
@@ -133,6 +153,11 @@ contract RNSUnified_SetRecord_Test is RNSUnifiedTest {
     (bool allowed, bytes4 error) = _rns.canSetRecord(_protectedSettler, id, indicator);
     assertFalse(allowed, _errorIndentifier[error]);
     assertEq(error, INSUnified.CannotSetImmutableField.selector, _errorIndentifier[error]);
+
+    INSUnified.MutableRecord memory mutRecord;
+    vm.expectRevert(error);
+    vm.prank(_protectedSettler);
+    _rns.setRecord(id, indicator, mutRecord);
   }
 
   function testFuzz_WhenNotMinted_AsProtectedSettler_CannotSetOtherMutableField_canSetRecord(
@@ -147,5 +172,10 @@ contract RNSUnified_SetRecord_Test is RNSUnifiedTest {
     (bool allowed, bytes4 error) = _rns.canSetRecord(_protectedSettler, id, indicator);
     assertFalse(allowed, _errorIndentifier[error]);
     assertEq(error, INSUnified.Unexists.selector, _errorIndentifier[error]);
+
+    INSUnified.MutableRecord memory mutRecord;
+    vm.expectRevert(error);
+    vm.prank(_protectedSettler);
+    _rns.setRecord(id, indicator, mutRecord);
   }
 }
