@@ -163,7 +163,20 @@ contract RNSUnified is Initializable, RNSToken {
     onlyAuthorized(id, indicator)
   {
     Record memory record;
-    _recordOf[id].mut = record.mut = mutRecord;
+    MutableRecord storage sMutRecord = _recordOf[id].mut;
+
+    if (indicator.hasAny(ModifyingField.Protected.indicator())) {
+      sMutRecord.protected = record.mut.protected = mutRecord.protected;
+    }
+    if (indicator.hasAny(ModifyingField.Owner.indicator())) {
+      sMutRecord.owner = record.mut.owner = mutRecord.owner;
+    }
+    if (indicator.hasAny(ModifyingField.Expiry.indicator())) {
+      sMutRecord.expiry = record.mut.expiry = mutRecord.expiry;
+    }
+    if (indicator.hasAny(ModifyingField.Resolver.indicator())) {
+      sMutRecord.resolver = record.mut.resolver = mutRecord.resolver;
+    }
     emit RecordUpdated(id, indicator, record);
   }
 
