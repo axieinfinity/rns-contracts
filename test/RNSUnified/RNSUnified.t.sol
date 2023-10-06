@@ -9,6 +9,19 @@ import "@rns-contracts/RNSUnified.sol";
 abstract contract RNSUnifiedTest is Test {
   using Strings for *;
 
+  /// @dev Emitted when a base URI is updated.
+  event BaseURIUpdated(address indexed operator, string newURI);
+  /// @dev Emitted when the grace period for all domain is updated.
+  event GracePeriodUpdated(address indexed operator, uint64 newGracePeriod);
+
+  /**
+   * @dev Emitted when the record of node is updated.
+   * @param indicator The binary index of updated fields. Eg, 0b10101011 means fields at position 1, 2, 4, 6, 8 (right
+   * to left) needs to be updated.
+   * @param record The updated fields.
+   */
+  event RecordUpdated(uint256 indexed node, ModifyingIndicator indicator, INSUnified.Record record);
+
   struct MintParam {
     address owner;
     string name;

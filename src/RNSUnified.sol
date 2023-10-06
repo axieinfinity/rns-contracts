@@ -174,11 +174,12 @@ contract RNSUnified is Initializable, RNSToken {
     if (indicator.hasAny(ModifyingField.Resolver.indicator())) {
       sMutRecord.resolver = record.mut.resolver = mutRecord.resolver;
     }
-    if (indicator.hasAny(ModifyingField.Owner.indicator())) {
+    bool modifyingOwner = indicator.hasAny(ModifyingField.Owner.indicator());
+    if (modifyingOwner) {
       _safeTransfer(_recordOf[id].mut.owner, mutRecord.owner, id, "");
     }
-
-    emit RecordUpdated(id, indicator, record);
+    // {_afterTokenTransfer} will emit event `RecordUpdated`
+    if (!modifyingOwner) emit RecordUpdated(id, indicator, record);
   }
 
   /**
@@ -331,13 +332,20 @@ contract RNSUnified is Initializable, RNSToken {
     }
     bool shouldUpdateProtected = !hasRole(PROTECTED_SETTLER_ROLE, _msgSender());
     if (shouldUpdateProtected) {
-      indicator = indicator | ModifyingField.Protected.indicator();
       record.mut.protected = false;
     }
+    ModifyingIndicator protectedIndicator = ModifyingField.Protected.indicator();
 
     for (uint256 id = firstTokenId; id < firstTokenId + batchSize;) {
       _recordOf[id].mut.owner = to;
-      if (shouldUpdateProtected) _recordOf[id].mut.protected = false;
+      if (shouldUpdateProtected && _recordOf[id].mut.protected) {
+        // add protected field indicator
+        indicator = indicator | protectedIndicator;
+        _recordOf[id].mut.protected = false;
+      } else {
+        // remove protected field indicator
+        indicator = indicator & ~protectedIndicator;
+      }
       emit RecordUpdated(id, indicator, record);
 
       unchecked {

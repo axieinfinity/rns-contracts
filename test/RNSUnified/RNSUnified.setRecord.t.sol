@@ -148,9 +148,4 @@ contract RNSUnified_SetRecord_Test is RNSUnifiedTest {
     assertFalse(allowed, _errorIndentifier[error]);
     assertEq(error, INSUnified.Unexists.selector, _errorIndentifier[error]);
   }
-
-  function testFuzz_AsController_canSetMutableRecord_canSetRecord(MintParam calldata mintParam)
-    external
-    mintAs(_controller)
-  { }
 }

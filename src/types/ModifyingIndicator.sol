@@ -7,6 +7,7 @@ using { hasAny } for ModifyingIndicator global;
 using { or as | } for ModifyingIndicator global;
 using { and as & } for ModifyingIndicator global;
 using { eq as == } for ModifyingIndicator global;
+using { not as ~ } for ModifyingIndicator global;
 using { neq as != } for ModifyingIndicator global;
 
 /// @dev Indicator for modifying immutable fields: Depth, ParentId, Label. See struct {INSUnified.ImmutableRecord}.
@@ -24,6 +25,10 @@ function eq(ModifyingIndicator self, ModifyingIndicator other) pure returns (boo
 
 function neq(ModifyingIndicator self, ModifyingIndicator other) pure returns (bool) {
   return !eq(self, other);
+}
+
+function not(ModifyingIndicator self) pure returns (ModifyingIndicator) {
+  return ModifyingIndicator.wrap(~ModifyingIndicator.unwrap(self));
 }
 
 function or(ModifyingIndicator self, ModifyingIndicator other) pure returns (ModifyingIndicator) {
