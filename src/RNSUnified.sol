@@ -168,15 +168,16 @@ contract RNSUnified is Initializable, RNSToken {
     if (indicator.hasAny(ModifyingField.Protected.indicator())) {
       sMutRecord.protected = record.mut.protected = mutRecord.protected;
     }
-    if (indicator.hasAny(ModifyingField.Owner.indicator())) {
-      sMutRecord.owner = record.mut.owner = mutRecord.owner;
-    }
     if (indicator.hasAny(ModifyingField.Expiry.indicator())) {
       sMutRecord.expiry = record.mut.expiry = mutRecord.expiry;
     }
     if (indicator.hasAny(ModifyingField.Resolver.indicator())) {
       sMutRecord.resolver = record.mut.resolver = mutRecord.resolver;
     }
+    if (indicator.hasAny(ModifyingField.Owner.indicator())) {
+      _safeTransfer(_recordOf[id].mut.owner, mutRecord.owner, id, "");
+    }
+
     emit RecordUpdated(id, indicator, record);
   }
 
@@ -321,15 +322,23 @@ contract RNSUnified is Initializable, RNSToken {
     Record memory record;
     record.mut.owner = to;
     ModifyingIndicator indicator = ModifyingField.Owner.indicator();
+    // check if top level function is modifying record with `setRecord`
+    if (msg.sig == this.setRecord.selector) {
+      MutableRecord memory mutRecord;
+      (, indicator, mutRecord) = abi.decode(msg.data[4:], (uint256, ModifyingIndicator, MutableRecord));
+      if (indicator.hasAny(ModifyingField.Expiry.indicator())) record.mut.expiry = mutRecord.expiry;
+      if (indicator.hasAny(ModifyingField.Resolver.indicator())) record.mut.resolver = mutRecord.resolver;
+    }
     bool shouldUpdateProtected = !hasRole(PROTECTED_SETTLER_ROLE, _msgSender());
-    if (shouldUpdateProtected) indicator = indicator | ModifyingField.Protected.indicator();
+    if (shouldUpdateProtected) {
+      indicator = indicator | ModifyingField.Protected.indicator();
+      record.mut.protected = false;
+    }
 
     for (uint256 id = firstTokenId; id < firstTokenId + batchSize;) {
       _recordOf[id].mut.owner = to;
-      if (shouldUpdateProtected) {
-        _recordOf[id].mut.protected = false;
-        emit RecordUpdated(id, indicator, record);
-      }
+      if (shouldUpdateProtected) _recordOf[id].mut.protected = false;
+      emit RecordUpdated(id, indicator, record);
 
       unchecked {
         id++;

@@ -29,7 +29,7 @@ contract RNSUnified_Mint_Test is RNSUnifiedTest {
     _mint(_ronId, mintParam, Error(true, "Pausable: paused"));
   }
 
-  function testFuzz_RevertWhen_RonIdTransfered_AsController_mint(address newAdmin, MintParam calldata mintParam)
+  function testFuzz_RevertWhenRonIdTransfered_AsController_mint(address newAdmin, MintParam calldata mintParam)
     external
     mintAs(_controller)
     validAccount(newAdmin)
@@ -63,7 +63,7 @@ contract RNSUnified_Mint_Test is RNSUnifiedTest {
     _mint(_ronId, mintParam, _noError);
   }
 
-  function testFuzz_AsController_WhenControllerUnapproved_mint(MintParam calldata mintParam)
+  function testFuzz_AsController_RevertWhenControllerUnapproved_mint(MintParam calldata mintParam)
     external
     mintAs(_controller)
   {

@@ -35,6 +35,15 @@ contract RNSUnified_SetRecord_Test is RNSUnifiedTest {
   ) external mintAs(_controller) {
     vm.assume(!indicator.hasAny(IMMUTABLE_FIELDS_INDICATOR));
     vm.assume(!indicator.hasAny(ModifyingField.Protected.indicator()));
+    if (indicator.hasAny(ModifyingField.Owner.indicator())) {
+      assumeAddressIsNot(
+        mutRecord.owner,
+        AddressType.ZeroAddress,
+        AddressType.NonPayable,
+        AddressType.Precompile,
+        AddressType.ForgeAddress
+      );
+    }
     (, uint256 id) = _mint(_ronId, mintParam, _noError);
     (bool allowed, bytes4 error) = _rns.canSetRecord(_controller, id, indicator);
     assertTrue(allowed, _errorIndentifier[error]);
