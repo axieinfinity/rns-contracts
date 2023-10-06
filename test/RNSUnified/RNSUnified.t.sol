@@ -52,6 +52,7 @@ abstract contract RNSUnifiedTest is Test {
   /// @dev state changes variables
   address internal $minter;
   address internal $reclaimer;
+  address internal $recordSetter;
   bool internal $mintGasOff;
 
   mapping(string name => bool used) internal _usedName;
@@ -71,6 +72,12 @@ abstract contract RNSUnifiedTest is Test {
   modifier reclaimAs(address addr) {
     _assumeValidAccount(addr);
     $reclaimer = addr;
+    _;
+  }
+
+  modifier setRecordAs(address addr) {
+    _assumeValidAccount(addr);
+    $recordSetter = addr;
     _;
   }
 
@@ -109,7 +116,7 @@ abstract contract RNSUnifiedTest is Test {
     vm.stopPrank();
   }
 
-  function _assumeValidAccount(address addr) private {
+  function _assumeValidAccount(address addr) internal {
     vm.assume(addr != _proxyAdmin);
     assumeAddressIsNot(
       addr, AddressType.NonPayable, AddressType.ForgeAddress, AddressType.ZeroAddress, AddressType.Precompile
@@ -167,6 +174,35 @@ abstract contract RNSUnifiedTest is Test {
     assertEq(owner, _rns.getRecord(id).mut.owner);
   }
 
+  function _setRecord(
+    uint256 id,
+    ModifyingIndicator indicator,
+    INSUnified.MutableRecord memory mutRecord,
+    Error memory error
+  ) internal {
+    require($recordSetter != address(0), "Record Setter for RNSUnified::setRecord not set!");
+
+    INSUnified.MutableRecord memory mutRecordBefore;
+    INSUnified.MutableRecord memory mutRecordAfter;
+    INSUnified.Record memory filledRecord;
+
+    if (error.shouldThrow) {
+      vm.expectRevert(error.revertMessage);
+    } else {
+      mutRecordBefore = _rns.getRecord(id).mut;
+      filledRecord = _fillMutRecord(indicator, mutRecord);
+      vm.expectEmit(address(_rns));
+      emit RecordUpdated(id, indicator, filledRecord);
+    }
+    vm.prank($recordSetter);
+    _rns.setRecord(id, indicator, mutRecord);
+
+    if (!error.shouldThrow) {
+      mutRecordAfter = _rns.getRecord(id).mut;
+      _assertRecord(id, indicator, filledRecord.mut, mutRecordBefore, mutRecordAfter);
+    }
+  }
+
   function _warpToExpire(uint64 expiry) internal {
     vm.warp(block.timestamp + expiry + 1 seconds);
   }
@@ -176,22 +212,63 @@ abstract contract RNSUnifiedTest is Test {
     id = uint256(keccak256(abi.encode(parentId, labelHash)));
   }
 
-  function _fillMutRecord(ModifyingIndicator indicator, INSUnified.Record memory record)
+  function _fillMutRecord(ModifyingIndicator indicator, INSUnified.MutableRecord memory mutRecord)
     internal
     pure
     returns (INSUnified.Record memory filledRecord)
   {
     if (indicator.hasAny(ModifyingField.Owner.indicator())) {
-      filledRecord.mut.owner = record.mut.owner;
+      filledRecord.mut.owner = mutRecord.owner;
     }
     if (indicator.hasAny(ModifyingField.Resolver.indicator())) {
-      filledRecord.mut.resolver = record.mut.resolver;
+      filledRecord.mut.resolver = mutRecord.resolver;
     }
     if (indicator.hasAny(ModifyingField.Expiry.indicator())) {
-      filledRecord.mut.expiry = record.mut.expiry;
+      filledRecord.mut.expiry = mutRecord.expiry;
     }
     if (indicator.hasAny(ModifyingField.Protected.indicator())) {
-      filledRecord.mut.protected = record.mut.protected;
+      filledRecord.mut.protected = mutRecord.protected;
+    }
+  }
+
+  function _assertRecord(
+    uint256 id,
+    ModifyingIndicator indicator,
+    INSUnified.MutableRecord memory filledMut,
+    INSUnified.MutableRecord memory mutRecordBefore,
+    INSUnified.MutableRecord memory mutRecordAfter
+  ) internal {
+    if (indicator.hasAny(ModifyingField.Owner.indicator())) {
+      assertEq(mutRecordAfter.owner, filledMut.owner);
+      if (mutRecordAfter.expiry >= block.timestamp) {
+        assertEq(_rns.ownerOf(id), filledMut.owner);
+      }
+    } else {
+      assertEq(mutRecordBefore.owner, mutRecordAfter.owner);
+      if (mutRecordAfter.expiry >= block.timestamp) {
+        assertEq(_rns.ownerOf(id), mutRecordBefore.owner);
+      }
+    }
+    if (indicator.hasAny(ModifyingField.Protected.indicator())) {
+      assertEq(mutRecordAfter.protected, filledMut.protected);
+    } else {
+      assertEq(mutRecordAfter.protected, mutRecordBefore.protected);
+    }
+    if (indicator.hasAny(ModifyingField.Expiry.indicator())) {
+      if (mutRecordAfter.expiry >= block.timestamp) {
+        if (!_rns.hasRole(_rns.RESERVATION_ROLE(), _rns.ownerOf(id))) {
+          assertEq(mutRecordAfter.expiry, filledMut.expiry);
+        } else {
+          assertEq(mutRecordAfter.expiry, _rns.MAX_EXPIRY());
+        }
+      }
+    } else {
+      assertEq(mutRecordAfter.expiry, mutRecordBefore.expiry);
+    }
+    if (indicator.hasAny(ModifyingField.Resolver.indicator())) {
+      assertEq(mutRecordAfter.resolver, filledMut.resolver);
+    } else {
+      assertEq(mutRecordAfter.resolver, mutRecordBefore.resolver);
     }
   }
 

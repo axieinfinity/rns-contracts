@@ -344,7 +344,10 @@ contract RNSUnified is Initializable, RNSToken {
         // remove protected field indicator
         indicator = indicator & ~protectedIndicator;
       }
-      emit RecordUpdated(id, indicator, record);
+      // will not emit {RecordUpdated} if minted or burned
+      if (!(from == address(0) || to == address(0))) {
+        emit RecordUpdated(id, indicator, record);
+      }
 
       unchecked {
         id++;
