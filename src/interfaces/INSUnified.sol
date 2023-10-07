@@ -8,7 +8,7 @@ interface INSUnified is IERC721Metadata {
   /// @dev Error: The provided token id is expired.
   error Expired();
   /// @dev Error: The provided token id is unexists.
-  error Unexists(uint256 id);
+  error Unexists();
   /// @dev Error: The provided id expiry is greater than parent id expiry.
   error ExceedParentExpiry();
   /// @dev Error: The provided name is unavailable for registration.

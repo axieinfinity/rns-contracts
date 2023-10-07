@@ -144,7 +144,7 @@ contract RNSUnified is Initializable, RNSToken {
 
     for (uint256 i; i < ids.length;) {
       id = ids[i];
-      if (!_exists(id)) revert Unexists(id);
+      if (!_exists(id)) revert Unexists();
       if (_recordOf[id].mut.protected != protected) {
         _recordOf[id].mut.protected = protected;
         emit RecordUpdated(id, indicator, record);
