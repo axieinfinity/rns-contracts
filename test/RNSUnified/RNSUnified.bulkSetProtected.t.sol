@@ -17,7 +17,7 @@ contract RNSUnified_BulkSetProtected_Test is RNSUnifiedTest {
     uint256 id = _toId(_ronId, mintParam.name);
     uint256[] memory ids = new uint256[](1);
     ids[0] = id;
-    vm.expectRevert(abi.encodeWithSelector(INSUnified.Unexists.selector, id));
+    vm.expectRevert(INSUnified.Unexists.selector);
     vm.prank(_protectedSettler);
     _rns.bulkSetProtected(ids, protected);
   }
