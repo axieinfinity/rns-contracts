@@ -61,6 +61,12 @@ interface IReverseRegistrar is IERC181 {
   function setNameForAddr(address addr, string memory name) external returns (bytes32 node);
 
   /**
+   * @dev Returns address that the reverse node resolves for.
+   * Eg. node namehash('{addr}.addr.reverse') will always resolve for `addr`.
+   */
+  function getAddress(bytes32 node) external view returns (address);
+
+  /**
    * @dev Returns the node hash for a given account's reverse records.
    * @param addr The address to hash
    * @return The INS node hash.
