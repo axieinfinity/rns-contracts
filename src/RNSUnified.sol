@@ -318,39 +318,24 @@ contract RNSUnified is Initializable, RNSToken {
     emit GracePeriodUpdated(_msgSender(), gracePeriod);
   }
 
-  /// @dev Override {ERC721-_afterTokenTransfer}.
-  function _afterTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize)
-    internal
-    virtual
-    override
-  {
-    super._afterTokenTransfer(from, to, firstTokenId, batchSize);
+  /// @dev Override {ERC721-_transfer}.
+  function _transfer(address from, address to, uint256 id) internal override {
+    super._transfer(from, to, id);
 
     Record memory record;
-    record.mut.owner = to;
     ModifyingIndicator indicator = ModifyingField.Owner.indicator();
-    bool shouldRemoveProtected = !hasRole(PROTECTED_SETTLER_ROLE, _msgSender());
-    if (shouldRemoveProtected) record.mut.protected = false;
-    ModifyingIndicator protectedIndicator = ModifyingField.Protected.indicator();
 
-    for (uint256 id = firstTokenId; id < firstTokenId + batchSize;) {
-      _recordOf[id].mut.owner = to;
-      if (shouldRemoveProtected && _recordOf[id].mut.protected) {
-        // add protected field indicator
-        indicator = indicator | protectedIndicator;
-        _recordOf[id].mut.protected = false;
-      } else {
-        // remove protected field indicator
-        indicator = indicator & ~protectedIndicator;
-      }
-      // will not emit {RecordUpdated} if minted or burned
-      if (!(from == address(0) || to == address(0))) {
-        emit RecordUpdated(id, indicator, record);
-      }
-
-      unchecked {
-        id++;
-      }
+    _recordOf[id].mut.owner = record.mut.owner = to;
+    if (!hasRole(PROTECTED_SETTLER_ROLE, _msgSender()) && _recordOf[id].mut.protected) {
+      _recordOf[id].mut.protected = false;
+      indicator = indicator | ModifyingField.Protected.indicator();
     }
+    emit RecordUpdated(id, indicator, record);
+  }
+
+  /// @dev Override {ERC721-_burn}.
+  function _burn(uint256 id) internal override {
+    super._burn(id);
+    delete _recordOf[id];
   }
 }
