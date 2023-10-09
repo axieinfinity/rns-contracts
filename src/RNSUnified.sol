@@ -53,7 +53,9 @@ contract RNSUnified is Initializable, RNSToken {
     _setGracePeriod(gracePeriod);
 
     _mint(admin, 0x00);
-    _recordOf[0x00].mut.expiry = MAX_EXPIRY;
+    Record memory record;
+    _recordOf[0x00].mut.expiry = record.mut.expiry = MAX_EXPIRY;
+    emit RecordUpdated(0x00, ALL_FIELDS_INDICATOR, record);
   }
 
   /// @inheritdoc INSUnified
@@ -127,12 +129,18 @@ contract RNSUnified is Initializable, RNSToken {
 
   /// @inheritdoc INSUnified
   function renew(uint256 id, uint64 duration) external whenNotPaused onlyRole(CONTROLLER_ROLE) {
-    _setExpiry(id, uint64(LibSafeRange.addWithUpperbound(_recordOf[id].mut.expiry, duration, MAX_EXPIRY)));
+    Record memory record;
+    _setExpiry(
+      id, record.mut.expiry = uint64(LibSafeRange.addWithUpperbound(_recordOf[id].mut.expiry, duration, MAX_EXPIRY))
+    );
+    emit RecordUpdated(id, ModifyingField.Expiry.indicator(), record);
   }
 
   /// @inheritdoc INSUnified
   function setExpiry(uint256 id, uint64 expiry) external whenNotPaused onlyRole(CONTROLLER_ROLE) {
-    _setExpiry(id, expiry);
+    Record memory record;
+    _setExpiry(id, record.mut.expiry = expiry);
+    emit RecordUpdated(id, ModifyingField.Expiry.indicator(), record);
   }
 
   /// @inheritdoc INSUnified
@@ -174,12 +182,10 @@ contract RNSUnified is Initializable, RNSToken {
     if (indicator.hasAny(ModifyingField.Resolver.indicator())) {
       sMutRecord.resolver = record.mut.resolver = mutRecord.resolver;
     }
-    bool modifyingOwner = indicator.hasAny(ModifyingField.Owner.indicator());
-    if (modifyingOwner) {
+    if (indicator.hasAny(ModifyingField.Owner.indicator())) {
       _safeTransfer(_recordOf[id].mut.owner, mutRecord.owner, id, "");
     }
-    // {_afterTokenTransfer} will emit event `RecordUpdated`
-    if (!modifyingOwner) emit RecordUpdated(id, indicator, record);
+    emit RecordUpdated(id, indicator, record);
   }
 
   /**
@@ -299,10 +305,6 @@ contract RNSUnified is Initializable, RNSToken {
 
     Record memory record;
     _recordOf[id].mut.expiry = record.mut.expiry = expiry;
-    // check if top level function is modifying record with `setRecord`
-    if (msg.sig != this.setRecord.selector) {
-      emit RecordUpdated(id, ModifyingField.Expiry.indicator(), record);
-    }
   }
 
   /**
@@ -326,13 +328,6 @@ contract RNSUnified is Initializable, RNSToken {
     Record memory record;
     record.mut.owner = to;
     ModifyingIndicator indicator = ModifyingField.Owner.indicator();
-    // check if top level function is modifying record with `setRecord`
-    if (msg.sig == this.setRecord.selector) {
-      MutableRecord memory mutRecord;
-      (, indicator, mutRecord) = abi.decode(msg.data[4:], (uint256, ModifyingIndicator, MutableRecord));
-      if (indicator.hasAny(ModifyingField.Expiry.indicator())) record.mut.expiry = mutRecord.expiry;
-      if (indicator.hasAny(ModifyingField.Resolver.indicator())) record.mut.resolver = mutRecord.resolver;
-    }
     bool shouldUpdateProtected = !hasRole(PROTECTED_SETTLER_ROLE, _msgSender());
     if (shouldUpdateProtected) record.mut.protected = false;
     ModifyingIndicator protectedIndicator = ModifyingField.Protected.indicator();
