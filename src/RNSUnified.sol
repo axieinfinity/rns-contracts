@@ -130,7 +130,7 @@ contract RNSUnified is Initializable, RNSToken {
   /// @inheritdoc INSUnified
   function renew(uint256 id, uint64 duration) external whenNotPaused onlyRole(CONTROLLER_ROLE) {
     Record memory record;
-    record.mut.expiry = uint64(LibSafeRange.addWithUpperbound(_recordOf[id].mut.expiry, duration, MAX_EXPIRY);
+    record.mut.expiry = uint64(LibSafeRange.addWithUpperbound(_recordOf[id].mut.expiry, duration, MAX_EXPIRY));
     _setExpiry(id, record.mut.expiry);
     emit RecordUpdated(id, ModifyingField.Expiry.indicator(), record);
   }
@@ -329,13 +329,13 @@ contract RNSUnified is Initializable, RNSToken {
     Record memory record;
     record.mut.owner = to;
     ModifyingIndicator indicator = ModifyingField.Owner.indicator();
-    bool shouldUpdateProtected = !hasRole(PROTECTED_SETTLER_ROLE, _msgSender());
-    if (shouldUpdateProtected) record.mut.protected = false;
+    bool shouldRemoveProtected = !hasRole(PROTECTED_SETTLER_ROLE, _msgSender());
+    if (shouldRemoveProtected) record.mut.protected = false;
     ModifyingIndicator protectedIndicator = ModifyingField.Protected.indicator();
 
     for (uint256 id = firstTokenId; id < firstTokenId + batchSize;) {
       _recordOf[id].mut.owner = to;
-      if (shouldUpdateProtected && _recordOf[id].mut.protected) {
+      if (shouldRemoveProtected && _recordOf[id].mut.protected) {
         // add protected field indicator
         indicator = indicator | protectedIndicator;
         _recordOf[id].mut.protected = false;
