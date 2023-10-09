@@ -130,9 +130,8 @@ contract RNSUnified is Initializable, RNSToken {
   /// @inheritdoc INSUnified
   function renew(uint256 id, uint64 duration) external whenNotPaused onlyRole(CONTROLLER_ROLE) {
     Record memory record;
-    _setExpiry(
-      id, record.mut.expiry = uint64(LibSafeRange.addWithUpperbound(_recordOf[id].mut.expiry, duration, MAX_EXPIRY))
-    );
+    record.mut.expiry = uint64(LibSafeRange.addWithUpperbound(_recordOf[id].mut.expiry, duration, MAX_EXPIRY);
+    _setExpiry(id, record.mut.expiry);
     emit RecordUpdated(id, ModifyingField.Expiry.indicator(), record);
   }
 
