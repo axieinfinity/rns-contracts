@@ -182,6 +182,7 @@ contract RNSUnified is Initializable, RNSToken {
     if (indicator.hasAny(ModifyingField.Resolver.indicator())) {
       sMutRecord.resolver = record.mut.resolver = mutRecord.resolver;
     }
+    // updating `owner` might emit extra {RecordUpdated} event on changing `owner` and `protected` field.
     if (indicator.hasAny(ModifyingField.Owner.indicator())) {
       _safeTransfer(_recordOf[id].mut.owner, mutRecord.owner, id, "");
     }
