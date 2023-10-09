@@ -336,6 +336,6 @@ contract RNSUnified is Initializable, RNSToken {
   /// @dev Override {ERC721-_burn}.
   function _burn(uint256 id) internal override {
     super._burn(id);
-    delete _recordOf[id];
+    delete _recordOf[id].mut;
   }
 }
