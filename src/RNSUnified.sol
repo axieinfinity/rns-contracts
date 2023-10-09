@@ -55,7 +55,7 @@ contract RNSUnified is Initializable, RNSToken {
     _mint(admin, 0x00);
     Record memory record;
     _recordOf[0x00].mut.expiry = record.mut.expiry = MAX_EXPIRY;
-    emit RecordUpdated(0x00, ALL_FIELDS_INDICATOR, record);
+    emit RecordUpdated(0x00, ModifyingField.Expiry.indicator(), record);
   }
 
   /// @inheritdoc INSUnified
