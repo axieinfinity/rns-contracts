@@ -183,7 +183,7 @@ contract RNSUnified is Initializable, RNSToken {
     }
     emit RecordUpdated(id, indicator, record);
 
-    // Updating owner might emit more {RecordUpdated} events. See method {_afterTokenTransfer}.
+    // Updating owner might emit more {RecordUpdated} events. See method {_transfer}.
     if (indicator.hasAny(ModifyingField.Owner.indicator())) {
       _safeTransfer(_recordOf[id].mut.owner, mutRecord.owner, id, "");
     }
