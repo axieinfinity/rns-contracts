@@ -1,7 +1,9 @@
 // SPDX-LicINSe-Identifier: UNLICINSED
 pragma solidity ^0.8.0;
 
+import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { INameResolver } from "./resolvers/INameResolver.sol";
+import { INSUnified } from "./INSUnified.sol";
 
 /// @dev See https://eips.ethereum.org/EIPS/eip-181#registrar
 interface IERC181 {
@@ -32,8 +34,13 @@ interface IERC181 {
   function setName(string memory name) external returns (bytes32);
 }
 
-interface IReverseRegistrar is IERC181 {
+interface IReverseRegistrar is IERC181, IERC165 {
+  error InvalidNode();
+  error InvalidConfig();
+  error Unauthorized();
+  error NullAssignment();
   /// @dev Emitted when reverse node is claimed.
+
   event ReverseClaimed(address indexed addr, bytes32 indexed node);
   /// @dev Emitted when the default resolver is changed.
   event DefaultResolverChanged(INameResolver indexed resolver);
@@ -41,7 +48,12 @@ interface IReverseRegistrar is IERC181 {
   /**
    * @dev Returns default resolver.
    */
-  function defaultResolver() external view returns (INameResolver);
+  function getDefaultResolver() external view returns (INameResolver);
+
+  /**
+   * @dev Returns RNSUnified contract.
+   */
+  function getRNSUnified() external view returns (INSUnified);
 
   /**
    * @dev Sets default resolver.

@@ -33,14 +33,16 @@ library LibStrAddrConvert {
    * Reverts if the string length is not equal to 40.
    */
   function parseAddr(string memory stringifiedAddr) internal pure returns (address) {
-    if (bytes(stringifiedAddr).length != 40) revert InvalidStringLength();
-    uint160 addr;
-    for (uint256 i = 0; i < 40; i += 2) {
-      addr *= 0x100;
-      addr += uint160(_hexCharToDec(bytes(stringifiedAddr)[i])) * 0x10;
-      addr += _hexCharToDec(bytes(stringifiedAddr)[i + 1]);
+    unchecked {
+      if (bytes(stringifiedAddr).length != 40) revert InvalidStringLength();
+      uint160 addr;
+      for (uint256 i = 0; i < 40; i += 2) {
+        addr *= 0x100;
+        addr += uint160(_hexCharToDec(bytes(stringifiedAddr)[i])) * 0x10;
+        addr += _hexCharToDec(bytes(stringifiedAddr)[i + 1]);
+      }
+      return address(addr);
     }
-    return address(addr);
   }
 
   /**
@@ -48,9 +50,11 @@ library LibStrAddrConvert {
    * Reverts if the char is invalid.
    */
   function _hexCharToDec(bytes1 c) private pure returns (uint8 r) {
-    if ((bytes1("a") <= c) && (c <= bytes1("f"))) r = uint8(c) - 87;
-    else if ((bytes1("A") <= c) && (c <= bytes1("F"))) r = uint8(c) - 55;
-    else if ((bytes1("0") <= c) && (c <= bytes1("9"))) r = uint8(c) - 48;
-    else revert InvalidCharacter(c);
+    unchecked {
+      if ((bytes1("a") <= c) && (c <= bytes1("f"))) r = uint8(c) - 87;
+      else if ((bytes1("A") <= c) && (c <= bytes1("F"))) r = uint8(c) - 55;
+      else if ((bytes1("0") <= c) && (c <= bytes1("9"))) r = uint8(c) - 48;
+      else revert InvalidCharacter(c);
+    }
   }
 }
