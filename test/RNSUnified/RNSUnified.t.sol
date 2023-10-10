@@ -111,7 +111,7 @@ abstract contract RNSUnifiedTest is Test {
 
     vm.warp(block.timestamp + GRACE_PERIOD + 1 seconds);
     vm.startPrank(_admin);
-    (_ronExpiry, _ronId) = _rns.mint(0x00, "ron", address(0), _admin, _rns.MAX_EXPIRY());
+    (_ronExpiry, _ronId) = _rns.mint(0x0, "ron", address(0), _admin, _rns.MAX_EXPIRY());
     _rns.setApprovalForAll(_controller, true);
     vm.stopPrank();
   }

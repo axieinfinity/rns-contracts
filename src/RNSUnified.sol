@@ -52,10 +52,10 @@ contract RNSUnified is Initializable, RNSToken {
     _setBaseURI(baseTokenURI);
     _setGracePeriod(gracePeriod);
 
-    _mint(admin, 0x00);
+    _mint(admin, 0x0);
     Record memory record;
-    _recordOf[0x00].mut.expiry = record.mut.expiry = MAX_EXPIRY;
-    emit RecordUpdated(0x00, ModifyingField.Expiry.indicator(), record);
+    _recordOf[0x0].mut.expiry = record.mut.expiry = MAX_EXPIRY;
+    emit RecordUpdated(0x0, ModifyingField.Expiry.indicator(), record);
   }
 
   /// @inheritdoc INSUnified
@@ -220,12 +220,12 @@ contract RNSUnified is Initializable, RNSToken {
       return (false, Unauthorized.selector);
     }
 
-    return (true, 0x00);
+    return (true, 0x0);
   }
 
   /// @dev Override {ERC721-ownerOf}.
   function ownerOf(uint256 tokenId) public view override(ERC721, IERC721) returns (address) {
-    if (_isExpired(tokenId)) revert Expired();
+    if (_isExpired(tokenId)) return address(0x0);
     return super.ownerOf(tokenId);
   }
 
@@ -280,8 +280,8 @@ contract RNSUnified is Initializable, RNSToken {
     (bool allowed, bytes4 errorCode) = canSetRecord(_msgSender(), id, indicator);
     if (!allowed) {
       assembly ("memory-safe") {
-        mstore(0x00, errorCode)
-        revert(0x00, 0x04)
+        mstore(0x0, errorCode)
+        revert(0x0, 0x04)
       }
     }
   }

@@ -12,8 +12,7 @@ contract RNSUnified_ERC721_Test is RNSUnifiedTest {
   function testFuzz_WhenExpired_RevokeOwnership_ownerOf(MintParam calldata mintParam) external mintAs(_controller) {
     (uint64 expiry, uint256 id) = _mint(_ronId, mintParam, _noError);
     _warpToExpire(expiry);
-    vm.expectRevert(INSUnified.Expired.selector);
-    _rns.ownerOf(id);
+    assertEq(_rns.ownerOf(id), address(0x00));
   }
 
   function testFuzz_WhenExpired_RevokeApproval_getApproved(address approved, MintParam calldata mintParam)
