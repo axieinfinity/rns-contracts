@@ -53,6 +53,9 @@ contract RNSUnified is Initializable, RNSToken {
     _setGracePeriod(gracePeriod);
 
     _mint(admin, 0x00);
+    Record memory record;
+    _recordOf[0x00].mut.expiry = record.mut.expiry = MAX_EXPIRY;
+    emit RecordUpdated(0x00, ModifyingField.Expiry.indicator(), record);
   }
 
   /// @inheritdoc INSUnified
@@ -126,12 +129,17 @@ contract RNSUnified is Initializable, RNSToken {
 
   /// @inheritdoc INSUnified
   function renew(uint256 id, uint64 duration) external whenNotPaused onlyRole(CONTROLLER_ROLE) {
-    _setExpiry(id, uint64(LibSafeRange.addWithUpperbound(_recordOf[id].mut.expiry, duration, MAX_EXPIRY)));
+    Record memory record;
+    record.mut.expiry = uint64(LibSafeRange.addWithUpperbound(_recordOf[id].mut.expiry, duration, MAX_EXPIRY));
+    _setExpiry(id, record.mut.expiry);
+    emit RecordUpdated(id, ModifyingField.Expiry.indicator(), record);
   }
 
   /// @inheritdoc INSUnified
   function setExpiry(uint256 id, uint64 expiry) external whenNotPaused onlyRole(CONTROLLER_ROLE) {
-    _setExpiry(id, expiry);
+    Record memory record;
+    _setExpiry(id, record.mut.expiry = expiry);
+    emit RecordUpdated(id, ModifyingField.Expiry.indicator(), record);
   }
 
   /// @inheritdoc INSUnified
@@ -143,6 +151,7 @@ contract RNSUnified is Initializable, RNSToken {
 
     for (uint256 i; i < ids.length;) {
       id = ids[i];
+      if (!_exists(id)) revert Unexists();
       if (_recordOf[id].mut.protected != protected) {
         _recordOf[id].mut.protected = protected;
         emit RecordUpdated(id, indicator, record);
@@ -161,8 +170,23 @@ contract RNSUnified is Initializable, RNSToken {
     onlyAuthorized(id, indicator)
   {
     Record memory record;
-    _recordOf[id].mut = record.mut = mutRecord;
+    MutableRecord storage sMutRecord = _recordOf[id].mut;
+
+    if (indicator.hasAny(ModifyingField.Protected.indicator())) {
+      sMutRecord.protected = record.mut.protected = mutRecord.protected;
+    }
+    if (indicator.hasAny(ModifyingField.Expiry.indicator())) {
+      _setExpiry(id, record.mut.expiry = mutRecord.expiry);
+    }
+    if (indicator.hasAny(ModifyingField.Resolver.indicator())) {
+      sMutRecord.resolver = record.mut.resolver = mutRecord.resolver;
+    }
     emit RecordUpdated(id, indicator, record);
+
+    // Updating owner might emit more {RecordUpdated} events. See method {_transfer}.
+    if (indicator.hasAny(ModifyingField.Owner.indicator())) {
+      _safeTransfer(_recordOf[id].mut.owner, mutRecord.owner, id, "");
+    }
   }
 
   /**
@@ -181,6 +205,7 @@ contract RNSUnified is Initializable, RNSToken {
     if (indicator.hasAny(IMMUTABLE_FIELDS_INDICATOR)) {
       return (false, CannotSetImmutableField.selector);
     }
+    if (!_exists(id)) return (false, Unexists.selector);
     if (indicator.hasAny(ModifyingField.Protected.indicator()) && !hasRole(PROTECTED_SETTLER_ROLE, requester)) {
       return (false, MissingProtectedSettlerRole.selector);
     }
@@ -253,7 +278,7 @@ contract RNSUnified is Initializable, RNSToken {
     if (!allowed) {
       assembly ("memory-safe") {
         mstore(0x00, errorCode)
-        revert(0x1c, 0x04)
+        revert(0x00, 0x04)
       }
     }
   }
@@ -281,7 +306,6 @@ contract RNSUnified is Initializable, RNSToken {
 
     Record memory record;
     _recordOf[id].mut.expiry = record.mut.expiry = expiry;
-    emit RecordUpdated(id, ModifyingField.Expiry.indicator(), record);
   }
 
   /**
@@ -294,30 +318,24 @@ contract RNSUnified is Initializable, RNSToken {
     emit GracePeriodUpdated(_msgSender(), gracePeriod);
   }
 
-  /// @dev Override {ERC721-_afterTokenTransfer}.
-  function _afterTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize)
-    internal
-    virtual
-    override
-  {
-    super._afterTokenTransfer(from, to, firstTokenId, batchSize);
+  /// @dev Override {ERC721-_transfer}.
+  function _transfer(address from, address to, uint256 id) internal override {
+    super._transfer(from, to, id);
 
     Record memory record;
-    record.mut.owner = to;
     ModifyingIndicator indicator = ModifyingField.Owner.indicator();
-    bool shouldUpdateProtected = !hasRole(PROTECTED_SETTLER_ROLE, _msgSender());
-    if (shouldUpdateProtected) indicator = indicator | ModifyingField.Protected.indicator();
 
-    for (uint256 id = firstTokenId; id < firstTokenId + batchSize;) {
-      _recordOf[id].mut.owner = to;
-      if (shouldUpdateProtected) {
-        _recordOf[id].mut.protected = false;
-        emit RecordUpdated(id, indicator, record);
-      }
-
-      unchecked {
-        id++;
-      }
+    _recordOf[id].mut.owner = record.mut.owner = to;
+    if (!hasRole(PROTECTED_SETTLER_ROLE, _msgSender()) && _recordOf[id].mut.protected) {
+      _recordOf[id].mut.protected = false;
+      indicator = indicator | ModifyingField.Protected.indicator();
     }
+    emit RecordUpdated(id, indicator, record);
+  }
+
+  /// @dev Override {ERC721-_burn}.
+  function _burn(uint256 id) internal override {
+    super._burn(id);
+    delete _recordOf[id].mut;
   }
 }
