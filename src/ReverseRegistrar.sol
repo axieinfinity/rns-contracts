@@ -112,7 +112,6 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
    */
   function setNameForAddr(address addr, string memory name)
     public
-    override
     live
     onlyAuthorized(addr)
     returns (bytes32 node)
@@ -131,7 +130,7 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
   /**
    * @inheritdoc IReverseRegistrar
    */
-  function computeNode(address addr) public pure override returns (bytes32) {
+  function computeNode(address addr) public pure returns (bytes32) {
     return keccak256(abi.encodePacked(ADDR_REVERSE_NODE, keccak256(bytes(LibStrAddrConvert.toString(addr)))));
   }
 
