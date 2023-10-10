@@ -1,7 +1,9 @@
 // SPDX-LicINSe-Identifier: UNLICINSED
 pragma solidity ^0.8.0;
 
+import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { INameResolver } from "./resolvers/INameResolver.sol";
+import { INSUnified } from "./INSUnified.sol";
 
 /// @dev See https://eips.ethereum.org/EIPS/eip-181#registrar
 interface IERC181 {
@@ -32,16 +34,40 @@ interface IERC181 {
   function setName(string memory name) external returns (bytes32);
 }
 
-interface IReverseRegistrar is IERC181 {
+interface IReverseRegistrar is IERC181, IERC165 {
+  /// @dev Error: The provided id is not child node of `ADDR_REVERSE_NODE`
+  error InvalidNode();
+  /// @dev Error: The contract is not authorized for minting or modifying domain hex(addr) + '.addr.reverse'.
+  error InvalidConfig();
+  /// @dev Error: The sender lacks the necessary permissions.
+  error Unauthorized();
+  /// @dev Error: The provided resolver address is null.
+  error NullAssignment();
+
   /// @dev Emitted when reverse node is claimed.
   event ReverseClaimed(address indexed addr, bytes32 indexed node);
   /// @dev Emitted when the default resolver is changed.
   event DefaultResolverChanged(INameResolver indexed resolver);
 
   /**
+   * @dev Returns the controller role.
+   */
+  function CONTROLLER_ROLE() external pure returns (bytes32);
+
+  /**
+   * @dev Returns the address reverse role.
+   */
+  function ADDR_REVERSE_NODE() external pure returns (bytes32);
+
+  /**
    * @dev Returns default resolver.
    */
-  function defaultResolver() external view returns (INameResolver);
+  function getDefaultResolver() external view returns (INameResolver);
+
+  /**
+   * @dev Returns RNSUnified contract.
+   */
+  function getRNSUnified() external view returns (INSUnified);
 
   /**
    * @dev Sets default resolver.
