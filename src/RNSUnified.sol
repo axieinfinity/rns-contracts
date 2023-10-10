@@ -80,9 +80,7 @@ contract RNSUnified is Initializable, RNSToken {
     returns (uint64 expiryTime, uint256 id)
   {
     if (!_checkOwnerRules(_msgSender(), parentId)) revert Unauthorized();
-
-    bytes32 labelHash = keccak256(bytes(label));
-    id = uint256(keccak256(abi.encode(parentId, labelHash)));
+    id = namehash(parentId, label);
     if (!available(id)) revert Unavailable();
 
     if (_exists(id)) _burn(id);
@@ -96,6 +94,11 @@ contract RNSUnified is Initializable, RNSToken {
 
     _recordOf[id] = record;
     emit RecordUpdated(id, ALL_FIELDS_INDICATOR, record);
+  }
+
+  /// @inheritdoc INSUnified
+  function namehash(uint256 parentId, string calldata label) public pure returns (uint256 id) {
+    id = uint256(keccak256(abi.encode(parentId, keccak256(bytes(label)))));
   }
 
   /// @inheritdoc INSUnified
