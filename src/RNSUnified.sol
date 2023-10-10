@@ -80,7 +80,7 @@ contract RNSUnified is Initializable, RNSToken {
     returns (uint64 expiryTime, uint256 id)
   {
     if (!_checkOwnerRules(_msgSender(), parentId)) revert Unauthorized();
-    id = namehash(parentId, label);
+    id = uint256(keccak256(abi.encode(parentId, keccak256(bytes(label)))));
     if (!available(id)) revert Unavailable();
 
     if (_exists(id)) _burn(id);
@@ -97,8 +97,38 @@ contract RNSUnified is Initializable, RNSToken {
   }
 
   /// @inheritdoc INSUnified
-  function namehash(uint256 parentId, string calldata label) public pure returns (uint256 id) {
-    id = uint256(keccak256(abi.encode(parentId, keccak256(bytes(label)))));
+  function namehash(string memory str) public pure returns (bytes32 hashed) {
+    // TODO(TuDo): convert str to lowercase
+    assembly ("memory-safe") {
+      // load str length
+      let len := mload(str)
+      // returns address(0x0) if length is zero
+      if iszero(iszero(len)) {
+        let hashedLen
+        // compute pointer to i = 0
+        let head := add(str, 0x20)
+        // compute pointer to i = length - 1
+        let tail := add(head, sub(len, 1))
+        // cleanup dirty bytes if contains any
+        mstore(0x00, 0x00)
+        // loop backwards from `tail` to `head`
+        for { let i := tail } iszero(lt(i, head)) { i := sub(i, 1) } {
+          // check if `i` is `head`
+          let isHead := eq(i, head)
+          // check if `str[i-1]` is "."
+          let isDotNext := eq(shr(0xf8, mload(sub(i, 1))), 0x2e)
+          if or(isHead, isDotNext) {
+            // size = distance(length, i) - hashedLength + 1
+            let size := add(sub(sub(tail, i), hashedLen), 1)
+            mstore(0x20, keccak256(i, size))
+            mstore(0x00, keccak256(0x00, 0x40))
+            // skip "." thereby + 1
+            hashedLen := add(hashedLen, add(size, 1))
+          }
+        }
+      }
+      hashed := mload(0x00)
+    }
   }
 
   /// @inheritdoc INSUnified
