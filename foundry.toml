@@ -14,6 +14,7 @@ fs_permissions = [{ access = "read-write", path = "./" }]
 [fmt]
 line_length = 120
 tab_width = 2
+bracket_spacing = true
 
 [rpc_endpoints]
 ronin-mainnet = "https://api.roninchain.com/rpc"
