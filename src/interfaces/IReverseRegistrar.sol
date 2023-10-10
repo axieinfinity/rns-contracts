@@ -35,15 +35,29 @@ interface IERC181 {
 }
 
 interface IReverseRegistrar is IERC181, IERC165 {
+  /// @dev Error: The provided id is not child node of `ADDR_REVERSE_NODE`
   error InvalidNode();
+  /// @dev Error: The contract is not authorized for minting or modifying domain hex(addr) + '.addr.reverse'.
   error InvalidConfig();
+  /// @dev Error: The sender lacks the necessary permissions.
   error Unauthorized();
+  /// @dev Error: The provided resolver address is null.
   error NullAssignment();
-  /// @dev Emitted when reverse node is claimed.
 
+  /// @dev Emitted when reverse node is claimed.
   event ReverseClaimed(address indexed addr, bytes32 indexed node);
   /// @dev Emitted when the default resolver is changed.
   event DefaultResolverChanged(INameResolver indexed resolver);
+
+  /**
+   * @dev Returns the controller role.
+   */
+  function CONTROLLER_ROLE() external pure returns (bytes32);
+
+  /**
+   * @dev Returns the address reverse role.
+   */
+  function ADDR_REVERSE_NODE() external pure returns (bytes32);
 
   /**
    * @dev Returns default resolver.

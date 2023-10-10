@@ -53,6 +53,9 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
     return _defaultResolver;
   }
 
+  /**
+   * @inheritdoc IReverseRegistrar
+   */
   function getRNSUnified() external view returns (INSUnified) {
     return _rnsUnified;
   }
@@ -144,10 +147,16 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
     emit ReverseClaimed(addr, node);
   }
 
+  /**
+   * @dev Helper method to ensure the contract can mint or modify domain hex(addr) + '.addr.reverse' for addr.
+   */
   function _requireLive() internal view {
     if (_rnsUnified.ownerOf(uint256(ADDR_REVERSE_NODE)) == address(this)) revert InvalidConfig();
   }
 
+  /**
+   * @dev Helper method to ensure addr is authorized for claiming domain hex(addr) + '.addr.reverse' for addr.
+   */
   function _requireAuthorized(address addr) internal view {
     address sender = _msgSender();
     INSUnified rnsUnified = _rnsUnified;
