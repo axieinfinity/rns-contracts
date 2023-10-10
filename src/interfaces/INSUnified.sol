@@ -8,6 +8,8 @@ import { ModifyingIndicator } from "../types/ModifyingIndicator.sol";
 interface INSUnified is IAccessControlEnumerable, IERC721Metadata {
   /// @dev Error: The provided token id is expired.
   error Expired();
+  /// @dev Error: The provided token id is unexists.
+  error Unexists();
   /// @dev Error: The provided id expiry is greater than parent id expiry.
   error ExceedParentExpiry();
   /// @dev Error: The provided name is unavailable for registration.
@@ -96,6 +98,11 @@ interface INSUnified is IAccessControlEnumerable, IERC721Metadata {
    * @notice Never expire for token owner has this role.
    */
   function RESERVATION_ROLE() external pure returns (bytes32);
+
+  /**
+   * @dev Returns the max expiry value.
+   */
+  function MAX_EXPIRY() external pure returns (uint64);
 
   /**
    * @dev Returns true if the specified name is available for registration.
