@@ -9,7 +9,7 @@ import { INSUnified } from "@rns-contracts/interfaces/INSUnified.sol";
 import { LibStrAddrConvert } from "@rns-contracts/libraries/LibStrAddrConvert.sol";
 
 /**
- * @notice Customized version of RNSReverseRegistrar: https://github.com/ensdomains/ens-contracts/blob/0c75ba23fae76165d51c9c80d76d22261e06179d/contracts/reverseRegistrar/ReverseRegistrar.sol
+ * @notice Customized version of ReverseRegistrar: https://github.com/ensdomains/ens-contracts/blob/0c75ba23fae76165d51c9c80d76d22261e06179d/contracts/reverseRegistrar/ReverseRegistrar.sol
  * @dev The reverse registrar provides functions to claim a reverse record, as well as a convenience function to
  * configure the record as it's most commonly used, as a way of specifying a canonical name for an address.
  * The reverse registrar is specified in EIP 181 https://eips.ethereum.org/EIPS/eip-181.
