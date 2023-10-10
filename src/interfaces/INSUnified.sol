@@ -2,9 +2,10 @@
 pragma solidity ^0.8.19;
 
 import { IERC721Metadata } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import { IAccessControlEnumerable } from "@openzeppelin/contracts/access/IAccessControlEnumerable.sol";
 import { ModifyingIndicator } from "../types/ModifyingIndicator.sol";
 
-interface INSUnified is IERC721Metadata {
+interface INSUnified is IAccessControlEnumerable, IERC721Metadata {
   /// @dev Error: The provided token id is expired.
   error Expired();
   /// @dev Error: The provided token id is unexists.
