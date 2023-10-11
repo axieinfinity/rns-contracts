@@ -98,36 +98,37 @@ contract RNSUnified is Initializable, RNSToken {
 
   /// @inheritdoc INSUnified
   function namehash(string memory str) public pure returns (bytes32 hashed) {
-    // TODO(TuDo): convert str to lowercase
+    // notice: this method is case-sensitive, ensure the string is lowercased before calling this method
     assembly ("memory-safe") {
       // load str length
       let len := mload(str)
-      // returns address(0x0) if length is zero
+      // returns bytes32(0x0) if length is zero
       if iszero(iszero(len)) {
         let hashedLen
-        // compute pointer to i = 0
-        let head := add(str, 0x20)
-        // compute pointer to i = length - 1
+        // compute pointer to str[0]
+        let head := add(str, 32)
+        // compute pointer to str[length - 1]
         let tail := add(head, sub(len, 1))
         // cleanup dirty bytes if contains any
-        mstore(0x00, 0x00)
+        mstore(0x0, 0)
         // loop backwards from `tail` to `head`
         for { let i := tail } iszero(lt(i, head)) { i := sub(i, 1) } {
           // check if `i` is `head`
           let isHead := eq(i, head)
           // check if `str[i-1]` is "."
-          let isDotNext := eq(shr(0xf8, mload(sub(i, 1))), 0x2e)
+          // `0x2e` == bytes1(".")
+          let isDotNext := eq(shr(248, mload(sub(i, 1))), 0x2e)
           if or(isHead, isDotNext) {
             // size = distance(length, i) - hashedLength + 1
             let size := add(sub(sub(tail, i), hashedLen), 1)
             mstore(0x20, keccak256(i, size))
-            mstore(0x00, keccak256(0x00, 0x40))
+            mstore(0x0, keccak256(0x0, 64))
             // skip "." thereby + 1
             hashedLen := add(hashedLen, add(size, 1))
           }
         }
       }
-      hashed := mload(0x00)
+      hashed := mload(0x0)
     }
   }
 
