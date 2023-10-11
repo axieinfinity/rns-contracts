@@ -11,18 +11,18 @@ interface IERC181 {
    * @dev Claims the name hex(addr) + '.addr.reverse' for addr.
    *
    * @param addr The address to set as the addr of the reverse record in INS.
-   * @return node The INS node hash of the reverse record.
+   * @return id The INS node hash of the reverse record.
    */
-  function claim(address addr) external returns (bytes32 node);
+  function claim(address addr) external returns (uint256 id);
 
   /**
    * @dev Claims the name hex(owner) + '.addr.reverse' for owner and sets resolver.
    *
    * @param addr The address to set as the owner of the reverse record in INS.
    * @param resolver The address of the resolver to set; 0 to leave unchanged.
-   * @return node The INS node hash of the reverse record.
+   * @return id The INS node hash of the reverse record.
    */
-  function claimWithResolver(address addr, address resolver) external returns (bytes32 node);
+  function claimWithResolver(address addr, address resolver) external returns (uint256 id);
 
   /**
    * @dev Sets the name record for the reverse INS record associated with the calling account. First updates the
@@ -31,12 +31,12 @@ interface IERC181 {
    * @param name The name to set for this address.
    * @return The INS node hash of the reverse record.
    */
-  function setName(string memory name) external returns (bytes32);
+  function setName(string memory name) external returns (uint256);
 }
 
-interface IReverseRegistrar is IERC181, IERC165 {
-  /// @dev Error: The provided id is not child node of `ADDR_REVERSE_NODE`
-  error InvalidNode();
+interface INSReverseRegistrar is IERC181, IERC165 {
+  /// @dev Error: The provided id is not child node of `ADDR_REVERSE_ID`
+  error InvalidId();
   /// @dev Error: The contract is not authorized for minting or modifying domain hex(addr) + '.addr.reverse'.
   error InvalidConfig();
   /// @dev Error: The sender lacks the necessary permissions.
@@ -45,7 +45,7 @@ interface IReverseRegistrar is IERC181, IERC165 {
   error NullAssignment();
 
   /// @dev Emitted when reverse node is claimed.
-  event ReverseClaimed(address indexed addr, bytes32 indexed node);
+  event ReverseClaimed(address indexed addr, uint256 indexed id);
   /// @dev Emitted when the default resolver is changed.
   event DefaultResolverChanged(INameResolver indexed resolver);
 
@@ -53,11 +53,6 @@ interface IReverseRegistrar is IERC181, IERC165 {
    * @dev Returns the controller role.
    */
   function CONTROLLER_ROLE() external pure returns (bytes32);
-
-  /**
-   * @dev Returns the address reverse role.
-   */
-  function ADDR_REVERSE_NODE() external pure returns (bytes32);
 
   /**
    * @dev Returns default resolver.
@@ -84,18 +79,18 @@ interface IReverseRegistrar is IERC181, IERC165 {
   /**
    * @dev Same as {IERC181-setName}.
    */
-  function setNameForAddr(address addr, string memory name) external returns (bytes32 node);
+  function setNameForAddr(address addr, string memory name) external returns (uint256 id);
 
   /**
    * @dev Returns address that the reverse node resolves for.
    * Eg. node namehash('{addr}.addr.reverse') will always resolve for `addr`.
    */
-  function getAddress(bytes32 node) external view returns (address);
+  function getAddress(uint256 id) external view returns (address);
 
   /**
-   * @dev Returns the node hash for a given account's reverse records.
+   * @dev Returns the id hash for a given account's reverse records.
    * @param addr The address to hash
    * @return The INS node hash.
    */
-  function computeNode(address addr) external pure returns (bytes32);
+  function computeId(address addr) external pure returns (uint256);
 }

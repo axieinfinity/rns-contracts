@@ -16,6 +16,10 @@ library LibRNSDomain {
     uint8 max;
   }
 
+  /// @dev Value equals to namehash('ron')
+  uint256 internal constant RON_ID = 0xba69923fa107dbf5a25a073a10b7c9216ae39fbadc95dc891d460d9ae315d688;
+  /// @dev Value equals to namehash('addr.reverse')
+  uint256 internal constant ADDR_REVERSE_ID = 0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2;
   uint256 internal constant MAX_SUBSTRING_SIZE = type(uint16).max;
   /// @dev Lookup constant for method. See more detail at https://eips.ethereum.org/EIPS/eip-181
   bytes32 internal constant LOOKUP = 0x3031323334353637383961626364656600000000000000000000000000000000;
