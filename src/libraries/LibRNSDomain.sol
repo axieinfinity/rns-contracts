@@ -23,7 +23,13 @@ library LibRNSDomain {
    * @dev Calculate the corresponding id given parentId and label.
    */
   function toId(uint256 parentId, string memory label) internal pure returns (uint256 id) {
-    return uint256(keccak256(abi.encode(parentId, keccak256(bytes(label)))));
+    return uint256(keccak256(abi.encode(parentId, hashLabel(label))));
+  }
+
+  function hashLabel(string memory label) internal pure returns (bytes32 hashed) {
+    assembly ("memory-safe") {
+      hashed := keccak256(add(label, 32), mload(label))
+    }
   }
 
   /**
