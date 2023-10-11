@@ -7,3 +7,6 @@
 [submodule "lib/contract-template"]
 	path = lib/contract-template
 	url = https://github.com/axieinfinity/contract-template
+[submodule "lib/solady"]
+	path = lib/solady
+	url = https://github.com/vectorized/solady

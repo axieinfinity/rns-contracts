@@ -104,6 +104,11 @@ interface INSUnified is IERC721Metadata {
   function MAX_EXPIRY() external pure returns (uint64);
 
   /**
+   * @dev Calculate the RNS namehash of a str.
+   */
+  function namehash(string memory str) external pure returns (bytes32 hashed);
+
+  /**
    * @dev Returns true if the specified name is available for registration.
    * Note: Only available after passing the grace period.
    */
