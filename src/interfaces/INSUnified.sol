@@ -2,11 +2,16 @@
 pragma solidity ^0.8.19;
 
 import { IERC721Metadata } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import { IAccessControlEnumerable } from "@openzeppelin/contracts/access/IAccessControlEnumerable.sol";
 import { ModifyingIndicator } from "../types/ModifyingIndicator.sol";
 
-interface INSUnified is IERC721Metadata {
+interface INSUnified is IAccessControlEnumerable, IERC721Metadata {
   /// @dev Error: The provided token id is expired.
   error Expired();
+  /// @dev Error: The provided token id is unexists.
+  error Unexists();
+  /// @dev Error: The provided id expiry is greater than parent id expiry.
+  error ExceedParentExpiry();
   /// @dev Error: The provided name is unavailable for registration.
   error Unavailable();
   /// @dev Error: The sender lacks the necessary permissions.
@@ -32,9 +37,9 @@ interface INSUnified is IERC721Metadata {
   struct ImmutableRecord {
     // The level-th of a domain.
     uint8 depth;
-    // The node of parent token. Eg, parent node of vip.dukethor.ron equals to namehash('dukethor.ron')
+    // The node of parent token. Eg, parent node of vip.duke.ron equals to namehash('duke.ron')
     uint256 parentId;
-    // The label of a domain. Eg, label is vip for domain vip.dukethor.ron
+    // The label of a domain. Eg, label is vip for domain vip.duke.ron
     string label;
   }
 
@@ -42,18 +47,15 @@ interface INSUnified is IERC721Metadata {
    * | Fields\Idc,Roles | Modifying Indicator | Controller | Protected setter | (Parent) Owner/Spender |
    * | ---------------- | ------------------- | ---------- | ---------------- | ---------------------- |
    * | resolver         | 0b00001000          | x          |                  | x                      |
-   * | ttl              | 0b00010000          | x          |                  | x                      |
-   * | owner            | 0b00100000          | x          |                  | x                      |
-   * | expiry           | 0b01000000          | x          |                  |                        |
-   * | protected        | 0b10000000          |            | x                |                        |
+   * | owner            | 0b00010000          | x          |                  | x                      |
+   * | expiry           | 0b00100000          | x          |                  |                        |
+   * | protected        | 0b01000000          |            | x                |                        |
    * Note: (Parent) Owner/Spender means parent owner or current owner or current token spender.
    */
   struct MutableRecord {
     // The resolver address.
     address resolver;
-    // Duration in second(s) to live.
-    uint64 ttl;
-    // The record owner.
+    // The record owner. This field must equal to the owner of token.
     address owner;
     // Expiry timestamp.
     uint64 expiry;
@@ -68,15 +70,16 @@ interface INSUnified is IERC721Metadata {
 
   /// @dev Emitted when a base URI is updated.
   event BaseURIUpdated(address indexed operator, string newURI);
+  /// @dev Emitted when the grace period for all domain is updated.
   event GracePeriodUpdated(address indexed operator, uint64 newGracePeriod);
 
   /**
-   * @dev Emitted when records of node are updated.
+   * @dev Emitted when the record of node is updated.
    * @param indicator The binary index of updated fields. Eg, 0b10101011 means fields at position 1, 2, 4, 6, 8 (right
    * to left) needs to be updated.
    * @param record The updated fields.
    */
-  event RecordsUpdated(uint256 indexed node, ModifyingIndicator indicator, Record record);
+  event RecordUpdated(uint256 indexed node, ModifyingIndicator indicator, Record record);
 
   /**
    * @dev Returns the controller role.
@@ -95,6 +98,11 @@ interface INSUnified is IERC721Metadata {
    * @notice Never expire for token owner has this role.
    */
   function RESERVATION_ROLE() external pure returns (bytes32);
+
+  /**
+   * @dev Returns the max expiry value.
+   */
+  function MAX_EXPIRY() external pure returns (uint64);
 
   /**
    * @dev Returns the name hash output of a domain.
@@ -145,43 +153,47 @@ interface INSUnified is IERC721Metadata {
    * - The token must be available.
    * - The method caller must be (parent) owner or approved spender. See struct {MutableRecord}.
    *
-   * Emits an event {RecordsUpdated}.
+   * Emits an event {RecordUpdated}.
    *
    * @param parentId The parent node to mint or create subnode.
-   * @param label The domain label. Eg, label is dukethor for domain dukethor.ron.
+   * @param label The domain label. Eg, label is duke for domain duke.ron.
    * @param resolver The resolver address.
-   * @param ttl Duration in second(s) to live.
    * @param owner The token owner.
    * @param duration Duration in second(s) to expire. Leave 0 to set as parent.
    */
-  function mint(uint256 parentId, string calldata label, address resolver, uint64 ttl, address owner, uint64 duration)
+  function mint(uint256 parentId, string calldata label, address resolver, address owner, uint64 duration)
     external
     returns (uint64 expiryTime, uint256 id);
 
   /**
-   * @dev Returns all records of a domain.
+   * @dev Returns all record of a domain.
    * Reverts if the token is non existent.
    */
-  function getRecords(uint256 id) external view returns (Record memory records, string memory domain);
+  function getRecord(uint256 id) external view returns (Record memory record);
 
   /**
-   * @dev Returns whether the requester is able to modify the records based on the updated index.
+   * @dev Returns the domain name of id.
+   */
+  function getDomain(uint256 id) external view returns (string memory domain);
+
+  /**
+   * @dev Returns whether the requester is able to modify the record based on the updated index.
    * Note: This method strictly follows the permission of struct {MutableRecord}.
    */
-  function canSetRecords(address requester, uint256 id, ModifyingIndicator indicator)
+  function canSetRecord(address requester, uint256 id, ModifyingIndicator indicator)
     external
     view
     returns (bool, bytes4 error);
 
   /**
-   * @dev Sets records of existing token. Update operation for {Record.mut}.
+   * @dev Sets record of existing token. Update operation for {Record.mut}.
    *
    * Requirements:
    * - The method caller must have role based on the corresponding `indicator`. See struct {MutableRecord}.
    *
-   * Emits an event {RecordsUpdated}.
+   * Emits an event {RecordUpdated}.
    */
-  function setRecords(uint256 id, ModifyingIndicator indicator, MutableRecord calldata records) external;
+  function setRecord(uint256 id, ModifyingIndicator indicator, MutableRecord calldata record) external;
 
   /**
    * @dev Reclaims ownership. Update operation for {Record.mut.owner}.
@@ -190,7 +202,7 @@ interface INSUnified is IERC721Metadata {
    * - The method caller should have controller role.
    * - The method caller should be (parent) owner or approved spender. See struct {MutableRecord}.
    *
-   * Emits an event {RecordsUpdated}.
+   * Emits an event {RecordUpdated}.
    */
   function reclaim(uint256 id, address owner) external;
 
@@ -200,7 +212,7 @@ interface INSUnified is IERC721Metadata {
    * Requirements:
    * - The method caller should have controller role.
    *
-   * Emits an event {RecordsUpdated}.
+   * Emits an event {RecordUpdated}.
    */
   function renew(uint256 id, uint64 duration) external;
 
@@ -210,7 +222,7 @@ interface INSUnified is IERC721Metadata {
    * Requirements:
    * - The method caller must have controller role.
    *
-   * Emits an event {RecordsUpdated}.
+   * Emits an event {RecordUpdated}.
    */
   function setExpiry(uint256 id, uint64 expiry) external;
 
@@ -220,7 +232,7 @@ interface INSUnified is IERC721Metadata {
    * Requirements:
    * - The method caller must have protected setter role.
    *
-   * Emits events {RecordsUpdated}.
+   * Emits events {RecordUpdated}.
    */
   function bulkSetProtected(uint256[] calldata ids, bool protected) external;
 }
