@@ -55,11 +55,6 @@ interface INSAuction {
   function MAX_EXPIRY() external pure returns (uint64);
 
   /**
-   * @dev Value is equal to namehash("ron")
-   */
-  function RON_ID() external pure returns (uint256);
-
-  /**
    * @dev Returns the operator role.
    */
   function OPERATOR_ROLE() external pure returns (bytes32);
