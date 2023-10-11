@@ -20,6 +20,13 @@ library LibRNSDomain {
   bytes32 internal constant LOOKUP = 0x3031323334353637383961626364656600000000000000000000000000000000;
 
   /**
+   * @dev Calculate the corresponding id given parentId and label.
+   */
+  function toId(uint256 parentId, string memory label) internal pure returns (uint256 id) {
+    return uint256(keccak256(abi.encode(parentId, keccak256(bytes(label)))));
+  }
+
+  /**
    * @dev Calculate the RNS namehash of a str.
    */
   function namehash(string memory str) public pure returns (bytes32 hashed) {

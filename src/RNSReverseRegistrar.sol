@@ -126,7 +126,7 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
    * @inheritdoc IReverseRegistrar
    */
   function computeNode(address addr) public pure returns (bytes32) {
-    return keccak256(abi.encodePacked(ADDR_REVERSE_NODE, keccak256(bytes(LibRNSDomain.toString(addr)))));
+    return bytes32(LibRNSDomain.toId(uint256(ADDR_REVERSE_NODE), LibRNSDomain.toString(addr)));
   }
 
   /**

@@ -81,7 +81,7 @@ contract RNSUnified is Initializable, RNSToken {
     returns (uint64 expiryTime, uint256 id)
   {
     if (!_checkOwnerRules(_msgSender(), parentId)) revert Unauthorized();
-    id = uint256(keccak256(abi.encode(parentId, keccak256(bytes(label)))));
+    id = LibRNSDomain.toId(parentId, label);
     if (!available(id)) revert Unavailable();
 
     if (_exists(id)) _burn(id);
