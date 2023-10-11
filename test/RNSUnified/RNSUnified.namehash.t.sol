@@ -49,7 +49,7 @@ contract RNSUnified_NameHash_Test is RNSUnifiedTest {
     // script: `cast namehash abc.def.xyz.ron`
     bytes32 precomputedAbcDefXyzRonNode = 0xfa0b23ea2345da3c215b2ce4a5bb2139c5ed05616b14e7f1d535813acce45b42;
     // script: `cast namehash �.ron`
-    bytes32 precomputedASCIIRonNode = 0xb302a636e6ceb332cbd5d0c9f2dc9be5d81975d2ce808400168856f186fee057;
+    bytes32 precomputedUnicodeRonNode = 0xb302a636e6ceb332cbd5d0c9f2dc9be5d81975d2ce808400168856f186fee057;
 
     mintParam.owner = _controller;
     mintParam.name = "duke";
@@ -62,7 +62,7 @@ contract RNSUnified_NameHash_Test is RNSUnifiedTest {
     assertEq(bytes32(vipDukeRonId), precomputedVipDukeRonNode);
     assertEq(_rns.namehash("ron"), precomputedRonNode);
     assertEq(_rns.namehash("duke.ron"), precomputedDukeRonNode);
-    assertEq(_rns.namehash(unicode"�.ron"), precomputedASCIIRonNode);
+    assertEq(_rns.namehash(unicode"�.ron"), precomputedUnicodeRonNode);
     assertEq(_rns.namehash("vip.duke.ron"), precomputedVipDukeRonNode);
     assertEq(_rns.namehash("abc.def.xyz.ron"), precomputedAbcDefXyzRonNode);
   }
