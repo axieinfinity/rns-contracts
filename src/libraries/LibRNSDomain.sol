@@ -6,6 +6,7 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 library LibRNSDomain {
   error InvalidStringLength();
   error InvalidCharacter(bytes1 char);
+  error TotalSubStringTooLarge(uint256 total);
 
   /**
    * @dev Struct representing a word range with minimum and maximum word lengths.
@@ -23,7 +24,11 @@ library LibRNSDomain {
    * @dev Calculate the corresponding id given parentId and label.
    */
   function toId(uint256 parentId, string memory label) internal pure returns (uint256 id) {
-    return uint256(keccak256(abi.encode(parentId, hashLabel(label))));
+    assembly ("memory-safe") {
+      mstore(0x0, parentId)
+      mstore(0x20, keccak256(add(label, 32), mload(label)))
+      id := keccak256(0x0, 64)
+    }
   }
 
   function hashLabel(string memory label) internal pure returns (bytes32 hashed) {
@@ -118,7 +123,7 @@ library LibRNSDomain {
       // `(range + 1)` represents the number of possible substring lengths in `range`.
       // `(strlen - min + 1)` represents the number of possible starting positions for substrings with a minimum length of `min`.
       total = (range + 1) * (len - min + 1) - (((range + 1) * range) >> 1);
-      require(total <= MAX_SUBSTRING_SIZE, "LibSubString: substring count exceeds 65535");
+      if (total > MAX_SUBSTRING_SIZE) revert TotalSubStringTooLarge(total);
     }
   }
 
