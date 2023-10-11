@@ -4,3 +4,4 @@ forge-std/=lib/forge-std/src/
 @openzeppelin/=lib/openzeppelin-contracts/
 contract-template/=lib/contract-template/src/
 solady/=lib/solady/src/
+@pythnetwork/=lib/pyth-sdk-solidity/

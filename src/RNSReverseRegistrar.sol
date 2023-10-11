@@ -6,7 +6,7 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { INameResolver } from "@rns-contracts/interfaces/resolvers/INameResolver.sol";
 import { IERC165, IERC181, IReverseRegistrar } from "@rns-contracts/interfaces/IReverseRegistrar.sol";
 import { INSUnified } from "@rns-contracts/interfaces/INSUnified.sol";
-import { LibStrAddrConvert } from "@rns-contracts/libraries/LibStrAddrConvert.sol";
+import { LibRNSDomain } from "@rns-contracts/libraries/LibRNSDomain.sol";
 
 /**
  * @notice Customized version of ReverseRegistrar: https://github.com/ensdomains/ens-contracts/blob/0c75ba23fae76165d51c9c80d76d22261e06179d/contracts/reverseRegistrar/ReverseRegistrar.sol
@@ -97,7 +97,7 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
   function getAddress(bytes32 node) external view returns (address) {
     INSUnified.Record memory record = _rnsUnified.getRecord(uint256(node));
     if (record.immut.parentId != uint256(ADDR_REVERSE_NODE)) revert InvalidNode();
-    return LibStrAddrConvert.parseAddr(record.immut.label);
+    return LibRNSDomain.parseAddr(record.immut.label);
   }
 
   /**
@@ -110,12 +110,7 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
   /**
    * @inheritdoc IReverseRegistrar
    */
-  function setNameForAddr(address addr, string memory name)
-    public
-    live
-    onlyAuthorized(addr)
-    returns (bytes32 node)
-  {
+  function setNameForAddr(address addr, string memory name) public live onlyAuthorized(addr) returns (bytes32 node) {
     node = computeNode(addr);
     INSUnified rnsUnified = _rnsUnified;
     if (rnsUnified.ownerOf(uint256(node)) != address(this)) {
@@ -131,7 +126,7 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
    * @inheritdoc IReverseRegistrar
    */
   function computeNode(address addr) public pure returns (bytes32) {
-    return keccak256(abi.encodePacked(ADDR_REVERSE_NODE, keccak256(bytes(LibStrAddrConvert.toString(addr)))));
+    return keccak256(abi.encodePacked(ADDR_REVERSE_NODE, keccak256(bytes(LibRNSDomain.toString(addr)))));
   }
 
   /**
@@ -139,7 +134,7 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
    * Emits an event {ReverseClaimed}.
    */
   function _claimWithResolver(address addr, address resolver) internal returns (bytes32 node) {
-    string memory stringifiedAddr = LibStrAddrConvert.toString(addr);
+    string memory stringifiedAddr = LibRNSDomain.toString(addr);
     (, uint256 id) =
       _rnsUnified.mint(uint256(ADDR_REVERSE_NODE), stringifiedAddr, resolver, address(this), type(uint64).max);
     node = bytes32(id);
