@@ -5,4 +5,3 @@ forge-std/=lib/forge-std/src/
 contract-template/=lib/contract-template/src/
 @ensdomains/ens-contracts/=lib/ens-contracts/contracts/
 @ensdomains/buffer/=lib/buffer/
-@pythnetwork/=lib/pyth-sdk-solidity/
