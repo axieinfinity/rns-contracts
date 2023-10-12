@@ -3,4 +3,5 @@ ds-test/=lib/forge-std/lib/ds-test/src/
 forge-std/=lib/forge-std/src/
 @openzeppelin/=lib/openzeppelin-contracts/
 contract-template/=lib/contract-template/src/
-@pythnetwork/=lib/pyth-sdk-solidity/
+@ensdomains/ens-contracts/=lib/ens-contracts/contracts/
+@ensdomains/buffer/=lib/buffer/
