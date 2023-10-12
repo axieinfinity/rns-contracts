@@ -111,7 +111,7 @@ interface INSDomainPrice {
   function getRenewalFee(string calldata label, uint256 duration)
     external
     view
-    returns (uint256 usdPrice, uint256 ronPrice);
+    returns (uint256 usdPrice, uint256 ronPrice, uint256 usdTax, uint256 ronTax);
 
   /**
    * @dev Returns the renewal fee of a label. Reverts if not overridden.

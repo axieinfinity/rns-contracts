@@ -240,7 +240,7 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   function getRenewalFee(string memory label, uint256 duration)
     public
     view
-    returns (uint256 usdPrice, uint256 ronPrice)
+    returns (uint256 usdPrice, uint256 ronPrice, uint256 usdTax, uint256 ronTax)
   {
     uint256 nameLen = label.strlen();
     bytes32 lbHash = label.hashLabel();
@@ -253,10 +253,11 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
       usdPrice = duration * renewalFeeByLength;
       // tax is added of name is reserved for auction
       if (_auction.reserved(LibRNSDomain.toId(LibRNSDomain.RON_ID, label))) {
-        usdPrice += Math.mulDiv(_taxRatio, _getDomainPrice(lbHash), MAX_PERCENTAGE);
+        usdTax = Math.mulDiv(_taxRatio, _getDomainPrice(lbHash), MAX_PERCENTAGE);
       }
     }
 
+    ronTax = convertUSDToRON(usdTax);
     ronPrice = convertUSDToRON(usdPrice);
   }
 
