@@ -38,7 +38,6 @@ contract PublicResolver is
 
   /// @dev The RNS Unified contract
   INSUnified internal _rnsUnified;
-
   /// @dev The reverse registrar contract
   IReverseRegistrar internal _reverseRegistrar;
 
@@ -117,9 +116,8 @@ contract PublicResolver is
   }
 
   /// @inheritdoc IAddressResolver
-  function setAddr(bytes32 node, address addr_) external onlyAuthorized(node) {
+  function setAddr(bytes32 node, address /* addr_ */) external view onlyAuthorized(node) {
     revert("PublicResolver: Cannot set address");
-    _setAddr(node, addr_);
   }
 
   /// @inheritdoc IContentHashResolver
@@ -159,7 +157,7 @@ contract PublicResolver is
 
   /// @inheritdoc IPublicResolver
   function isAuthorized(bytes32 node, address account) public view returns (bool authorized) {
-    (authorized,) = _rnsUnified.canSetRecords(account, uint256(node), USER_FIELDS_INDICATOR);
+    (authorized,) = _rnsUnified.canSetRecord(account, uint256(node), USER_FIELDS_INDICATOR);
   }
 
   /// @dev Override {IAddressResolvable-addr}.
