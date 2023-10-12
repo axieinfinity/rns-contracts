@@ -7,3 +7,9 @@
 [submodule "lib/contract-template"]
 	path = lib/contract-template
 	url = https://github.com/axieinfinity/contract-template
+[submodule "lib/ens-contracts"]
+	path = lib/ens-contracts
+	url = https://github.com/ensdomains/ens-contracts
+[submodule "lib/buffer"]
+	path = lib/buffer
+	url = https://github.com/ensdomains/buffer
