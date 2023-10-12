@@ -159,7 +159,7 @@ contract PublicResolver is
 
   /// @inheritdoc IPublicResolver
   function isAuthorized(bytes32 node, address account) public view returns (bool authorized) {
-    (authorized,) = _rnsUnified.canSetRecords(account, uint256(node), USER_FIELDS_INDICATOR);
+    (authorized,) = _rnsUnified.canSetRecord(account, uint256(node), USER_FIELDS_INDICATOR);
   }
 
   /// @dev Override {IAddressResolvable-addr}.
@@ -177,7 +177,7 @@ contract PublicResolver is
   function name(bytes32 node) public view virtual override(INameResolver, NameResolvable) returns (string memory) {
     address reversedAddress = _reverseRegistrar.getAddress(node);
     string memory domainName = super.name(node);
-    uint256 tokenId = _rnsUnified.namehash(domainName);
+    uint256 tokenId = uint256(_rnsUnified.namehash(domainName));
     return _rnsUnified.ownerOf(tokenId) == reversedAddress ? domainName : "";
   }
 
