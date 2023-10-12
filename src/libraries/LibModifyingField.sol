@@ -8,7 +8,6 @@ enum ModifyingField {
   ParentId,
   Label,
   Resolver,
-  Ttl,
   Owner,
   Expiry,
   Protected
