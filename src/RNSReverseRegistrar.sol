@@ -110,12 +110,7 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
   /**
    * @inheritdoc IReverseRegistrar
    */
-  function setNameForAddr(address addr, string memory name)
-    public
-    live
-    onlyAuthorized(addr)
-    returns (bytes32 node)
-  {
+  function setNameForAddr(address addr, string memory name) public live onlyAuthorized(addr) returns (bytes32 node) {
     node = computeNode(addr);
     INSUnified rnsUnified = _rnsUnified;
     if (rnsUnified.ownerOf(uint256(node)) != address(this)) {

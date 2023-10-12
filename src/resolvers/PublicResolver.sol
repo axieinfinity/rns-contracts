@@ -116,7 +116,7 @@ contract PublicResolver is
   }
 
   /// @inheritdoc IAddressResolver
-  function setAddr(bytes32 node, address /* addr_ */) external view onlyAuthorized(node) {
+  function setAddr(bytes32 node, address /* addr_ */ ) external view onlyAuthorized(node) {
     revert("PublicResolver: Cannot set address");
   }
 
@@ -175,7 +175,7 @@ contract PublicResolver is
   function name(bytes32 node) public view virtual override(INameResolver, NameResolvable) returns (string memory) {
     address reversedAddress = _reverseRegistrar.getAddress(node);
     string memory domainName = super.name(node);
-    uint256 tokenId = _rnsUnified.namehash(domainName);
+    uint256 tokenId = uint256(_rnsUnified.namehash(domainName));
     return _rnsUnified.ownerOf(tokenId) == reversedAddress ? domainName : "";
   }
 

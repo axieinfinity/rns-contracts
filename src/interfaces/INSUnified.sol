@@ -107,7 +107,7 @@ interface INSUnified is IAccessControlEnumerable, IERC721Metadata {
   /**
    * @dev Returns the name hash output of a domain.
    */
-  function namehash(string memory domain) external view returns (uint256 id);
+  function namehash(string memory domain) external view returns (bytes32);
 
   /**
    * @dev Returns true if the specified name is available for registration.

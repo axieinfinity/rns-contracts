@@ -59,7 +59,7 @@ contract RNSUnified is Initializable, RNSToken {
   }
 
   /// @inheritdoc INSUnified
-  function namehash(string memory) external pure returns (uint256) {
+  function namehash(string memory) external pure returns (bytes32) {
     revert("TODO");
   }
 
