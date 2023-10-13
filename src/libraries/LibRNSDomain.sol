@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
 library LibRNSDomain {
@@ -16,6 +16,9 @@ library LibRNSDomain {
     }
   }
 
+  /**
+   * @dev Calculate the hash of the label.
+   */
   function hashLabel(string memory label) internal pure returns (bytes32 hashed) {
     assembly ("memory-safe") {
       hashed := keccak256(add(label, 32), mload(label))

@@ -34,7 +34,7 @@ interface IERC181 {
   function setName(string memory name) external returns (bytes32);
 }
 
-interface IReverseRegistrar is IERC181, IERC165 {
+interface INSReverseRegistrar is IERC181, IERC165 {
   /// @dev Error: The provided id is not child node of `ADDR_REVERSE_NODE`
   error InvalidNode();
   /// @dev Error: The contract is not authorized for minting or modifying domain hex(addr) + '.addr.reverse'.

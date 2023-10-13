@@ -40,7 +40,7 @@ contract PublicResolver is
   INSUnified internal _rnsUnified;
 
   /// @dev The reverse registrar contract
-  IReverseRegistrar internal _reverseRegistrar;
+  INSReverseRegistrar internal _reverseRegistrar;
 
   modifier onlyAuthorized(bytes32 node) {
     _requireAuthorized(node, msg.sender);
@@ -51,7 +51,7 @@ contract PublicResolver is
     _disableInitializers();
   }
 
-  function initialize(INSUnified rnsUnified, IReverseRegistrar reverseRegistrar) external initializer {
+  function initialize(INSUnified rnsUnified, INSReverseRegistrar reverseRegistrar) external initializer {
     _rnsUnified = rnsUnified;
     _reverseRegistrar = reverseRegistrar;
   }
@@ -84,7 +84,7 @@ contract PublicResolver is
   }
 
   /// @inheritdoc IPublicResolver
-  function getReverseRegistrar() external view returns (IReverseRegistrar) {
+  function getReverseRegistrar() external view returns (INSReverseRegistrar) {
     return _reverseRegistrar;
   }
 
