@@ -40,7 +40,7 @@ contract PublicResolver is
   INSUnified internal _rnsUnified;
 
   /// @dev The reverse registrar contract
-  INSReverseRegistrar internal _reverseRegistrar;
+  IReverseRegistrar internal _reverseRegistrar;
 
   modifier onlyAuthorized(bytes32 node) {
     _requireAuthorized(node, msg.sender);
@@ -51,7 +51,7 @@ contract PublicResolver is
     _disableInitializers();
   }
 
-  function initialize(INSUnified rnsUnified, INSReverseRegistrar reverseRegistrar) external initializer {
+  function initialize(INSUnified rnsUnified, IReverseRegistrar reverseRegistrar) external initializer {
     _rnsUnified = rnsUnified;
     _reverseRegistrar = reverseRegistrar;
   }
@@ -84,7 +84,7 @@ contract PublicResolver is
   }
 
   /// @inheritdoc IPublicResolver
-  function getReverseRegistrar() external view returns (INSReverseRegistrar) {
+  function getReverseRegistrar() external view returns (IReverseRegistrar) {
     return _reverseRegistrar;
   }
 
@@ -175,7 +175,7 @@ contract PublicResolver is
 
   /// @dev Override {INameResolver-name}.
   function name(bytes32 node) public view virtual override(INameResolver, NameResolvable) returns (string memory) {
-    address reversedAddress = _reverseRegistrar.getAddress(uint256(node));
+    address reversedAddress = _reverseRegistrar.getAddress(node);
     string memory domainName = super.name(node);
     uint256 tokenId = uint256(_rnsUnified.namehash(domainName));
     return _rnsUnified.ownerOf(tokenId) == reversedAddress ? domainName : "";
