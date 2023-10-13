@@ -105,6 +105,11 @@ interface INSUnified is IAccessControlEnumerable, IERC721Metadata {
   function MAX_EXPIRY() external pure returns (uint64);
 
   /**
+   * @dev Returns the name hash output of a domain.
+   */
+  function namehash(string memory domain) external pure returns (bytes32 node);
+
+  /**
    * @dev Returns true if the specified name is available for registration.
    * Note: Only available after passing the grace period.
    */
