@@ -9,10 +9,12 @@ import { INSAuction } from "./interfaces/INSAuction.sol";
 import { INSDomainPrice } from "./interfaces/INSDomainPrice.sol";
 import { PeriodScaler, LibPeriodScaler, Math } from "src/libraries/math/PeriodScalingUtils.sol";
 import { TimestampWrapper } from "./libraries/TimestampWrapperUtils.sol";
+import { LibString } from "./libraries/LibString.sol";
 import { LibRNSDomain } from "./libraries/LibRNSDomain.sol";
 import { PythConverter } from "./libraries/pyth/PythConverter.sol";
 
 contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPrice {
+  using LibString for *;
   using LibRNSDomain for string;
   using LibPeriodScaler for PeriodScaler;
   using PythConverter for PythStructs.Price;
