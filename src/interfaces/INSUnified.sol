@@ -2,9 +2,10 @@
 pragma solidity ^0.8.19;
 
 import { IERC721Metadata } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import { IAccessControlEnumerable } from "@openzeppelin/contracts/access/IAccessControlEnumerable.sol";
 import { ModifyingIndicator } from "../types/ModifyingIndicator.sol";
 
-interface INSUnified is IERC721Metadata {
+interface INSUnified is IAccessControlEnumerable, IERC721Metadata {
   /// @dev Error: The provided token id is expired.
   error Expired();
   /// @dev Error: The provided token id is unexists.
@@ -104,9 +105,9 @@ interface INSUnified is IERC721Metadata {
   function MAX_EXPIRY() external pure returns (uint64);
 
   /**
-   * @dev Calculate the RNS namehash of a str.
+   * @dev Returns the name hash output of a domain.
    */
-  function namehash(string memory str) external pure returns (bytes32 hashed);
+  function namehash(string memory domain) external pure returns (bytes32 node);
 
   /**
    * @dev Returns true if the specified name is available for registration.
