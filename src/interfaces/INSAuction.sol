@@ -48,6 +48,8 @@ interface INSAuction {
   event TreasuryUpdated(address indexed addr);
   /// @dev Emitted when bid gap ratio is updated.
   event BidGapRatioUpdated(uint256 ratio);
+  /// @dev Emitted when operator update ids reservation status.
+  event ReservedIdsUpdated(address indexed operator, uint256[] ids, bool shouldSet);
 
   /**
    * @dev The maximum expiry duration
@@ -68,6 +70,18 @@ interface INSAuction {
    * @dev The expiry duration of a domain after transferring to bidder.
    */
   function DOMAIN_EXPIRY_DURATION() external pure returns (uint64);
+
+  /**
+   * @dev Set ids reservation status.
+   *
+   * Requirements:
+   * - The method caller must be contract operator.
+   *
+   * @param ids The id corresponding for namehash of domain names
+   * @param shouldSet Boolean indicate whether ids should be reserved or not
+   * Emit an event {ReservedIdsUpdated}.
+   */
+  function setReservedIdsStatus(uint256[] calldata ids, bool shouldSet) external;
 
   /**
    * @dev Claims domain names for auction.

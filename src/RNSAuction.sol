@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { AccessControlEnumerable } from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import { BitMaps } from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import { INSUnified, INSAuction } from "./interfaces/INSAuction.sol";
 import { LibSafeRange } from "./libraries/math/LibSafeRange.sol";
 import { LibRNSDomain } from "./libraries/LibRNSDomain.sol";
@@ -12,6 +13,7 @@ import { RONTransferHelper } from "./libraries/transfers/RONTransferHelper.sol";
 
 contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
   using LibSafeRange for uint256;
+  using BitMaps for BitMaps.BitMap;
   using LibEventRange for EventRange;
 
   /// @inheritdoc INSAuction
@@ -37,6 +39,8 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
   address payable internal _treasury;
   /// @dev The gap ratio between 2 bids with the starting price.
   uint256 internal _bidGapRatio;
+  /// @dev Mapping from id => bool reserved status
+  BitMaps.BitMap internal _reserved;
 
   modifier whenNotStarted(bytes32 auctionId) {
     _requireNotStarted(auctionId);
@@ -90,18 +94,38 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
 
     for (uint256 i; i < length;) {
       (, ids[i]) = rnsUnified.mint(parentId, labels[i], address(0x0), address(this), domainExpiryDuration);
+      _reserved.set(ids[i]);
 
       unchecked {
         ++i;
       }
     }
+
+    emit ReservedIdsUpdated(_msgSender(), ids, true);
   }
 
   /**
    * @inheritdoc INSAuction
    */
   function reserved(uint256 id) public view returns (bool) {
-    return _rnsUnified.ownerOf(id) == address(this);
+    return _reserved.get(id);
+  }
+
+  /**
+   * @inheritdoc INSAuction
+   */
+  function setReservedIdsStatus(uint256[] calldata ids, bool shouldSet) external onlyRole(OPERATOR_ROLE) {
+    uint256 length = ids.length;
+
+    for (uint256 i; i < length;) {
+      _reserved.setTo(ids[i], shouldSet);
+
+      unchecked {
+        ++i;
+      }
+    }
+
+    emit ReservedIdsUpdated(_msgSender(), ids, shouldSet);
   }
 
   /**
