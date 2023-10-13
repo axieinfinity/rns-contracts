@@ -3,8 +3,8 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@ensdomains/ens-contracts/dnssec-oracle/RRUtils.sol";
-import "@rns-contracts/interfaces/resolvers/IDNSRecordResolver.sol";
-import "@rns-contracts/interfaces/resolvers/IDNSZoneResolver.sol";
+import "../interfaces/resolvers/IDNSRecordResolver.sol";
+import "../interfaces/resolvers/IDNSZoneResolver.sol";
 import "./BaseVersion.sol";
 
 abstract contract DNSResolvable is IDNSRecordResolver, IDNSZoneResolver, ERC165, BaseVersion {

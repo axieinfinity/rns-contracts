@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import "@rns-contracts/interfaces/resolvers/IVersionResolver.sol";
+import "../interfaces/resolvers/IVersionResolver.sol";
 
 abstract contract BaseVersion is IVersionResolver, ERC165 {
   /// @dev Gap for upgradeability.

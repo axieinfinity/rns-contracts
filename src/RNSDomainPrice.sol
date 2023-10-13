@@ -7,7 +7,7 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { IPyth, PythStructs } from "@pythnetwork/IPyth.sol";
 import { INSAuction } from "./interfaces/INSAuction.sol";
 import { INSDomainPrice } from "./interfaces/INSDomainPrice.sol";
-import { PeriodScaler, LibPeriodScaler, Math } from "src/libraries/math/PeriodScalingUtils.sol";
+import { PeriodScaler, LibPeriodScaler, Math } from "./libraries/math/PeriodScalingUtils.sol";
 import { TimestampWrapper } from "./libraries/TimestampWrapperUtils.sol";
 import { LibString } from "./libraries/LibString.sol";
 import { LibRNSDomain } from "./libraries/LibRNSDomain.sol";
