@@ -100,8 +100,6 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
         ++i;
       }
     }
-
-    emit ReservedIdsUpdated(_msgSender(), ids, true);
   }
 
   /**
@@ -109,23 +107,6 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
    */
   function reserved(uint256 id) public view returns (bool) {
     return _reserved.get(id);
-  }
-
-  /**
-   * @inheritdoc INSAuction
-   */
-  function setReservedIdsStatus(uint256[] calldata ids, bool shouldSet) external onlyRole(OPERATOR_ROLE) {
-    uint256 length = ids.length;
-
-    for (uint256 i; i < length;) {
-      _reserved.setTo(ids[i], shouldSet);
-
-      unchecked {
-        ++i;
-      }
-    }
-
-    emit ReservedIdsUpdated(_msgSender(), ids, shouldSet);
   }
 
   /**
