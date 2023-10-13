@@ -175,7 +175,7 @@ contract PublicResolver is
 
   /// @dev Override {INameResolver-name}.
   function name(bytes32 node) public view virtual override(INameResolver, NameResolvable) returns (string memory) {
-    address reversedAddress = _reverseRegistrar.getAddress(node);
+    address reversedAddress = _reverseRegistrar.getAddress(uint256(node));
     string memory domainName = super.name(node);
     uint256 tokenId = uint256(_rnsUnified.namehash(domainName));
     return _rnsUnified.ownerOf(tokenId) == reversedAddress ? domainName : "";
