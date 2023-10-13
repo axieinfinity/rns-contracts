@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { INameResolver } from "@rns-contracts/interfaces/resolvers/INameResolver.sol";
-import { IERC165, IERC181, IReverseRegistrar } from "@rns-contracts/interfaces/IReverseRegistrar.sol";
+import { IERC165, IERC181, INSReverseRegistrar } from "@rns-contracts/interfaces/INSReverseRegistrar.sol";
 import { INSUnified } from "@rns-contracts/interfaces/INSUnified.sol";
 import { LibStrAddrConvert } from "@rns-contracts/libraries/LibStrAddrConvert.sol";
 
@@ -14,8 +14,8 @@ import { LibStrAddrConvert } from "@rns-contracts/libraries/LibStrAddrConvert.so
  * configure the record as it's most commonly used, as a way of specifying a canonical name for an address.
  * The reverse registrar is specified in EIP 181 https://eips.ethereum.org/EIPS/eip-181.
  */
-contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
-  /// @dev This controller must equal to IReverseRegistrar.CONTROLLER_ROLE()
+contract RNSReverseRegistrar is Initializable, Ownable, INSReverseRegistrar {
+  /// @dev This controller must equal to INSReverseRegistrar.CONTROLLER_ROLE()
   bytes32 public constant CONTROLLER_ROLE = keccak256("CONTROLLER_ROLE");
   /// @dev Value equals to namehash('addr.reverse')
   bytes32 public constant ADDR_REVERSE_NODE = 0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2;
@@ -47,14 +47,14 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
   }
 
   /**
-   * @inheritdoc IReverseRegistrar
+   * @inheritdoc INSReverseRegistrar
    */
   function getDefaultResolver() external view returns (INameResolver) {
     return _defaultResolver;
   }
 
   /**
-   * @inheritdoc IReverseRegistrar
+   * @inheritdoc INSReverseRegistrar
    */
   function getRNSUnified() external view returns (INSUnified) {
     return _rnsUnified;
@@ -64,12 +64,12 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
    * @inheritdoc IERC165
    */
   function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
-    return interfaceId == type(IReverseRegistrar).interfaceId || interfaceId == type(IERC165).interfaceId
+    return interfaceId == type(INSReverseRegistrar).interfaceId || interfaceId == type(IERC165).interfaceId
       || interfaceId == type(IERC181).interfaceId;
   }
 
   /**
-   * @inheritdoc IReverseRegistrar
+   * @inheritdoc INSReverseRegistrar
    */
   function setDefaultResolver(INameResolver resolver) external onlyOwner {
     if (address(resolver) == address(0)) revert NullAssignment();
@@ -92,7 +92,7 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
   }
 
   /**
-   * @inheritdoc IReverseRegistrar
+   * @inheritdoc INSReverseRegistrar
    */
   function getAddress(bytes32 node) external view returns (address) {
     INSUnified.Record memory record = _rnsUnified.getRecord(uint256(node));
@@ -108,14 +108,9 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
   }
 
   /**
-   * @inheritdoc IReverseRegistrar
+   * @inheritdoc INSReverseRegistrar
    */
-  function setNameForAddr(address addr, string memory name)
-    public
-    live
-    onlyAuthorized(addr)
-    returns (bytes32 node)
-  {
+  function setNameForAddr(address addr, string memory name) public live onlyAuthorized(addr) returns (bytes32 node) {
     node = computeNode(addr);
     INSUnified rnsUnified = _rnsUnified;
     if (rnsUnified.ownerOf(uint256(node)) != address(this)) {
@@ -128,7 +123,7 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
   }
 
   /**
-   * @inheritdoc IReverseRegistrar
+   * @inheritdoc INSReverseRegistrar
    */
   function computeNode(address addr) public pure returns (bytes32) {
     return keccak256(abi.encodePacked(ADDR_REVERSE_NODE, keccak256(bytes(LibStrAddrConvert.toString(addr)))));

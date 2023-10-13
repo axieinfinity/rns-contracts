@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { INSUnified } from "@rns-contracts/interfaces/INSUnified.sol";
-import { IReverseRegistrar } from "@rns-contracts/interfaces/IReverseRegistrar.sol";
+import { INSReverseRegistrar } from "@rns-contracts/interfaces/INSReverseRegistrar.sol";
 import { IABIResolver } from "./IABIResolver.sol";
 import { IAddressResolver } from "./IAddressResolver.sol";
 import { IContentHashResolver } from "./IContentHashResolver.sol";
@@ -48,7 +48,7 @@ interface IPublicResolver is
   /**
    * @dev Retrieves the reverse registrar associated with this resolver.
    */
-  function getReverseRegistrar() external view returns (IReverseRegistrar);
+  function getReverseRegistrar() external view returns (INSReverseRegistrar);
 
   /**
    * @dev This function provides an extra security check when called from privileged contracts (such as
