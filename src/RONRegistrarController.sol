@@ -13,6 +13,7 @@ import {
   INSReverseRegistrar,
   IRONRegistrarController
 } from "./interfaces/IRONRegistrarController.sol";
+import { LibString } from "./libraries/LibString.sol";
 import { LibRNSDomain } from "./libraries/LibRNSDomain.sol";
 import { RONTransferHelper } from "./libraries/transfers/RONTransferHelper.sol";
 
@@ -28,6 +29,7 @@ contract RONRegistrarController is
   AccessControlEnumerable,
   IRONRegistrarController
 {
+  using LibString for string;
   using LibRNSDomain for string;
 
   /// @dev The minimum domain name's length

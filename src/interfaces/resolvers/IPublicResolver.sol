@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { INSUnified } from "@rns-contracts/interfaces/INSUnified.sol";
-import { INSReverseRegistrar } from "@rns-contracts/interfaces/INSReverseRegistrar.sol";
+import { INSUnified } from "../INSUnified.sol";
+import { INSReverseRegistrar } from "../INSReverseRegistrar.sol";
 import { IABIResolver } from "./IABIResolver.sol";
 import { IAddressResolver } from "./IAddressResolver.sol";
 import { IContentHashResolver } from "./IContentHashResolver.sol";
