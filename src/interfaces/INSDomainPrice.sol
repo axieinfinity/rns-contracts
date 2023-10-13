@@ -13,6 +13,11 @@ interface INSDomainPrice {
     uint256 fee;
   }
 
+  struct UnitPrice {
+    uint256 usd;
+    uint256 ron;
+  }
+
   /// @dev Emitted when the renewal reservation ratio is updated.
   event TaxRatioUpdated(address indexed operator, uint256 indexed ratio);
   /// @dev Emitted when the maximum length of renewal fee is updated.
@@ -111,7 +116,7 @@ interface INSDomainPrice {
   function getRenewalFee(string calldata label, uint256 duration)
     external
     view
-    returns (uint256 usdPrice, uint256 ronPrice, uint256 usdTax, uint256 ronTax);
+    returns (UnitPrice memory basePrice, UnitPrice memory tax);
 
   /**
    * @dev Returns the renewal fee of a label. Reverts if not overridden.
