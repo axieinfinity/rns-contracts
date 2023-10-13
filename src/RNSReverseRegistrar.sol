@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.19;
 
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { INameResolver } from "@rns-contracts/interfaces/resolvers/INameResolver.sol";
-import { IERC165, IERC181, IReverseRegistrar } from "@rns-contracts/interfaces/IReverseRegistrar.sol";
-import { INSUnified } from "@rns-contracts/interfaces/INSUnified.sol";
-import { LibStrAddrConvert } from "@rns-contracts/libraries/LibStrAddrConvert.sol";
+import { INameResolver } from "./interfaces/resolvers/INameResolver.sol";
+import { IERC165, IERC181, INSReverseRegistrar } from "./interfaces/INSReverseRegistrar.sol";
+import { INSUnified } from "./interfaces/INSUnified.sol";
+import { LibString } from "./libraries/LibString.sol";
+import { LibRNSDomain } from "./libraries/LibRNSDomain.sol";
 
 /**
  * @notice Customized version of ReverseRegistrar: https://github.com/ensdomains/ens-contracts/blob/0c75ba23fae76165d51c9c80d76d22261e06179d/contracts/reverseRegistrar/ReverseRegistrar.sol
@@ -14,11 +15,11 @@ import { LibStrAddrConvert } from "@rns-contracts/libraries/LibStrAddrConvert.so
  * configure the record as it's most commonly used, as a way of specifying a canonical name for an address.
  * The reverse registrar is specified in EIP 181 https://eips.ethereum.org/EIPS/eip-181.
  */
-contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
-  /// @dev This controller must equal to IReverseRegistrar.CONTROLLER_ROLE()
+contract RNSReverseRegistrar is Initializable, Ownable, INSReverseRegistrar {
+  using LibString for *;
+
+  /// @dev This controller must equal to INSReverseRegistrar.CONTROLLER_ROLE()
   bytes32 public constant CONTROLLER_ROLE = keccak256("CONTROLLER_ROLE");
-  /// @dev Value equals to namehash('addr.reverse')
-  bytes32 public constant ADDR_REVERSE_NODE = 0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2;
 
   /// @dev Gap for upgradeability.
   uint256[50] private ____gap;
@@ -47,14 +48,14 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
   }
 
   /**
-   * @inheritdoc IReverseRegistrar
+   * @inheritdoc INSReverseRegistrar
    */
   function getDefaultResolver() external view returns (INameResolver) {
     return _defaultResolver;
   }
 
   /**
-   * @inheritdoc IReverseRegistrar
+   * @inheritdoc INSReverseRegistrar
    */
   function getRNSUnified() external view returns (INSUnified) {
     return _rnsUnified;
@@ -64,12 +65,12 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
    * @inheritdoc IERC165
    */
   function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
-    return interfaceId == type(IReverseRegistrar).interfaceId || interfaceId == type(IERC165).interfaceId
+    return interfaceId == type(INSReverseRegistrar).interfaceId || interfaceId == type(IERC165).interfaceId
       || interfaceId == type(IERC181).interfaceId;
   }
 
   /**
-   * @inheritdoc IReverseRegistrar
+   * @inheritdoc INSReverseRegistrar
    */
   function setDefaultResolver(INameResolver resolver) external onlyOwner {
     if (address(resolver) == address(0)) revert NullAssignment();
@@ -80,77 +81,78 @@ contract RNSReverseRegistrar is Initializable, Ownable, IReverseRegistrar {
   /**
    * @inheritdoc IERC181
    */
-  function claim(address addr) external returns (bytes32) {
-    return claimWithResolver(addr, address(_defaultResolver));
+  function claim(address addr) external returns (uint256 id) {
+    id = claimWithResolver(addr, address(_defaultResolver));
   }
 
   /**
    * @inheritdoc IERC181
    */
-  function setName(string memory name) external returns (bytes32 node) {
-    return setNameForAddr(_msgSender(), name);
+  function setName(string memory name) external returns (uint256 id) {
+    id = setNameForAddr(_msgSender(), name);
   }
 
   /**
-   * @inheritdoc IReverseRegistrar
+   * @inheritdoc INSReverseRegistrar
    */
-  function getAddress(bytes32 node) external view returns (address) {
-    INSUnified.Record memory record = _rnsUnified.getRecord(uint256(node));
-    if (record.immut.parentId != uint256(ADDR_REVERSE_NODE)) revert InvalidNode();
-    return LibStrAddrConvert.parseAddr(record.immut.label);
+  function getAddress(uint256 id) external view returns (address) {
+    INSUnified.Record memory record = _rnsUnified.getRecord(id);
+    if (record.immut.parentId != LibRNSDomain.ADDR_REVERSE_ID) revert InvalidId();
+    return record.immut.label.parseAddr();
   }
 
   /**
    * @inheritdoc IERC181
    */
-  function claimWithResolver(address addr, address resolver) public live onlyAuthorized(addr) returns (bytes32 node) {
-    node = _claimWithResolver(addr, resolver);
+  function claimWithResolver(address addr, address resolver) public live onlyAuthorized(addr) returns (uint256 id) {
+    id = _claimWithResolver(addr, resolver);
   }
 
   /**
-   * @inheritdoc IReverseRegistrar
+   * @inheritdoc INSReverseRegistrar
    */
-  function setNameForAddr(address addr, string memory name)
-    public
-    live
-    onlyAuthorized(addr)
-    returns (bytes32 node)
-  {
-    node = computeNode(addr);
+  function setNameForAddr(address addr, string memory name) public live onlyAuthorized(addr) returns (uint256 id) {
+    id = computeId(addr);
     INSUnified rnsUnified = _rnsUnified;
-    if (rnsUnified.ownerOf(uint256(node)) != address(this)) {
-      bytes32 claimedNode = _claimWithResolver(addr, address(_defaultResolver));
-      if (claimedNode != node) revert InvalidNode();
+    if (rnsUnified.ownerOf(id) != address(this)) {
+      uint256 claimedId = _claimWithResolver(addr, address(_defaultResolver));
+      if (claimedId != id) revert InvalidId();
     }
 
-    INSUnified.Record memory record = rnsUnified.getRecord(uint256(node));
-    INameResolver(record.mut.resolver).setName(node, name);
+    INSUnified.Record memory record = rnsUnified.getRecord(id);
+    INameResolver(record.mut.resolver).setName(bytes32(id), name);
   }
 
   /**
-   * @inheritdoc IReverseRegistrar
+   * @inheritdoc INSReverseRegistrar
    */
-  function computeNode(address addr) public pure returns (bytes32) {
-    return keccak256(abi.encodePacked(ADDR_REVERSE_NODE, keccak256(bytes(LibStrAddrConvert.toString(addr)))));
+  function computeId(address addr) public pure returns (uint256 id) {
+    id = LibRNSDomain.toId(LibRNSDomain.ADDR_REVERSE_ID, addr.toString());
   }
 
   /**
    * @dev Helper method to claim domain hex(addr) + '.addr.reverse' for addr.
    * Emits an event {ReverseClaimed}.
    */
-  function _claimWithResolver(address addr, address resolver) internal returns (bytes32 node) {
-    string memory stringifiedAddr = LibStrAddrConvert.toString(addr);
-    (, uint256 id) =
-      _rnsUnified.mint(uint256(ADDR_REVERSE_NODE), stringifiedAddr, resolver, address(this), type(uint64).max);
-    node = bytes32(id);
-    emit ReverseClaimed(addr, node);
+  function _claimWithResolver(address addr, address resolver) internal returns (uint256 id) {
+    string memory stringifiedAddr = addr.toString();
+    (, id) = _rnsUnified.mint(LibRNSDomain.ADDR_REVERSE_ID, stringifiedAddr, resolver, address(this), type(uint64).max);
+    emit ReverseClaimed(addr, id);
   }
 
   /**
    * @dev Helper method to ensure the contract can mint or modify domain hex(addr) + '.addr.reverse' for addr.
    */
   function _requireLive() internal view {
-    if (_rnsUnified.ownerOf(uint256(ADDR_REVERSE_NODE)) == address(this)) revert InvalidConfig();
+    INSUnified rnsUnified = _rnsUnified;
+    uint256 addrReverseId = LibRNSDomain.ADDR_REVERSE_ID;
+    address owner = rnsUnified.ownerOf(addrReverseId);
+    if (
+      owner == address(this) || rnsUnified.getApproved(addrReverseId) == address(this)
+        || rnsUnified.isApprovedForAll(owner, address(this))
+    ) {
+      revert InvalidConfig();
+    }
   }
 
   /**
