@@ -7,7 +7,7 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { IPyth, PythStructs } from "@pythnetwork/IPyth.sol";
 import { INSAuction } from "./interfaces/INSAuction.sol";
 import { INSDomainPrice } from "./interfaces/INSDomainPrice.sol";
-import { PeriodScaler, LibPeriodScaler, Math } from "./libraries/math/PeriodScalingUtils.sol";
+import { PeriodScaler, LibPeriodScaler, Math } from "src/libraries/math/PeriodScalingUtils.sol";
 import { TimestampWrapper } from "./libraries/TimestampWrapperUtils.sol";
 import { LibString } from "./libraries/LibString.sol";
 import { LibRNSDomain } from "./libraries/LibRNSDomain.sol";
@@ -67,7 +67,7 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
     bytes32 pythIdForRONUSD
   ) external initializer {
     uint256 length = operators.length;
-    bytes32 operatorRole = OPERATOR_ROLE;
+    bytes32 operatorRole;
 
     for (uint256 i; i < length;) {
       _setupRole(operatorRole, operators[i]);

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { BaseVersion } from "./BaseVersion.sol";
-import { ITextResolver } from "../interfaces/resolvers/ITextResolver.sol";
+import { ITextResolver } from "@rns-contracts/interfaces/resolvers/ITextResolver.sol";
 
 abstract contract TextResolvable is BaseVersion, ITextResolver {
   /// @dev Gap for upgradeability.

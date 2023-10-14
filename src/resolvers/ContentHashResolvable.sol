@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import "../interfaces/resolvers/IContentHashResolver.sol";
+import "@rns-contracts/interfaces/resolvers/IContentHashResolver.sol";
 import "./BaseVersion.sol";
 
 abstract contract ContentHashResolvable is IContentHashResolver, ERC165, BaseVersion {

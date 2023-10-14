@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import "../interfaces/resolvers/IABIResolver.sol";
+import "@rns-contracts/interfaces/resolvers/IABIResolver.sol";
 import "./BaseVersion.sol";
 
 abstract contract ABIResolvable is IABIResolver, ERC165, BaseVersion {

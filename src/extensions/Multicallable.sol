@@ -2,8 +2,8 @@
 pragma solidity ^0.8.0;
 
 import { ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import { IMulticallable } from "../interfaces/IMulticallable.sol";
-import { ErrorHandler } from "../libraries/ErrorHandler.sol";
+import { IMulticallable } from "@rns-contracts/interfaces/IMulticallable.sol";
+import { ErrorHandler } from "@rns-contracts/libraries/ErrorHandler.sol";
 
 abstract contract Multicallable is ERC165, IMulticallable {
   using ErrorHandler for bool;

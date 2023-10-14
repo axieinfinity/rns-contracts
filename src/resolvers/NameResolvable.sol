@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { BaseVersion } from "./BaseVersion.sol";
-import { INameResolver } from "../interfaces/resolvers/INameResolver.sol";
+import { INameResolver } from "@rns-contracts/interfaces/resolvers/INameResolver.sol";
 
 abstract contract NameResolvable is INameResolver, BaseVersion {
   /// @dev Gap for upgradeability.

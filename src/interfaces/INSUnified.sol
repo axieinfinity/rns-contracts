@@ -214,7 +214,7 @@ interface INSUnified is IAccessControlEnumerable, IERC721Metadata {
    *
    * Emits an event {RecordUpdated}.
    */
-  function renew(uint256 id, uint64 duration) external returns (uint64 expiry);
+  function renew(uint256 id, uint64 duration) external;
 
   /**
    * @dev Sets expiry time for a token. Update operation for {Record.mut.expiry}.

@@ -3,7 +3,6 @@ pragma solidity ^0.8.19;
 
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { IERC721State, IERC721, ERC721, INSUnified, RNSToken } from "./RNSToken.sol";
-import { LibRNSDomain } from "./libraries/LibRNSDomain.sol";
 import { LibSafeRange } from "./libraries/math/LibSafeRange.sol";
 import { ModifyingField, LibModifyingField } from "./libraries/LibModifyingField.sol";
 import {
@@ -14,7 +13,6 @@ import {
 } from "./types/ModifyingIndicator.sol";
 
 contract RNSUnified is Initializable, RNSToken {
-  using LibRNSDomain for string;
   using LibModifyingField for ModifyingField;
 
   bytes32 public constant CONTROLLER_ROLE = keccak256("CONTROLLER_ROLE");
@@ -61,6 +59,11 @@ contract RNSUnified is Initializable, RNSToken {
   }
 
   /// @inheritdoc INSUnified
+  function namehash(string memory) external pure returns (bytes32 node) {
+    revert("TODO");
+  }
+
+  /// @inheritdoc INSUnified
   function available(uint256 id) public view returns (bool) {
     return block.timestamp > LibSafeRange.add(_expiry(id), _gracePeriod);
   }
@@ -82,7 +85,9 @@ contract RNSUnified is Initializable, RNSToken {
     returns (uint64 expiryTime, uint256 id)
   {
     if (!_checkOwnerRules(_msgSender(), parentId)) revert Unauthorized();
-    id = LibRNSDomain.toId(parentId, label);
+
+    bytes32 labelHash = keccak256(bytes(label));
+    id = uint256(keccak256(abi.encode(parentId, labelHash)));
     if (!available(id)) revert Unavailable();
 
     if (_exists(id)) _burn(id);
@@ -96,11 +101,6 @@ contract RNSUnified is Initializable, RNSToken {
 
     _recordOf[id] = record;
     emit RecordUpdated(id, ALL_FIELDS_INDICATOR, record);
-  }
-
-  /// @inheritdoc INSUnified
-  function namehash(string memory str) public pure returns (bytes32 hashed) {
-    hashed = str.namehash();
   }
 
   /// @inheritdoc INSUnified
@@ -133,11 +133,10 @@ contract RNSUnified is Initializable, RNSToken {
   }
 
   /// @inheritdoc INSUnified
-  function renew(uint256 id, uint64 duration) external whenNotPaused onlyRole(CONTROLLER_ROLE) returns (uint64 expiry) {
+  function renew(uint256 id, uint64 duration) external whenNotPaused onlyRole(CONTROLLER_ROLE) {
     Record memory record;
     record.mut.expiry = uint64(LibSafeRange.addWithUpperbound(_recordOf[id].mut.expiry, duration, MAX_EXPIRY));
     _setExpiry(id, record.mut.expiry);
-    expiry = record.mut.expiry;
     emit RecordUpdated(id, ModifyingField.Expiry.indicator(), record);
   }
 
