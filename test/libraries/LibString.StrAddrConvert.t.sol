@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "forge-std/Test.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "src/libraries/LibStrAddrConvert.sol";
+import { Test } from "forge-std/Test.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { LibString } from "@rns-contracts/libraries/LibString.sol";
 
-contract LibStrAddrConvertTest is Test {
+contract LibString_StrAddrConvert_Test is Test {
   function test_AddressToString(address addr) public {
     string memory expected = withoutHexPrefix(Strings.toHexString(addr));
-    string memory actual = LibStrAddrConvert.toString(addr);
+    string memory actual = LibString.toString(addr);
     assertEq(expected, actual);
   }
 
   function test_StringToAddress(address expected) public {
     string memory stringifiedAddr = withoutHexPrefix(Strings.toHexString(expected));
-    address actual = LibStrAddrConvert.parseAddr(stringifiedAddr);
+    address actual = LibString.parseAddr(stringifiedAddr);
     assertEq(expected, actual);
   }
 
