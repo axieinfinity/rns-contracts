@@ -284,8 +284,7 @@ abstract contract RNSUnifiedTest is Test {
     assertEq(record.mut.protected, false);
     assertEq(record.mut.resolver, mintParam.resolver);
     assertEq(record.immut.depth, parentRecord.immut.depth + 1);
-    assertEq(domain, string.concat(name, ".", parentDomain));
-    assertEq(domain, string.concat(name, ".", parentRecord.immut.label));
+    assertEq(domain, string.concat(name, ".", parentDomain), "domain != $`name.{parentDomain})`");
     assertEq(_rns.tokenURI(id), string.concat(BASE_URI, address(_rns).toHexString(), "/", id.toString()));
   }
 }
