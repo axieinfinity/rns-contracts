@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import { BaseVersion } from "./BaseVersion.sol";
-import { IInterfaceResolver } from "@rns-contracts/interfaces/resolvers/IInterfaceResolver.sol";
+import { IInterfaceResolver } from "../interfaces/resolvers/IInterfaceResolver.sol";
 
 abstract contract InterfaceResolvable is IInterfaceResolver, ERC165, BaseVersion {
   /// @dev Gap for upgradeability.

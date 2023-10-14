@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { BaseVersion } from "./BaseVersion.sol";
-import { IPublicKeyResolver } from "@rns-contracts/interfaces/resolvers/IPublicKeyResolver.sol";
+import { IPublicKeyResolver } from "../interfaces/resolvers/IPublicKeyResolver.sol";
 
 abstract contract PublicKeyResolvable is BaseVersion, IPublicKeyResolver {
   /// @dev Gap for upgradeability.
