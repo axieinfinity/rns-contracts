@@ -67,7 +67,7 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
     bytes32 pythIdForRONUSD
   ) external initializer {
     uint256 length = operators.length;
-    bytes32 operatorRole;
+    bytes32 operatorRole = OPERATOR_ROLE;
 
     for (uint256 i; i < length;) {
       _setupRole(operatorRole, operators[i]);
