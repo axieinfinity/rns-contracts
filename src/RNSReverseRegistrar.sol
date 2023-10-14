@@ -148,8 +148,10 @@ contract RNSReverseRegistrar is Initializable, Ownable, INSReverseRegistrar {
     uint256 addrReverseId = LibRNSDomain.ADDR_REVERSE_ID;
     address owner = rnsUnified.ownerOf(addrReverseId);
     if (
-      owner == address(this) || rnsUnified.getApproved(addrReverseId) == address(this)
-        || rnsUnified.isApprovedForAll(owner, address(this))
+      !(
+        owner == address(this) || rnsUnified.getApproved(addrReverseId) == address(this)
+          || rnsUnified.isApprovedForAll(owner, address(this))
+      )
     ) {
       revert InvalidConfig();
     }
