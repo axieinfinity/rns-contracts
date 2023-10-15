@@ -18,7 +18,7 @@ import { PublicResolver, PublicResolverDeploy } from "script/contracts/PublicRes
 import { RNSReverseRegistrar, RNSReverseRegistrarDeploy } from "script/contracts/RNSReverseRegistrarDeploy.s.sol";
 import { INSDomainPrice, RNSDeploy } from "../RNSDeploy.s.sol";
 
-contract Migration__202310101_Deploy is RNSDeploy {
+contract Migration__20231015_Deploy is RNSDeploy {
   using Strings for *;
   using LibRNSDomain for string;
 
@@ -43,7 +43,7 @@ contract Migration__202310101_Deploy is RNSDeploy {
 
     address admin = _rns.getRoleMember(_rns.DEFAULT_ADMIN_ROLE(), 0);
     {
-      string memory data = vm.readFile("./script/20231012-deploy/data/data.json");
+      string memory data = vm.readFile("./script/20231015-deploy/data/data.json");
       _blacklistedWords = vm.parseJsonStringArray(data, ".words");
     }
     uint256[] memory packedWords = _nameChecker.packBulk(_blacklistedWords);
