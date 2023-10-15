@@ -1,1 +1,1 @@
-op run --env-file="./.env" -- forge script --trezor --legacy --sig "run(string)" "$@"
+op run --env-file="./.env" -- forge script --legacy --sig "run(string)" "$@"
