@@ -1,0 +1,245 @@
+name: Create Pull Request From Release to Feature
+on:
+  push:
+    branches:
+      - 'release/*'
+      - 'release*/*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  HEAD_BRANCH: ${{ github.head_ref || github.ref_name }}
+
+jobs:
+  mergeRelease2FeatureRnsUnified:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set env
+        run: |
+          echo "PR_BRANCH=merge/${HEAD_BRANCH}-feature/rns-unified" >> $GITHUB_ENV
+      - uses: actions/checkout@v3
+        with:
+          ref: feature/rns-unified
+      - name: Reset promotion branch
+        run: |
+          git fetch origin ${HEAD_BRANCH}:${HEAD_BRANCH}
+          git reset --hard ${HEAD_BRANCH}
+
+      - name: Render template
+        id: template
+        uses: chuhlomin/render-template@v1.4
+        with:
+          template: .github/template/create-pull-request.md
+          vars: |
+            fromBranch: ${{env.HEAD_BRANCH}}
+            toBranch: feature/rns-unified
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          labels: automated PR
+          team-reviewers: axieinfinity/smart-contract
+          delete-branch: true
+          title: 'chore(rns-unified): merge from `${{env.HEAD_BRANCH}}`'
+          body: ${{ steps.template.outputs.result }}
+          branch: ${{env.PR_BRANCH}}
+
+  mergeRelease2FeatureController:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set env
+        run: |
+          echo "PR_BRANCH=merge/${HEAD_BRANCH}-feature/controller" >> $GITHUB_ENV
+      - uses: actions/checkout@v3
+        with:
+          ref: feature/controller
+      - name: Reset promotion branch
+        run: |
+          git fetch origin ${HEAD_BRANCH}:${HEAD_BRANCH}
+          git reset --hard ${HEAD_BRANCH}
+
+      - name: Render template
+        id: template
+        uses: chuhlomin/render-template@v1.4
+        with:
+          template: .github/template/create-pull-request.md
+          vars: |
+            fromBranch: ${{env.HEAD_BRANCH}}
+            toBranch: feature/controller
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          labels: automated PR
+          team-reviewers: axieinfinity/smart-contract
+          delete-branch: true
+          title: 'chore(controller): merge from `${{env.HEAD_BRANCH}}`'
+          body: ${{ steps.template.outputs.result }}
+          branch: ${{env.PR_BRANCH}}
+
+  mergeRelease2FeatureDomainPrice:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set env
+        run: |
+          echo "PR_BRANCH=merge/${HEAD_BRANCH}-feature/domain-price" >> $GITHUB_ENV
+      - uses: actions/checkout@v3
+        with:
+          ref: feature/domain-price
+      - name: Reset promotion branch
+        run: |
+          git fetch origin ${HEAD_BRANCH}:${HEAD_BRANCH}
+          git reset --hard ${HEAD_BRANCH}
+
+      - name: Render template
+        id: template
+        uses: chuhlomin/render-template@v1.4
+        with:
+          template: .github/template/create-pull-request.md
+          vars: |
+            fromBranch: ${{env.HEAD_BRANCH}}
+            toBranch: feature/domain-price
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          labels: automated PR
+          team-reviewers: axieinfinity/smart-contract
+          delete-branch: true
+          title: 'chore(domain-price): merge from `${{env.HEAD_BRANCH}}`'
+          body: ${{ steps.template.outputs.result }}
+          branch: ${{env.PR_BRANCH}}
+
+  mergeRelease2FeatureAuction:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set env
+        run: |
+          echo "PR_BRANCH=merge/${HEAD_BRANCH}-feature/auction" >> $GITHUB_ENV
+      - uses: actions/checkout@v3
+        with:
+          ref: feature/auction
+      - name: Reset promotion branch
+        run: |
+          git fetch origin ${HEAD_BRANCH}:${HEAD_BRANCH}
+          git reset --hard ${HEAD_BRANCH}
+
+      - name: Render template
+        id: template
+        uses: chuhlomin/render-template@v1.4
+        with:
+          template: .github/template/create-pull-request.md
+          vars: |
+            fromBranch: ${{env.HEAD_BRANCH}}
+            toBranch: feature/auction
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          labels: automated PR
+          team-reviewers: axieinfinity/smart-contract
+          delete-branch: true
+          title: 'chore(auction): merge from `${{env.HEAD_BRANCH}}`'
+          body: ${{ steps.template.outputs.result }}
+          branch: ${{env.PR_BRANCH}}
+
+  mergeRelease2FeaturePublicResolver:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set env
+        run: |
+          echo "PR_BRANCH=merge/${HEAD_BRANCH}-feature/public-resolver" >> $GITHUB_ENV
+      - uses: actions/checkout@v3
+        with:
+          ref: feature/public-resolver
+      - name: Reset promotion branch
+        run: |
+          git fetch origin ${HEAD_BRANCH}:${HEAD_BRANCH}
+          git reset --hard ${HEAD_BRANCH}
+
+      - name: Render template
+        id: template
+        uses: chuhlomin/render-template@v1.4
+        with:
+          template: .github/template/create-pull-request.md
+          vars: |
+            fromBranch: ${{env.HEAD_BRANCH}}
+            toBranch: feature/public-resolver
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          labels: automated PR
+          team-reviewers: axieinfinity/smart-contract
+          delete-branch: true
+          title: 'chore(public-resolver): merge from `${{env.HEAD_BRANCH}}`'
+          body: ${{ steps.template.outputs.result }}
+          branch: ${{env.PR_BRANCH}}
+
+  mergeRelease2FeatureCI:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set env
+        run: |
+          echo "PR_BRANCH=merge/${HEAD_BRANCH}-feature/ci" >> $GITHUB_ENV
+      - uses: actions/checkout@v3
+        with:
+          ref: feature/ci
+      - name: Reset promotion branch
+        run: |
+          git fetch origin ${HEAD_BRANCH}:${HEAD_BRANCH}
+          git reset --hard ${HEAD_BRANCH}
+
+      - name: Render template
+        id: template
+        uses: chuhlomin/render-template@v1.4
+        with:
+          template: .github/template/create-pull-request.md
+          vars: |
+            fromBranch: ${{env.HEAD_BRANCH}}
+            toBranch: feature/ci
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          labels: automated PR
+          team-reviewers: axieinfinity/smart-contract
+          delete-branch: true
+          title: 'chore(ci): merge from `${{env.HEAD_BRANCH}}`'
+          body: ${{ steps.template.outputs.result }}
+          branch: ${{env.PR_BRANCH}}
+
+  mergeRelease2FeatureReverseRegistrar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set env
+        run: |
+          echo "PR_BRANCH=merge/${HEAD_BRANCH}-feature/reverse-registrar" >> $GITHUB_ENV
+      - uses: actions/checkout@v3
+        with:
+          ref: feature/reverse-registrar
+      - name: Reset promotion branch
+        run: |
+          git fetch origin ${HEAD_BRANCH}:${HEAD_BRANCH}
+          git reset --hard ${HEAD_BRANCH}
+
+      - name: Render template
+        id: template
+        uses: chuhlomin/render-template@v1.4
+        with:
+          template: .github/template/create-pull-request.md
+          vars: |
+            fromBranch: ${{env.HEAD_BRANCH}}
+            toBranch: feature/reverse-registrar
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          labels: automated PR
+          team-reviewers: axieinfinity/smart-contract
+          delete-branch: true
+          title: 'chore(reverse-registrar): merge from `${{env.HEAD_BRANCH}}`'
+          body: ${{ steps.template.outputs.result }}
+          branch: ${{env.PR_BRANCH}}
