@@ -46,6 +46,5 @@ jobs:
           branch: ${{ env.HEAD_BRANCH }}
           base: ${{env.FEATURE_BRANCH}}
           labels: automated PR
-          team-reviewers: axieinfinity/smart-contract
           title: 'feat(${{env.FEATURE_NAME}}): implement `${{env.IMPLEMENT_NAME}}`'
           body: ${{ steps.template.outputs.result }}
