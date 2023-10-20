@@ -9,8 +9,13 @@
     "src/**/*.sol"
   ],
   "devDependencies": {
+    "dotenv": "^16.3.1",
+    "hardhat": "^2.12.7",
+    "hardhat-deploy": "0.11.29",
     "husky": "^8.0.3",
-    "lint-staged": "^14.0.1"
+    "lint-staged": "^14.0.1",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4"
   },
   "lint-staged": {
     "{src,script,test}/**/*.sol": [

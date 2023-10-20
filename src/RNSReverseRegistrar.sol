@@ -88,7 +88,7 @@ contract RNSReverseRegistrar is Initializable, Ownable, INSReverseRegistrar {
   /**
    * @inheritdoc IERC181
    */
-  function setName(string memory name) external returns (uint256 id) {
+  function setName(string calldata name) external returns (uint256 id) {
     id = setNameForAddr(_msgSender(), name);
   }
 
@@ -111,7 +111,7 @@ contract RNSReverseRegistrar is Initializable, Ownable, INSReverseRegistrar {
   /**
    * @inheritdoc INSReverseRegistrar
    */
-  function setNameForAddr(address addr, string memory name) public live onlyAuthorized(addr) returns (uint256 id) {
+  function setNameForAddr(address addr, string calldata name) public live onlyAuthorized(addr) returns (uint256 id) {
     id = computeId(addr);
     INSUnified rnsUnified = _rnsUnified;
     if (rnsUnified.ownerOf(id) != address(this)) {
@@ -148,8 +148,10 @@ contract RNSReverseRegistrar is Initializable, Ownable, INSReverseRegistrar {
     uint256 addrReverseId = LibRNSDomain.ADDR_REVERSE_ID;
     address owner = rnsUnified.ownerOf(addrReverseId);
     if (
-      owner == address(this) || rnsUnified.getApproved(addrReverseId) == address(this)
-        || rnsUnified.isApprovedForAll(owner, address(this))
+      !(
+        owner == address(this) || rnsUnified.getApproved(addrReverseId) == address(this)
+          || rnsUnified.isApprovedForAll(owner, address(this))
+      )
     ) {
       revert InvalidConfig();
     }

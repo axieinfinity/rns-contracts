@@ -1,0 +1,50 @@
+name: Create Pull Request From Implement To Feature
+on:
+  push:
+    branches:
+      - 'implement-feature/**'
+      - 'implement-feature/**/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  HEAD_BRANCH: ${{ github.head_ref || github.ref_name }}
+
+jobs:
+  createPullRequest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set env
+        run: |
+          echo "FEATURE_NAME=$(echo ${HEAD_BRANCH} | cut -d'/' -f2)" >> $GITHUB_ENV
+          echo "FEATURE_BRANCH=feature/$(echo ${HEAD_BRANCH} | cut -d'/' -f2)" >> $GITHUB_ENV
+          echo "IMPLEMENT_NAME=$(echo ${HEAD_BRANCH} | cut -d'/' -f3)" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{env.FEATURE_BRANCH}}
+
+      - name: Reset promotion branch
+        run: |
+          git fetch origin ${HEAD_BRANCH}:${HEAD_BRANCH}
+          git reset --hard ${HEAD_BRANCH}
+
+      - name: Render template
+        id: template
+        uses: chuhlomin/render-template@v1.4
+        with:
+          template: .github/template/create-pull-request.md
+          vars: |
+            fromBranch: ${{env.HEAD_BRANCH}}
+            toBranch: ${{ env.FEATURE_BRANCH }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          branch: ${{ env.HEAD_BRANCH }}
+          base: ${{env.FEATURE_BRANCH}}
+          labels: automated PR
+          title: 'feat(${{env.FEATURE_NAME}}): implement `${{env.IMPLEMENT_NAME}}`'
+          body: ${{ steps.template.outputs.result }}
