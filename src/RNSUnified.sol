@@ -91,11 +91,14 @@ contract RNSUnified is Initializable, RNSToken {
     expiryTime = uint64(LibSafeRange.addWithUpperbound(block.timestamp, duration, MAX_EXPIRY));
     _requireValidExpiry(parentId, expiryTime);
     Record memory record;
-    record.mut = MutableRecord({ resolver: resolver, owner: owner, expiry: expiryTime, protected: false });
+    record.mut =
+      MutableRecord({ resolver: resolver, owner: owner, expiry: expiryTime, protected: _recordOf[id].mut.protected });
     record.immut = ImmutableRecord({ depth: _recordOf[parentId].immut.depth + 1, parentId: parentId, label: label });
 
     _recordOf[id] = record;
-    emit RecordUpdated(id, ALL_FIELDS_INDICATOR, record);
+    emit RecordUpdated(
+      id, IMMUTABLE_FIELDS_INDICATOR & USER_FIELDS_INDICATOR ^ ModifyingField.Protected.indicator(), record
+    );
   }
 
   /// @inheritdoc INSUnified
@@ -157,7 +160,6 @@ contract RNSUnified is Initializable, RNSToken {
 
     for (uint256 i; i < ids.length;) {
       id = ids[i];
-      if (!_exists(id)) revert Unexists();
       if (_recordOf[id].mut.protected != protected) {
         _recordOf[id].mut.protected = protected;
         emit RecordUpdated(id, indicator, record);
@@ -343,5 +345,7 @@ contract RNSUnified is Initializable, RNSToken {
   function _burn(uint256 id) internal override {
     super._burn(id);
     delete _recordOf[id].mut;
+    Record memory record;
+    emit RecordUpdated(id, USER_FIELDS_INDICATOR, record);
   }
 }
