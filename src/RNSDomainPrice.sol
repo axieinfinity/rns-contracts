@@ -5,10 +5,12 @@ import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable
 import { AccessControlEnumerable } from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { IPyth, PythStructs } from "@pythnetwork/IPyth.sol";
+import { INSUnified } from "./interfaces/INSUnified.sol";
 import { INSAuction } from "./interfaces/INSAuction.sol";
 import { INSDomainPrice } from "./interfaces/INSDomainPrice.sol";
 import { PeriodScaler, LibPeriodScaler, Math } from "./libraries/math/PeriodScalingUtils.sol";
 import { TimestampWrapper } from "./libraries/TimestampWrapperUtils.sol";
+import { LibSafeRange } from "./libraries/math/LibSafeRange.sol";
 import { LibString } from "./libraries/LibString.sol";
 import { LibRNSDomain } from "./libraries/LibRNSDomain.sol";
 import { PythConverter } from "./libraries/pyth/PythConverter.sol";
@@ -25,6 +27,8 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   uint64 public constant MAX_PERCENTAGE = 100_00;
   /// @inheritdoc INSDomainPrice
   bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
+   /// @inheritdoc INSDomainPrice
+  uint64 public constant MAX_AUCTION_DOMAIN_EXPIRY = 365 days * 3;
 
   /// @dev Gap for upgradeability.
   uint256[50] private ____gap;
@@ -253,8 +257,14 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
     } else {
       uint256 renewalFeeByLength = _rnFee[Math.min(nameLen, _rnfMaxLength)];
       basePrice.usd = duration * renewalFeeByLength;
-      // tax is added of name is reserved for auction
-      if (_auction.reserved(LibRNSDomain.toId(LibRNSDomain.RON_ID, label))) {
+      uint256 id = LibRNSDomain.toId(LibRNSDomain.RON_ID, label);
+      INSAuction auction = _auction;
+      if (auction.reserved(id)) {
+        INSUnified rns = auction.getRNSUnified();
+        uint256 expiry =
+          uint64(LibSafeRange.addWithUpperbound(rns.getRecord(id).mut.expiry, duration, type(uint64).max));
+        if (expiry - block.timestamp > MAX_AUCTION_DOMAIN_EXPIRY) revert ExceedAuctionDomainExpiry();
+        // tax is added of name is reserved for auction
         tax.usd = Math.mulDiv(_taxRatio, _getDomainPrice(lbHash), MAX_PERCENTAGE);
       }
     }
