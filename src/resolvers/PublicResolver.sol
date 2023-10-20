@@ -2,8 +2,8 @@
 pragma solidity ^0.8.19;
 
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import { IVersionResolver } from "@rns-contracts/interfaces/resolvers/IVersionResolver.sol";
-import { Multicallable } from "@rns-contracts/extensions/Multicallable.sol";
+import { IVersionResolver } from "../interfaces/resolvers/IVersionResolver.sol";
+import { Multicallable } from "../extensions/Multicallable.sol";
 import { USER_FIELDS_INDICATOR } from "../types/ModifyingIndicator.sol";
 import { ABIResolvable } from "./ABIResolvable.sol";
 import { AddressResolvable } from "./AddressResolvable.sol";
@@ -13,7 +13,7 @@ import { InterfaceResolvable } from "./InterfaceResolvable.sol";
 import { NameResolvable } from "./NameResolvable.sol";
 import { PublicKeyResolvable } from "./PublicKeyResolvable.sol";
 import { TextResolvable } from "./TextResolvable.sol";
-import "@rns-contracts/interfaces/resolvers/IPublicResolver.sol";
+import "../interfaces/resolvers/IPublicResolver.sol";
 
 /**
  * @title Public Resolver

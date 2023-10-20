@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import "@rns-contracts/interfaces/resolvers/IAddressResolver.sol";
+import "../interfaces/resolvers/IAddressResolver.sol";
 import "./BaseVersion.sol";
 
 abstract contract AddressResolvable is IAddressResolver, ERC165, BaseVersion {
