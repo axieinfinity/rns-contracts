@@ -91,7 +91,7 @@ contract RNSUnified is Initializable, RNSToken {
     expiryTime = uint64(LibSafeRange.addWithUpperbound(block.timestamp, duration, MAX_EXPIRY));
     _requireValidExpiry(parentId, expiryTime);
     Record memory record;
-    // preserve previous state of protected field
+    // Preserve previous state of the protected field
     record.mut =
       MutableRecord({ resolver: resolver, owner: owner, expiry: expiryTime, protected: _recordOf[id].mut.protected });
     record.immut = ImmutableRecord({ depth: _recordOf[parentId].immut.depth + 1, parentId: parentId, label: label });
