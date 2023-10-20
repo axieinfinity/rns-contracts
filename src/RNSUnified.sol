@@ -96,9 +96,7 @@ contract RNSUnified is Initializable, RNSToken {
     record.immut = ImmutableRecord({ depth: _recordOf[parentId].immut.depth + 1, parentId: parentId, label: label });
 
     _recordOf[id] = record;
-    emit RecordUpdated(
-      id, IMMUTABLE_FIELDS_INDICATOR & USER_FIELDS_INDICATOR ^ ModifyingField.Protected.indicator(), record
-    );
+    emit RecordUpdated(id, ALL_FIELDS_INDICATOR ^ ModifyingField.Protected.indicator(), record);
   }
 
   /// @inheritdoc INSUnified
