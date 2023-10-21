@@ -267,7 +267,7 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
         if (claimedAt != 0 && expiry - claimedAt > MAX_AUCTION_DOMAIN_EXPIRY) {
           revert ExceedAuctionDomainExpiry();
         }
-        // tax is added of name is reserved for auction
+        // Tax is added to the name reserved for the auction
         tax.usd = Math.mulDiv(_taxRatio, _getDomainPrice(lbHash), MAX_PERCENTAGE);
       }
     }
