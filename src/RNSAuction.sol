@@ -27,7 +27,6 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
 
   /// @dev Gap for upgradeability.
   uint256[50] private ____gap;
-
   /// @dev The RNSUnified contract.
   INSUnified internal _rnsUnified;
   /// @dev Mapping from auction Id => event range
@@ -207,13 +206,13 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
   /**
    * @inheritdoc INSAuction
    */
-  function bulkClaimBidNames(uint256[] calldata ids) external returns (bool[] memory claimeds) {
+  function bulkClaimBidNames(uint256[] calldata ids) external returns (uint256[] memory claimedAts) {
     uint256 id;
     uint256 accumulatedRON;
     EventRange memory range;
     DomainAuction memory auction;
     uint256 length = ids.length;
-    claimeds = new bool[](length);
+    claimedAts = new uint256[](length);
     INSUnified rnsUnified = _rnsUnified;
     uint64 expiry = uint64(block.timestamp.addWithUpperbound(DOMAIN_EXPIRY_DURATION, MAX_EXPIRY));
 
@@ -222,7 +221,7 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
       auction = _domainAuction[id];
       range = _auctionRange[auction.auctionId];
 
-      if (!auction.bid.claimed) {
+      if (auction.bid.claimedAt == 0) {
         if (!range.isEnded()) revert NotYetEnded();
         if (auction.bid.timestamp == 0) revert NoOneBidded();
 
@@ -230,7 +229,7 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
         rnsUnified.setExpiry(id, expiry);
         rnsUnified.transferFrom(address(this), auction.bid.bidder, id);
 
-        _domainAuction[id].bid.claimed = claimeds[i] = true;
+        _domainAuction[id].bid.claimedAt = claimedAts[i] = block.timestamp;
       }
 
       unchecked {

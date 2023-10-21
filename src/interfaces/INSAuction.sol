@@ -22,7 +22,7 @@ interface INSAuction {
     address payable bidder;
     uint256 price;
     uint256 timestamp;
-    bool claimed;
+    uint256 claimedAt;
   }
 
   struct DomainAuction {
@@ -161,7 +161,7 @@ interface INSAuction {
    *
    * @param ids The namehash id of domain name. Eg, namehash('foo.ron') for 'foo.ron'
    */
-  function bulkClaimBidNames(uint256[] calldata ids) external returns (bool[] memory claimeds);
+  function bulkClaimBidNames(uint256[] calldata ids) external returns (uint256[] memory claimedAts);
 
   /**
    * @dev Returns the treasury.

@@ -27,7 +27,7 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   uint64 public constant MAX_PERCENTAGE = 100_00;
   /// @inheritdoc INSDomainPrice
   bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
-   /// @inheritdoc INSDomainPrice
+  /// @inheritdoc INSDomainPrice
   uint64 public constant MAX_AUCTION_DOMAIN_EXPIRY = 365 days * 3;
 
   /// @dev Gap for upgradeability.
@@ -261,9 +261,12 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
       INSAuction auction = _auction;
       if (auction.reserved(id)) {
         INSUnified rns = auction.getRNSUnified();
-        uint256 expiry =
-          uint64(LibSafeRange.addWithUpperbound(rns.getRecord(id).mut.expiry, duration, type(uint64).max));
-        if (expiry - block.timestamp > MAX_AUCTION_DOMAIN_EXPIRY) revert ExceedAuctionDomainExpiry();
+        uint256 expiry = LibSafeRange.addWithUpperbound(rns.getRecord(id).mut.expiry, duration, type(uint64).max);
+        (INSAuction.DomainAuction memory domainAuction,) = auction.getAuction(id);
+        uint256 claimedAt = domainAuction.bid.claimedAt;
+        if (claimedAt != 0 && expiry - claimedAt > MAX_AUCTION_DOMAIN_EXPIRY) {
+          revert ExceedAuctionDomainExpiry();
+        }
         // tax is added of name is reserved for auction
         tax.usd = Math.mulDiv(_taxRatio, _getDomainPrice(lbHash), MAX_PERCENTAGE);
       }
