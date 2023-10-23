@@ -23,6 +23,8 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
   /// @inheritdoc INSAuction
   uint64 public constant DOMAIN_EXPIRY_DURATION = 365 days;
   /// @inheritdoc INSAuction
+  uint64 public constant MAX_AUCTION_DOMAIN_EXPIRY = 365 days * 3;
+  /// @inheritdoc INSAuction
   bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
   /// @dev Gap for upgradeability.

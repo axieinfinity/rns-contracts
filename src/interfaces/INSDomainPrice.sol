@@ -41,11 +41,6 @@ interface INSDomainPrice {
   );
 
   /**
-   * @dev The maximum expiry duration of a domain after transferring to bidder.
-   */
-  function MAX_AUCTION_DOMAIN_EXPIRY() external pure returns (uint64);
-
-  /**
    * @dev Returns the Pyth oracle config.
    */
   function getPythOracleConfig() external view returns (IPyth pyth, uint256 maxAcceptableAge, bytes32 pythIdForRONUSD);
