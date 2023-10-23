@@ -2,9 +2,8 @@ name: Create Pull Request From Release to Feature
 on:
   push:
     branches:
-      # - 'release/*'
-      # - 'release*/*'
-      - feature/enhance-pipeline-for-avoiding-looping
+      - 'release/*'
+      - 'release*/*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
@@ -18,8 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # branch_name: [feature/rns-unified, feature/controller, feature/domain-price, feature/auction, feature/public-resolver, feature/ci, feature/reverse-registrar]
-        branch_name: [feature/rns-unified-test, feature/controller-test]
+        branch_name: [feature/rns-unified, feature/controller, feature/domain-price, feature/auction, feature/public-resolver, feature/ci, feature/reverse-registrar]
+        # branch_name: [feature/rns-unified-test, feature/controller-test]
     steps:
       - name: Set env
         run: |
