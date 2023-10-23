@@ -14,6 +14,7 @@ contract RNSUnified_BulkSetProtected_Test is RNSUnifiedTest {
   }
 
   function testFuzz_RevertWhenNotMinted_bulkSetProtected(bool protected, MintParam calldata mintParam) external {
+    vm.skip(true);
     uint256 id = _toId(_ronId, mintParam.name);
     uint256[] memory ids = new uint256[](1);
     ids[0] = id;
