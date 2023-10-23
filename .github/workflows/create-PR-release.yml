@@ -18,7 +18,6 @@ jobs:
     strategy:
       matrix:
         branch_name: [feature/rns-unified, feature/controller, feature/domain-price, feature/auction, feature/public-resolver, feature/ci, feature/reverse-registrar]
-        # branch_name: [feature/rns-unified-test, feature/controller-test]
     steps:
       - name: Set env
         run: |
