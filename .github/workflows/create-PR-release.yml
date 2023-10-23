@@ -22,6 +22,7 @@ jobs:
       - name: Set env
         run: |
           echo "PR_BRANCH=merge/${HEAD_BRANCH}-${{matrix.branch_name}}" >> $GITHUB_ENV
+          echo "FEATURE_NAME=$(echo ${{matrix.branch_name}} | cut -d'/' -f2)" >> $GITHUB_ENV
       - uses: actions/checkout@v3
         with:
           ref: ${{matrix.branch_name}}
@@ -44,6 +45,6 @@ jobs:
         with:
           labels: automated PR
           delete-branch: true
-          title: 'chore(`${{matrix.branch_name}}`): merge from `${{env.HEAD_BRANCH}}`'
+          title: 'chore(`${{env.FEATURE_NAME}}`): merge from `${{env.HEAD_BRANCH}}`'
           body: ${{ steps.template.outputs.result }}
           branch: ${{env.PR_BRANCH}}
