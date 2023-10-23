@@ -22,7 +22,7 @@ interface INSAuction {
     address payable bidder;
     uint256 price;
     uint256 timestamp;
-    bool claimed;
+    uint256 claimedAt;
   }
 
   struct DomainAuction {
@@ -53,6 +53,11 @@ interface INSAuction {
    * @dev The maximum expiry duration
    */
   function MAX_EXPIRY() external pure returns (uint64);
+
+  /**
+   * @dev The maximum expiry duration of a domain after transferring to bidder.
+   */
+  function MAX_AUCTION_DOMAIN_EXPIRY() external pure returns (uint64);
 
   /**
    * @dev Returns the operator role.
@@ -161,7 +166,7 @@ interface INSAuction {
    *
    * @param ids The namehash id of domain name. Eg, namehash('foo.ron') for 'foo.ron'
    */
-  function bulkClaimBidNames(uint256[] calldata ids) external returns (bool[] memory claimeds);
+  function bulkClaimBidNames(uint256[] calldata ids) external returns (uint256[] memory claimedAts);
 
   /**
    * @dev Returns the treasury.
