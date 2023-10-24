@@ -27,6 +27,8 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   uint64 public constant MAX_PERCENTAGE = 100_00;
   /// @inheritdoc INSDomainPrice
   bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
+  /// @inheritdoc INSDomainPrice
+  bytes32 public constant OVERRIDER_ROLE = keccak256("OPERATOR_ROLE");
 
   /// @dev Gap for upgradeability.
   uint256[50] private ____gap;
@@ -170,7 +172,7 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
    */
   function bulkOverrideRenewalFees(bytes32[] calldata lbHashes, uint256[] calldata usdPrices)
     external
-    onlyRole(OPERATOR_ROLE)
+    onlyRole(OVERRIDER_ROLE)
   {
     uint256 length = lbHashes.length;
     if (length == 0 || length != usdPrices.length) revert InvalidArrayLength();
