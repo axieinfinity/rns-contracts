@@ -95,6 +95,7 @@ contract RNSUnified is Initializable, RNSToken {
     record.mut =
       MutableRecord({ resolver: resolver, owner: owner, expiry: expiryTime, protected: _recordOf[id].mut.protected });
     record.immut = ImmutableRecord({ depth: _recordOf[parentId].immut.depth + 1, parentId: parentId, label: label });
+    if (record.immut.depth >= 3) revert ThirdLevelDomainUnallowed();
 
     _recordOf[id] = record;
     emit RecordUpdated(id, ALL_FIELDS_INDICATOR, record);
