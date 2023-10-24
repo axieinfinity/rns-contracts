@@ -15,7 +15,7 @@ interface INSAuction {
   error QueryIsNotInPeriod();
   error InsufficientAmount();
   error InvalidArrayLength();
-  error BidderCannotReceiveRON();
+  error ContractBidderIsForbidden();
   error EventIsNotCreatedOrAlreadyStarted();
 
   struct Bid {

@@ -191,7 +191,7 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
     if (msg.value < beatPrice) revert InsufficientAmount();
     address payable bidder = payable(_msgSender());
     // check whether the bidder can receive RON
-    if (!RONTransferHelper.send(bidder, 0)) revert BidderCannotReceiveRON();
+    if (bidder != tx.origin) revert ContractBidderIsForbidden();
     address payable prvBidder = auction.bid.bidder;
     uint256 prvPrice = auction.bid.price;
 
