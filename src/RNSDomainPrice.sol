@@ -220,7 +220,7 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
     uint256[] calldata ronPrices,
     bytes32[] calldata proofHashes,
     uint256[] calldata setTypes
-  ) external onlyRole(OPERATOR_ROLE) {
+  ) external onlyRole(OVERRIDER_ROLE) {
     uint256 length = _requireBulkSetDomainPriceArgumentsValid(lbHashes, ronPrices, proofHashes, setTypes);
     address operator = _msgSender();
 
