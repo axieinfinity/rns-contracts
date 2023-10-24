@@ -15,6 +15,7 @@ docs/
 # Dotenv file
 .env
 .vscode
+.debug.env
 
 node_modules/
 yarn-error.log

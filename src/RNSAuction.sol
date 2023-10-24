@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { AccessControlEnumerable } from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import { BitMaps } from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import { INSUnified, INSAuction } from "./interfaces/INSAuction.sol";
 import { LibSafeRange } from "./libraries/math/LibSafeRange.sol";
 import { LibRNSDomain } from "./libraries/LibRNSDomain.sol";
@@ -12,6 +13,7 @@ import { RONTransferHelper } from "./libraries/transfers/RONTransferHelper.sol";
 
 contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
   using LibSafeRange for uint256;
+  using BitMaps for BitMaps.BitMap;
   using LibEventRange for EventRange;
 
   /// @inheritdoc INSAuction
@@ -21,11 +23,12 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
   /// @inheritdoc INSAuction
   uint64 public constant DOMAIN_EXPIRY_DURATION = 365 days;
   /// @inheritdoc INSAuction
+  uint64 public constant MAX_AUCTION_DOMAIN_EXPIRY = 365 days * 3;
+  /// @inheritdoc INSAuction
   bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
   /// @dev Gap for upgradeability.
   uint256[50] private ____gap;
-
   /// @dev The RNSUnified contract.
   INSUnified internal _rnsUnified;
   /// @dev Mapping from auction Id => event range
@@ -37,6 +40,8 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
   address payable internal _treasury;
   /// @dev The gap ratio between 2 bids with the starting price.
   uint256 internal _bidGapRatio;
+  /// @dev Mapping from id => bool reserved status
+  BitMaps.BitMap internal _reserved;
 
   modifier whenNotStarted(bytes32 auctionId) {
     _requireNotStarted(auctionId);
@@ -90,6 +95,7 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
 
     for (uint256 i; i < length;) {
       (, ids[i]) = rnsUnified.mint(parentId, labels[i], address(0x0), address(this), domainExpiryDuration);
+      _reserved.set(ids[i]);
 
       unchecked {
         ++i;
@@ -101,7 +107,7 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
    * @inheritdoc INSAuction
    */
   function reserved(uint256 id) public view returns (bool) {
-    return _rnsUnified.ownerOf(id) == address(this);
+    return _reserved.get(id);
   }
 
   /**
@@ -185,7 +191,7 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
     if (msg.value < beatPrice) revert InsufficientAmount();
     address payable bidder = payable(_msgSender());
     // check whether the bidder can receive RON
-    if (!RONTransferHelper.send(bidder, 0)) revert BidderCannotReceiveRON();
+    if (bidder != tx.origin) revert ContractBidderIsForbidden();
     address payable prvBidder = auction.bid.bidder;
     uint256 prvPrice = auction.bid.price;
 
@@ -202,13 +208,13 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
   /**
    * @inheritdoc INSAuction
    */
-  function bulkClaimBidNames(uint256[] calldata ids) external returns (bool[] memory claimeds) {
+  function bulkClaimBidNames(uint256[] calldata ids) external returns (uint256[] memory claimedAts) {
     uint256 id;
     uint256 accumulatedRON;
     EventRange memory range;
     DomainAuction memory auction;
     uint256 length = ids.length;
-    claimeds = new bool[](length);
+    claimedAts = new uint256[](length);
     INSUnified rnsUnified = _rnsUnified;
     uint64 expiry = uint64(block.timestamp.addWithUpperbound(DOMAIN_EXPIRY_DURATION, MAX_EXPIRY));
 
@@ -217,7 +223,7 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
       auction = _domainAuction[id];
       range = _auctionRange[auction.auctionId];
 
-      if (!auction.bid.claimed) {
+      if (auction.bid.claimedAt == 0) {
         if (!range.isEnded()) revert NotYetEnded();
         if (auction.bid.timestamp == 0) revert NoOneBidded();
 
@@ -225,7 +231,7 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
         rnsUnified.setExpiry(id, expiry);
         rnsUnified.transferFrom(address(this), auction.bid.bidder, id);
 
-        _domainAuction[id].bid.claimed = claimeds[i] = true;
+        _domainAuction[id].bid.claimedAt = claimedAts[i] = block.timestamp;
       }
 
       unchecked {

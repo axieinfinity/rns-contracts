@@ -10,6 +10,8 @@ interface INSUnified is IAccessControlEnumerable, IERC721Metadata {
   error Expired();
   /// @dev Error: The provided token id is unexists.
   error Unexists();
+  /// @dev Error: The provided token id's depth level is greater than 3.
+  error ThirdLevelDomainUnallowed();
   /// @dev Error: The provided id expiry is greater than parent id expiry.
   error ExceedParentExpiry();
   /// @dev Error: The provided name is unavailable for registration.

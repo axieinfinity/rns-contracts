@@ -7,3 +7,4 @@ solady/=lib/solady/src/
 @ensdomains/ens-contracts/=lib/ens-contracts/contracts/
 @ensdomains/buffer/=lib/buffer/
 @pythnetwork/=lib/pyth-sdk-solidity/
+foundry-deployment-kit/=lib/foundry-deployment-kit/script/

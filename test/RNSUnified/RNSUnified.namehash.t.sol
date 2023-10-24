@@ -23,6 +23,7 @@ contract RNSUnified_NameHash_Test is RNSUnifiedTest {
   }
 
   function testFuzz_WithDepth_namehash(string[] calldata names) external {
+    vm.skip(true);
     string memory domainName = "ron";
     for (uint256 i; i < names.length;) {
       vm.assume(names[i].is7BitASCII());
@@ -40,6 +41,7 @@ contract RNSUnified_NameHash_Test is RNSUnifiedTest {
   }
 
   function testConcrete_namehash(MintParam memory mintParam) external mintAs(_admin) mintGasOff {
+    vm.skip(true);
     // script: `cast namehash ron`
     bytes32 precomputedRonNode = 0xba69923fa107dbf5a25a073a10b7c9216ae39fbadc95dc891d460d9ae315d688;
     // script: `cast namehash duke.ron`

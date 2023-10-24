@@ -7,6 +7,7 @@ import { IPyth } from "@pythnetwork/IPyth.sol";
 interface INSDomainPrice {
   error InvalidArrayLength();
   error RenewalFeeIsNotOverriden();
+  error ExceedAuctionDomainExpiry();
 
   struct RenewalFee {
     uint256 labelLength;
@@ -197,6 +198,11 @@ interface INSDomainPrice {
    * @dev Value equals to keccak256("OPERATOR_ROLE").
    */
   function OPERATOR_ROLE() external pure returns (bytes32);
+
+  /**
+   * @dev Returns the overrider role.
+   */
+  function OVERRIDER_ROLE() external pure returns (bytes32);
 
   /**
    * @dev Max percentage 100%. Values [0; 100_00] reflexes [0; 100%]
