@@ -28,7 +28,7 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   /// @inheritdoc INSDomainPrice
   bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
   /// @inheritdoc INSDomainPrice
-  bytes32 public constant OVERRIDER_ROLE = keccak256("OPERATOR_ROLE");
+  bytes32 public constant OVERRIDER_ROLE = keccak256("OVERRIDER_ROLE");
 
   /// @dev Gap for upgradeability.
   uint256[50] private ____gap;
