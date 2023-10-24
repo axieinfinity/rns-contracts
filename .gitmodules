@@ -19,3 +19,6 @@
 [submodule "lib/solady"]
 	path = lib/solady
 	url = https://github.com/vectorized/solady
+[submodule "lib/foundry-deployment-kit"]
+	path = lib/foundry-deployment-kit
+	url = https://github.com/axieinfinity/foundry-deployment-kit

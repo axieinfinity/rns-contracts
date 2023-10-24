@@ -7,6 +7,7 @@ import { IPyth } from "@pythnetwork/IPyth.sol";
 interface INSDomainPrice {
   error InvalidArrayLength();
   error RenewalFeeIsNotOverriden();
+  error ExceedAuctionDomainExpiry();
 
   struct RenewalFee {
     uint256 labelLength;

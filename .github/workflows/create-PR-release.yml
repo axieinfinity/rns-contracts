@@ -1,0 +1,50 @@
+name: Create Pull Request From Release to Feature
+on:
+  push:
+    branches:
+      - 'release/*'
+      - 'release*/*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  HEAD_BRANCH: ${{ github.head_ref || github.ref_name }}
+
+jobs:
+  mergeRelease2FeatureRepo:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        branch_name: [feature/rns-unified, feature/controller, feature/domain-price, feature/auction, feature/public-resolver, feature/ci, feature/reverse-registrar]
+    steps:
+      - name: Set env
+        run: |
+          echo "PR_BRANCH=merge/${HEAD_BRANCH}-${{matrix.branch_name}}" >> $GITHUB_ENV
+          echo "FEATURE_NAME=$(echo ${{matrix.branch_name}} | cut -d'/' -f2)" >> $GITHUB_ENV
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{matrix.branch_name}}
+      - name: Reset promotion branch
+        run: |
+          git fetch origin ${HEAD_BRANCH}:${HEAD_BRANCH}
+          git reset --hard ${HEAD_BRANCH}
+
+      - name: Render template
+        id: template
+        uses: chuhlomin/render-template@v1.4
+        with:
+          template: .github/template/create-pull-request.md
+          vars: |
+            fromBranch: ${{env.HEAD_BRANCH}}
+            toBranch: ${{matrix.branch_name}}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          labels: automated PR
+          delete-branch: true
+          title: 'chore(`${{env.FEATURE_NAME}}`): merge from `${{env.HEAD_BRANCH}}`'
+          body: ${{ steps.template.outputs.result }}
+          branch: ${{env.PR_BRANCH}}
