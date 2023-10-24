@@ -9,6 +9,7 @@ abstract contract RNSDeploy is BaseDeploy {
     IPyth pyth;
     address admin;
     address pauser;
+    address overrider;
     address controller;
     uint8 minWord;
     uint8 maxWord;
