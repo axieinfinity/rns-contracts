@@ -9,7 +9,7 @@ contract Debug is RNSDeploy {
 
   function debug(uint256 forkBlock, address from, address to, uint256 value, bytes calldata callData) external {
     if (forkBlock != 0) {
-        vm.rollFork(forkBlock);
+      vm.rollFork(forkBlock);
     }
     vm.prank(from);
     (bool success, bytes memory returnOrRevertData) = to.call{ value: value }(callData);
