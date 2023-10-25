@@ -49,6 +49,7 @@ jobs:
 
   mergeRelease2FeatureRepo:
     runs-on: ubuntu-latest
+    needs: fetchAllFeatureBranches
     strategy:
       matrix: ${{ fromJSON(needs.fetchAllFeatureBranches.outputs.BRANCHES) }}
     steps:
