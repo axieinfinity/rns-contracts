@@ -65,6 +65,11 @@ contract RONRegistrarController is
   /// @dev Mapping id => owner => flag indicating whether the owner is whitelisted to buy protected name
   mapping(uint256 id => mapping(address owner => bool)) internal _protectedNamesWhitelisted;
 
+  modifier onlyAvailable(string memory name) {
+    _requireAvailable(name);
+    _;
+  }
+
   constructor() payable {
     _disableInitializers();
   }
@@ -150,7 +155,7 @@ contract RONRegistrarController is
     address resolver,
     bytes[] calldata data,
     bool reverseRecord
-  ) public pure returns (bytes32) {
+  ) public view onlyAvailable(name) returns (bytes32) {
     if (data.length != 0 && resolver == address(0)) revert ResolverRequiredWhenDataSupplied();
     return keccak256(abi.encode(computeId(name), owner, duration, secret, resolver, data, reverseRecord));
   }
@@ -201,7 +206,7 @@ contract RONRegistrarController is
       data: data,
       reverseRecord: reverseRecord
     });
-    _validateCommitment(name, duration, commitHash);
+    _validateCommitment(duration, commitHash);
 
     (uint256 usdPrice, uint256 ronPrice) = _handlePrice(name, duration);
     _register(name, owner, duration, resolver, data, reverseRecord, usdPrice, ronPrice);
@@ -233,7 +238,8 @@ contract RONRegistrarController is
     address resolver,
     bytes[] calldata data,
     bool reverseRecord
-  ) external payable whenNotPaused nonReentrant {
+  ) external payable whenNotPaused nonReentrant onlyAvailable(name) {
+    if (!available(name)) revert NameNotAvailable(name);
     uint256 id = computeId(name);
     bool protected = _rnsUnified.getRecord(id).mut.protected;
     bool whitelisted = _protectedNamesWhitelisted[id][owner];
@@ -358,12 +364,10 @@ contract RONRegistrarController is
    *
    * Requirements:
    * - The duration must larger than or equal to minimum registration duration.
-   * - The name must be available.
    * - The passed duration must in a valid range.
    */
-  function _validateCommitment(string memory name, uint64 duration, bytes32 commitment) internal {
+  function _validateCommitment(uint64 duration, bytes32 commitment) internal {
     if (duration < _minRegistrationDuration) revert DurationTooShort(duration);
-    if (!available(name)) revert NameNotAvailable(name);
 
     uint256 passedDuration = block.timestamp - _committedAt[commitment];
     if (passedDuration < _minCommitmentAge) revert CommitmentTooNew(commitment);
@@ -446,5 +450,12 @@ contract RONRegistrarController is
   function _setPriceOracle(INSDomainPrice priceOracle) internal {
     _priceOracle = priceOracle;
     emit DomainPriceUpdated(_msgSender(), priceOracle);
+  }
+
+  /**
+   * @dev Helper method to check if a domain name is available for register.
+   */
+  function _requireAvailable(string memory name) internal view {
+    if (!available(name)) revert NameNotAvailable(name);
   }
 }
