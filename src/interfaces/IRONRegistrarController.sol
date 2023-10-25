@@ -136,7 +136,7 @@ interface IRONRegistrarController {
     address resolver,
     bytes[] calldata data,
     bool reverseRecord
-  ) external pure returns (bytes32);
+  ) external view returns (bytes32);
 
   /**
    * @dev Commits to a registration using the commitment hash.
