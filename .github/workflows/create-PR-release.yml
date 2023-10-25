@@ -26,7 +26,7 @@ jobs:
     - id: step2
       name: List all the remote feature branches
       run: |
-        branches=$(git branch -r | grep -E '.*feature\/.*' | sed -e "s/.*origin\///" | tr "\n" " ")
+        branches=$(git branch -r | grep -E '.*origin\/feature\/.*' | sed -e "s/.*origin\///" | tr "\n" " ")
         JSON="["
         for branch in ${branches[@]}; do
             echo $branch
