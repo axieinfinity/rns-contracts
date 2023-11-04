@@ -22,3 +22,6 @@
 [submodule "lib/foundry-deployment-kit"]
 	path = lib/foundry-deployment-kit
 	url = https://github.com/axieinfinity/foundry-deployment-kit
+[submodule "lib/migration-20231015"]
+	path = lib/migration-20231015
+	url = https://github.com/axieinfinity/rns-contracts
