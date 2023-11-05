@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { RNSDeploy } from "./RNSDeploy.s.sol";
+import { BaseRNSMigration } from "./BaseRNSMigration.s.sol";
 import { ErrorHandler } from "@rns-contracts/libraries/ErrorHandler.sol";
 
-contract Debug is RNSDeploy {
+contract Debug is BaseRNSMigration {
   using ErrorHandler for *;
 
   function debug(uint256 forkBlock, address from, address to, uint256 value, bytes calldata callData) external {

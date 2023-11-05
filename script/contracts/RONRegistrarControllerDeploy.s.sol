@@ -6,15 +6,14 @@ import { RNSUnified, RNSUnifiedDeploy } from "./RNSUnifiedDeploy.s.sol";
 import { NameChecker, NameCheckerDeploy } from "./NameCheckerDeploy.s.sol";
 import { RNSDomainPrice, RNSDomainPriceDeploy } from "./RNSDomainPriceDeploy.s.sol";
 import { RNSReverseRegistrar, RNSReverseRegistrarDeploy } from "./RNSReverseRegistrarDeploy.s.sol";
-import { BaseDeploy, ContractKey } from "foundry-deployment-kit/BaseDeploy.s.sol";
-import { RNSDeploy } from "../RNSDeploy.s.sol";
+import { Contract, BaseRNSMigration } from "../BaseRNSMigration.s.sol";
 
-contract RONRegistrarControllerDeploy is RNSDeploy {
+contract RONRegistrarControllerDeploy is BaseRNSMigration {
   function _injectDependencies() internal virtual override {
-    _setDependencyDeployScript(ContractKey.RNSUnified, new RNSUnifiedDeploy());
-    _setDependencyDeployScript(ContractKey.NameChecker, new NameCheckerDeploy());
-    _setDependencyDeployScript(ContractKey.RNSDomainPrice, new RNSDomainPriceDeploy());
-    _setDependencyDeployScript(ContractKey.RNSReverseRegistrar, new RNSReverseRegistrarDeploy());
+    _setDependencyDeployScript(Contract.RNSUnified.key(), new RNSUnifiedDeploy());
+    _setDependencyDeployScript(Contract.NameChecker.key(), new NameCheckerDeploy());
+    _setDependencyDeployScript(Contract.RNSDomainPrice.key(), new RNSDomainPriceDeploy());
+    _setDependencyDeployScript(Contract.RNSReverseRegistrar.key(), new RNSReverseRegistrarDeploy());
   }
 
   function _defaultArguments() internal virtual override returns (bytes memory args) {
@@ -30,15 +29,15 @@ contract RONRegistrarControllerDeploy is RNSDeploy {
         config.maxAcceptableAge,
         config.minCommitmentAge,
         config.minRegistrationDuration,
-        RNSUnified(loadContractOrDeploy(ContractKey.RNSUnified)),
-        NameChecker(loadContractOrDeploy(ContractKey.NameChecker)),
-        RNSDomainPrice(loadContractOrDeploy(ContractKey.RNSDomainPrice)),
-        RNSReverseRegistrar(loadContractOrDeploy(ContractKey.RNSReverseRegistrar))
+        RNSUnified(loadContractOrDeploy(Contract.RNSUnified.key())),
+        NameChecker(loadContractOrDeploy(Contract.NameChecker.key())),
+        RNSDomainPrice(loadContractOrDeploy(Contract.RNSDomainPrice.key())),
+        RNSReverseRegistrar(loadContractOrDeploy(Contract.RNSReverseRegistrar.key()))
       )
     );
   }
 
-  function run() public virtual trySetUp returns (RONRegistrarController) {
-    return RONRegistrarController(_deployProxy(ContractKey.RONRegistrarController));
+  function run() public virtual returns (RONRegistrarController) {
+    return RONRegistrarController(_deployProxy(Contract.RONRegistrarController.key()));
   }
 }

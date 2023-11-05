@@ -3,12 +3,12 @@ pragma solidity ^0.8.19;
 
 import { RNSDomainPrice } from "@rns-contracts/RNSDomainPrice.sol";
 import { RNSAuction, RNSAuctionDeploy } from "./RNSAuctionDeploy.s.sol";
-import { BaseDeploy, ContractKey } from "foundry-deployment-kit/BaseDeploy.s.sol";
-import { RNSDeploy } from "../RNSDeploy.s.sol";
 
-contract RNSDomainPriceDeploy is RNSDeploy {
+import { Contract, BaseRNSMigration } from "../BaseRNSMigration.s.sol";
+
+contract RNSDomainPriceDeploy is BaseRNSMigration {
   function _injectDependencies() internal virtual override {
-    _setDependencyDeployScript(ContractKey.RNSAuction, new RNSAuctionDeploy());
+    _setDependencyDeployScript(Contract.RNSAuction.key(), new RNSAuctionDeploy());
   }
 
   function _defaultArguments() internal virtual override returns (bytes memory args) {
@@ -24,14 +24,14 @@ contract RNSDomainPriceDeploy is RNSDeploy {
         config.taxRatio,
         config.domainPriceScaleRule,
         config.pyth,
-        RNSAuction(loadContractOrDeploy(ContractKey.RNSAuction)),
+        RNSAuction(loadContractOrDeploy(Contract.RNSAuction.key())),
         config.maxAcceptableAge,
         config.pythIdForRONUSD
       )
     );
   }
 
-  function run() public virtual trySetUp returns (RNSDomainPrice) {
-    return RNSDomainPrice(_deployProxy(ContractKey.RNSDomainPrice));
+  function run() public virtual returns (RNSDomainPrice) {
+    return RNSDomainPrice(_deployProxy(Contract.RNSDomainPrice.key()));
   }
 }

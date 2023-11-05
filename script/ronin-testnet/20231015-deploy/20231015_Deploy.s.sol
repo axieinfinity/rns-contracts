@@ -6,7 +6,6 @@ import { StdStyle } from "forge-std/StdStyle.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { LibRNSDomain } from "@rns-contracts/libraries/LibRNSDomain.sol";
-import { ContractKey } from "foundry-deployment-kit/configs/ContractConfig.sol";
 import {
   RONRegistrarController, RONRegistrarControllerDeploy
 } from "script/contracts/RONRegistrarControllerDeploy.s.sol";
@@ -16,9 +15,9 @@ import { NameChecker, NameCheckerDeploy } from "script/contracts/NameCheckerDepl
 import { RNSDomainPrice, RNSDomainPriceDeploy } from "script/contracts/RNSDomainPriceDeploy.s.sol";
 import { PublicResolver, PublicResolverDeploy } from "script/contracts/PublicResolverDeploy.s.sol";
 import { RNSReverseRegistrar, RNSReverseRegistrarDeploy } from "script/contracts/RNSReverseRegistrarDeploy.s.sol";
-import { INSDomainPrice, RNSDeploy } from "../RNSDeploy.s.sol";
+import { Contract, INSDomainPrice, TestnetRNSMigration } from "../TestnetRNSMigration.s.sol";
 
-contract Migration__20231015_Deploy is RNSDeploy {
+contract Migration__20231015_Deploy is TestnetRNSMigration {
   using Strings for *;
   using LibRNSDomain for string;
 
@@ -32,7 +31,7 @@ contract Migration__20231015_Deploy is RNSDeploy {
 
   string[] internal _blacklistedWords;
 
-  function run() public trySetUp {
+  function run() public {
     _rns = new RNSUnifiedDeploy().run();
     _auction = new RNSAuctionDeploy().run();
     _nameChecker = new NameCheckerDeploy().run();
@@ -43,7 +42,7 @@ contract Migration__20231015_Deploy is RNSDeploy {
 
     address admin = _rns.getRoleMember(_rns.DEFAULT_ADMIN_ROLE(), 0);
     {
-      string memory data = vm.readFile("./script/20231015-deploy/data/data.json");
+      string memory data = vm.readFile("./script/ronin-testnet/20231015-deploy/data/data.json");
       _blacklistedWords = vm.parseJsonStringArray(data, ".words");
     }
     uint256[] memory packedWords = _nameChecker.packBulk(_blacklistedWords);

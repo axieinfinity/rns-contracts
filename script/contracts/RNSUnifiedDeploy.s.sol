@@ -2,10 +2,9 @@
 pragma solidity ^0.8.19;
 
 import { RNSUnified } from "@rns-contracts/RNSUnified.sol";
-import { BaseDeploy, ContractKey } from "foundry-deployment-kit/BaseDeploy.s.sol";
-import { RNSDeploy } from "../RNSDeploy.s.sol";
+import { Contract, BaseRNSMigration } from "../BaseRNSMigration.s.sol";
 
-contract RNSUnifiedDeploy is RNSDeploy {
+contract RNSUnifiedDeploy is BaseRNSMigration {
   function _defaultArguments() internal view override returns (bytes memory args) {
     Config memory config = getConfig();
     args = abi.encodeCall(
@@ -14,7 +13,7 @@ contract RNSUnifiedDeploy is RNSDeploy {
     );
   }
 
-  function run() public virtual trySetUp returns (RNSUnified) {
-    return RNSUnified(_deployProxy(ContractKey.RNSUnified));
+  function run() public virtual returns (RNSUnified) {
+    return RNSUnified(_deployProxy(Contract.RNSUnified.key()));
   }
 }
