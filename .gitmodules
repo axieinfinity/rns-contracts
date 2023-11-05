@@ -28,3 +28,6 @@
 [submodule "lib/migration-20231020"]
 	path = lib/migration-20231020
 	url = https://github.com/axieinfinity/rns-contracts
+[submodule "lib/migration-20231024"]
+	path = lib/migration-20231024
+	url = https://github.com/axieinfinity/rns-contracts
