@@ -13,15 +13,29 @@ contract Migration__20231106_SubmitReservedNames is RNSDeploy {
   using JSONParserLib for JSONParserLib.Item;
 
   function run() public {
-    string memory raw = vm.readFile("script/20231106-script/data/mock.json");
+    (address[] memory tos, string[] memory labels) = _parseData("script/20231106-script/data/mock.json");
+
+    uint64 duration = uint64(365 days);
+    OwnedMulticaller multicall = new OwnedMulticallerDeploy().run();
+    RNSUnified rns = RNSUnified(_config.getAddressFromCurrentNetwork(ContractKey.RNSUnified));
+    address resolver = _config.getAddressFromCurrentNetwork(ContractKey.PublicResolver);
+    address ronOwner = rns.ownerOf(LibRNSDomain.RON_ID);
+    vm.startBroadcast(ronOwner);
+    rns.approve(address(multicall), LibRNSDomain.RON_ID);
+    multicall.multiMint(rns, LibRNSDomain.RON_ID, resolver, duration, tos, labels);
+    vm.stopBroadcast();
+  }
+
+  function _parseData(string memory path) internal view returns (address[] memory tos, string[] memory labels) {
+    string memory raw = vm.readFile(path);
     console2.log("raw", raw);
     JSONParserLib.Item memory reservedNames = raw.parse().at('"reservedNames"');
     uint256 length = reservedNames.size();
 
     console2.log("length", length);
 
-    address[] memory tos = new address[](length);
-    string[] memory labels = new string[](length);
+    tos = new address[](length);
+    labels = new string[](length);
 
     for (uint256 i; i < length; ++i) {
       tos[i] = vm.parseAddress(reservedNames.at(i).at('"address"').value().decodeString());
@@ -30,17 +44,5 @@ contract Migration__20231106_SubmitReservedNames is RNSDeploy {
       console2.log("tos:", i, tos[i]);
       console2.log("labels:", i, labels[i]);
     }
-
-    uint64 duration = uint64(365 days);
-    OwnedMulticaller multicall = new OwnedMulticallerDeploy().run();
-    RNSUnified rns = RNSUnified(_config.getAddressFromCurrentNetwork(ContractKey.RNSUnified));
-    address resolver = _config.getAddressFromCurrentNetwork(ContractKey.PublicResolver);
-
-    address ronOwner = rns.ownerOf(LibRNSDomain.RON_ID);
-
-    vm.startBroadcast(ronOwner);
-    rns.approve(address(multicall), LibRNSDomain.RON_ID);
-    multicall.multiMint(rns, LibRNSDomain.RON_ID, resolver, duration, tos, labels);
-    vm.stopBroadcast();
   }
 }
