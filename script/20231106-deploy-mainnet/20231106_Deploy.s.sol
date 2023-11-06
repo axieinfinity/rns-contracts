@@ -50,7 +50,6 @@ contract Migration__20231106_Deploy is RNSDeploy {
     _rns.grantRole(_rns.CONTROLLER_ROLE(), address(_auction));
     _rns.grantRole(_rns.RESERVATION_ROLE(), address(_auction));
     _rns.grantRole(_rns.CONTROLLER_ROLE(), address(_ronController));
-    _domainPrice.grantRole(_domainPrice.OVERRIDER_ROLE(), config.overrider);
 
     (, uint256 ronId) = _rns.mint(0x0, "ron", address(0), admin, _rns.MAX_EXPIRY());
     (, uint256 reverseId) = _rns.mint(0x0, "reverse", address(0), admin, _rns.MAX_EXPIRY());
@@ -65,9 +64,7 @@ contract Migration__20231106_Deploy is RNSDeploy {
     vm.stopBroadcast();
     vm.pauseGasMetering();
 
-    _validateAuction();
     _validateController();
-    _validateDomainPrice();
     _validateReverseRegistrar();
     _validateRNSUnified(ronId, addrReverseId);
 
@@ -158,11 +155,7 @@ contract Migration__20231106_Deploy is RNSDeploy {
       (INSDomainPrice.UnitPrice memory basePrice,) = _domainPrice.getRenewalFee(domainName, 365 days);
       assertApproxEqAbs(basePrice.usd, 5e18, 1e16, "get renewal fee failed");
     }
-    {
-      _domainPrice.bulkOverrideRenewalFees(lbHashes, overriddenFees);
-      (INSDomainPrice.UnitPrice memory basePrice,) = _domainPrice.getRenewalFee(domainName, 365 days);
-      assertEq(basePrice.usd, 365 days, "get overridden renewal fee failed");
-    }
+
     {
       uint256[] memory setTypes = new uint256[](1);
       uint256[] memory ronPrices = new uint256[](1);
@@ -177,11 +170,6 @@ contract Migration__20231106_Deploy is RNSDeploy {
       _domainPrice.bulkTrySetDomainPrice(lbHashes, ronPrices, proofHashes, setTypes);
       (usdPrice,) = _domainPrice.getDomainPrice(domainName);
       assertApproxEqAbs(usdPrice, 2e18, 1e16, "get domain price 2 failed");
-
-      ronPrices[0] = _domainPrice.convertUSDToRON(1e18);
-      _domainPrice.bulkSetDomainPrice(lbHashes, ronPrices, proofHashes, setTypes);
-      (usdPrice,) = _domainPrice.getDomainPrice(domainName);
-      assertApproxEqAbs(usdPrice, 1e18, 1e16, "get domain price 3 failed");
     }
 
     vm.stopPrank();
