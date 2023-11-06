@@ -8,7 +8,10 @@ import { ErrorHandler } from "../libraries/ErrorHandler.sol";
 contract OwnedMulticaller is Ownable {
   using ErrorHandler for bool;
 
-  constructor() Ownable() { }
+  constructor(address owner_) {
+    require(owner_ != address(0), "owner_ == address(0x0)");
+    _transferOwnership(owner_);
+  }
 
   function kill() external onlyOwner {
     selfdestruct(payable(_msgSender()));

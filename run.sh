@@ -1,6 +1,6 @@
 verify_arg=""
 extra_argument=""
-op_command=""
+op_command="op run --env-file="./.env" --"
 
 for arg in "$@"; do
     case $arg in
