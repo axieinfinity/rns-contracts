@@ -42,11 +42,6 @@ contract Migration__20231106_Deploy is RNSDeploy {
     _ronController = new RONRegistrarControllerDeploy().run();
 
     address admin = _rns.getRoleMember(_rns.DEFAULT_ADMIN_ROLE(), 0);
-    // {
-    //   string memory data = vm.readFile("./script/20231015-deploy/data/data.json");
-    //   _blacklistedWords = vm.parseJsonStringArray(data, ".words");
-    // }
-    // uint256[] memory packedWords = _nameChecker.packBulk(_blacklistedWords);
 
     Config memory config = getConfig();
     vm.resumeGasMetering();
@@ -66,7 +61,6 @@ contract Migration__20231106_Deploy is RNSDeploy {
     _rns.approve(address(_reverseRegistrar), addrReverseId);
 
     _reverseRegistrar.setDefaultResolver(_publicResolver);
-    // _nameChecker.setForbiddenWords({ packedWords: packedWords, shouldForbid: true });
 
     vm.stopBroadcast();
     vm.pauseGasMetering();
@@ -75,7 +69,6 @@ contract Migration__20231106_Deploy is RNSDeploy {
     _validateController();
     _validateDomainPrice();
     _validateReverseRegistrar();
-    // _validateNameChecker();
     _validateRNSUnified(ronId, addrReverseId);
 
     console2.log(StdStyle.green(unicode"✅ All checks are passed"));
