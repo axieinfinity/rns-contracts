@@ -1,0 +1,32 @@
+{
+    "reservedNames": [
+        {
+            "label": "rnstesting1",
+            "address": "0xbf99983f7f2b87169e80d33c8ef74a0437558b97"
+        },
+        {
+            "label": "rnstesting2",
+            "address": "0xbf99983f7f2b87169e80d33c8ef74a0437558b97"
+        },
+        {
+            "label": "rnstesting3",
+            "address": "0xbf99983f7f2b87169e80d33c8ef74a0437558b97"
+        },
+        {
+            "label": "rnstesting4",
+            "address": "0xbf99983f7f2b87169e80d33c8ef74a0437558b97"
+        },
+        {
+            "label": "rnstesting5",
+            "address": "0xbf99983f7f2b87169e80d33c8ef74a0437558b97"
+        },
+        {
+            "label": "rnstesting9",
+            "address": "0xd115a29bdf33f6db712dc514721fbfa9b522505c"
+        },
+        {
+            "label": "rnstesting10",
+            "address": "0xd115a29bdf33f6db712dc514721fbfa9b522505c"
+        }
+    ]
+}
