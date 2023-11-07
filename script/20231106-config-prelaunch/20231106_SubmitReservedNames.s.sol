@@ -23,10 +23,14 @@ contract Migration__20231106_SubmitReservedNames is RNSDeploy {
     address ronOwner = rns.ownerOf(LibRNSDomain.RON_ID);
 
     vm.broadcast(ronOwner);
+    vm.resumeGasMetering();
     rns.setApprovalForAll(address(multicall), true);
+    vm.pauseGasMetering();
 
     vm.broadcast(_config.getSender());
+    vm.resumeGasMetering();
     multicall.multiMint(rns, LibRNSDomain.RON_ID, resolver, duration, tos, labels);
+    vm.pauseGasMetering();
   }
 
   function _parseData(string memory path) internal view returns (address[] memory tos, string[] memory labels) {

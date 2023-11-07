@@ -33,9 +33,13 @@ contract Migration__20231106_TransferOwnership is RNSDeploy {
     assertEq(currentOwner, rns.ownerOf(reverseId), "currentOwner != rns.ownerOf(reverseId)");
     assertEq(currentOwner, rns.ownerOf(addrReverseId), "currentOwner != rns.ownerOf(addrReverseId)");
 
-    // approve for owned-multicall contract
-    vm.prank(currentOwner);
-    rns.setApprovalForAll(address(multicall), true);
+    if (!rns.isApprovedForAll(currentOwner, address(multicall))) {
+      // approve for owned-multicall contract
+      vm.broadcast(currentOwner);
+      vm.resumeGasMetering();
+      rns.setApprovalForAll(address(multicall), true);
+      vm.pauseGasMetering();
+    }
 
     uint256[] memory values = new uint256[](3);
     address[] memory targets = new address[](3);
@@ -48,14 +52,18 @@ contract Migration__20231106_TransferOwnership is RNSDeploy {
     // transfer .ron id to original owner
     callDatas[2] = abi.encodeCall(rns.transferFrom, (currentOwner, originalOwner, LibRNSDomain.RON_ID));
 
-    vm.prank(multicall.owner());
+    vm.broadcast(multicall.owner());
+    vm.resumeGasMetering();
     multicall.multicall(targets, callDatas, values);
+    vm.pauseGasMetering();
 
-    vm.startPrank(originalOwner);
+    vm.startBroadcast(originalOwner);
+    vm.resumeGasMetering();
     rns.setApprovalForAll(address(auction), true);
     rns.setApprovalForAll(address(ronController), true);
     rns.approve(address(reverseRegistrar), addrReverseId);
-    vm.stopPrank();
+    vm.stopBroadcast();
+    vm.pauseGasMetering();
 
     assertTrue(
       rns.isApprovedForAll(originalOwner, address(auction)), "!rns.isApprovedForAll(originalOwner, address(auction))"
