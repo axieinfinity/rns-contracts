@@ -51,15 +51,23 @@ contract Migration__20231106_TransferOwnership is RNSDeploy {
     vm.prank(multicall.owner());
     multicall.multicall(targets, callDatas, values);
 
-    // re-approve for owned-multicall contract
-    vm.prank(originalOwner);
-    rns.setApprovalForAll(address(multicall), true);
+    vm.startPrank(originalOwner);
+    rns.setApprovalForAll(address(auction), true);
+    rns.setApprovalForAll(address(ronController), true);
+    rns.approve(address(reverseRegistrar), addrReverseId);
+    vm.stopPrank();
 
-    callDatas[0] = abi.encodeCall(rns.setApprovalForAll, (auction, true));
-    callDatas[1] = abi.encodeCall(rns.setApprovalForAll, (ronController, true));
-    callDatas[2] = abi.encodeCall(rns.approve, (reverseRegistrar, addrReverseId));
-
-    vm.prank(multicall.owner());
-    multicall.multicall(targets, callDatas, values);
+    assertTrue(
+      rns.isApprovedForAll(originalOwner, address(auction)), "!rns.isApprovedForAll(originalOwner, address(auction))"
+    );
+    assertEq(
+      rns.getApproved(addrReverseId),
+      address(reverseRegistrar),
+      "!rns.getApproved(addrReverseId), address(reverseRegistrar)"
+    );
+    assertTrue(
+      rns.isApprovedForAll(originalOwner, address(ronController)),
+      "!rns.isApprovedForAll(originalOwner, address(ronController))"
+    );
   }
 }
