@@ -11,7 +11,7 @@ import { OwnedMulticaller, OwnedMulticallerDeploy } from "script/contracts/Owned
 contract Migration__20231106_SubmitReservedNames is RNSDeploy {
   using JSONParserLib for *;
 
-  function run() public {
+  function run() public trySetUp {
     (address[] memory tos, string[] memory labels) = _parseData("script/20231106-config-prelaunch/data/test.json");
 
     // default duration is 1 year
@@ -21,9 +21,9 @@ contract Migration__20231106_SubmitReservedNames is RNSDeploy {
     RNSUnified rns = RNSUnified(_config.getAddressFromCurrentNetwork(ContractKey.RNSUnified));
     address resolver = _config.getAddressFromCurrentNetwork(ContractKey.PublicResolver);
     address ronOwner = rns.ownerOf(LibRNSDomain.RON_ID);
-    
+
     vm.broadcast(ronOwner);
-    rns.approve(address(multicall), LibRNSDomain.RON_ID);
+    rns.setApprovalForAll(address(multicall), true);
 
     vm.broadcast(_config.getSender());
     multicall.multiMint(rns, LibRNSDomain.RON_ID, resolver, duration, tos, labels);
