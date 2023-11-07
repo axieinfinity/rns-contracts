@@ -7,8 +7,7 @@ import { RNSDeploy } from "../RNSDeploy.s.sol";
 
 contract OwnedMulticallerDeploy is RNSDeploy {
   function _defaultArguments() internal virtual override returns (bytes memory args) {
-    Config memory config = getConfig();
-    args = abi.encode(config.admin);
+    args = abi.encode(_config.getSender());
   }
 
   function run() public virtual trySetUp returns (OwnedMulticaller) {

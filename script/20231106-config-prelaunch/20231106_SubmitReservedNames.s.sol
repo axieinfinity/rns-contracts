@@ -10,28 +10,29 @@ import { OwnedMulticaller, OwnedMulticallerDeploy } from "script/contracts/Owned
 
 contract Migration__20231106_SubmitReservedNames is RNSDeploy {
   using JSONParserLib for *;
-  using JSONParserLib for JSONParserLib.Item;
 
   function run() public {
-    (address[] memory tos, string[] memory labels) = _parseData("script/20231106-script/data/mock.json");
+    (address[] memory tos, string[] memory labels) = _parseData("script/20231106-config-prelaunch/data/test.json");
 
+    // default duration is 1 year
     uint64 duration = uint64(365 days);
+    // deploy owned-multicaller
     OwnedMulticaller multicall = new OwnedMulticallerDeploy().run();
     RNSUnified rns = RNSUnified(_config.getAddressFromCurrentNetwork(ContractKey.RNSUnified));
     address resolver = _config.getAddressFromCurrentNetwork(ContractKey.PublicResolver);
     address ronOwner = rns.ownerOf(LibRNSDomain.RON_ID);
-    vm.startBroadcast(ronOwner);
+    
+    vm.broadcast(ronOwner);
     rns.approve(address(multicall), LibRNSDomain.RON_ID);
+
+    vm.broadcast(_config.getSender());
     multicall.multiMint(rns, LibRNSDomain.RON_ID, resolver, duration, tos, labels);
-    vm.stopBroadcast();
   }
 
   function _parseData(string memory path) internal view returns (address[] memory tos, string[] memory labels) {
     string memory raw = vm.readFile(path);
-    console2.log("raw", raw);
     JSONParserLib.Item memory reservedNames = raw.parse().at('"reservedNames"');
     uint256 length = reservedNames.size();
-
     console2.log("length", length);
 
     tos = new address[](length);
