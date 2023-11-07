@@ -32,7 +32,7 @@ contract Migration__20231106_TransferOwnership is RNSDeploy {
     address currentOwner = rns.ownerOf(LibRNSDomain.RON_ID);
     assertEq(currentOwner, rns.ownerOf(reverseId), "currentOwner != rns.ownerOf(reverseId)");
     assertEq(currentOwner, rns.ownerOf(addrReverseId), "currentOwner != rns.ownerOf(addrReverseId)");
-    
+
     // approve for owned-multicall contract
     vm.prank(currentOwner);
     rns.setApprovalForAll(address(multicall), true);
