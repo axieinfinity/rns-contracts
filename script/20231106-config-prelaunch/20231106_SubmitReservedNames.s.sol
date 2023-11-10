@@ -12,21 +12,36 @@ contract Migration__20231106_SubmitReservedNames is RNSDeploy {
   using JSONParserLib for *;
 
   function run() public trySetUp {
-    (address[] memory tos, string[] memory labels) = _parseData("script/20231106-config-prelaunch/data/test.json");
-
     // default duration is 1 year
     uint64 duration = uint64(365 days);
-    // deploy owned-multicaller
-    OwnedMulticaller multicall = new OwnedMulticallerDeploy().run();
+
     RNSUnified rns = RNSUnified(_config.getAddressFromCurrentNetwork(ContractKey.RNSUnified));
     address resolver = _config.getAddressFromCurrentNetwork(ContractKey.PublicResolver);
-    address ronOwner = rns.ownerOf(LibRNSDomain.RON_ID);
 
-    vm.broadcast(ronOwner);
+    // deploy owned-multicaller
+    OwnedMulticaller multicall = new OwnedMulticallerDeploy().run();
+
+    vm.broadcast(rns.ownerOf(LibRNSDomain.RON_ID));
     vm.resumeGasMetering();
     rns.setApprovalForAll(address(multicall), true);
     vm.pauseGasMetering();
 
+    address[] memory tos;
+    string[] memory labels;
+    (tos, labels) = _parseData("script/20231106-config-prelaunch/data/mock.json");
+    mintBatch(multicall, duration, rns, resolver, tos, labels);
+    (tos, labels) = _parseData("script/20231106-config-prelaunch/data/test.json");
+    mintBatch(multicall, duration, rns, resolver, tos, labels);
+  }
+
+  function mintBatch(
+    OwnedMulticaller multicall,
+    uint64 duration,
+    RNSUnified rns,
+    address resolver,
+    address[] memory tos,
+    string[] memory labels
+  ) public {
     vm.broadcast(_config.getSender());
     vm.resumeGasMetering();
     multicall.multiMint(rns, LibRNSDomain.RON_ID, resolver, duration, tos, labels);
