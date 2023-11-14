@@ -45,25 +45,14 @@ contract NameChecker is Initializable, AccessControlEnumerable, INameChecker {
    * @inheritdoc INameChecker
    */
   function forbidden(string calldata name) public view returns (bool) {
-    return containsInvalidCharacter(name) || containsBlacklistedWord(name);
+    return containsInvalidCharacter(name) || isBlacklistedWord(name);
   }
 
   /**
    * @inheritdoc INameChecker
    */
-  function containsBlacklistedWord(string calldata name) public view returns (bool) {
-    string[] memory sstrs = getAllSubStrings(name);
-    uint256 length = sstrs.length;
-
-    for (uint256 i; i < length;) {
-      if (_forbiddenWordMap.get(pack(sstrs[i]))) return true;
-
-      unchecked {
-        ++i;
-      }
-    }
-
-    return false;
+  function isBlacklistedWord(string calldata name) public view returns (bool) {
+    return _forbiddenWordMap.get(pack(name));
   }
 
   /**

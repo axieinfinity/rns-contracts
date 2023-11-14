@@ -13,6 +13,6 @@ contract Migration__20231106_RevertRenewalFees is RNSDeploy {
     vm.broadcast(domainPrice.getRoleMember(domainPrice.DEFAULT_ADMIN_ROLE(), 0));
     vm.resumeGasMetering();
     domainPrice.setRenewalFeeByLengths(config.renewalFees);
-    vm.pauseGasMetering(); 
+    vm.pauseGasMetering();
   }
 }
