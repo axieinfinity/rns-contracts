@@ -74,11 +74,11 @@ interface INameChecker {
   function forbidden(string calldata name) external view returns (bool);
 
   /**
-   * @notice Checks if a given name is blacklisted.
+   * @notice Checks if a given name contains any blacklisted words.
    * @param name The string to check.
-   * @return true if the name is blacklisted, false otherwise.
+   * @return true if the name contains blacklisted words, false otherwise.
    */
-  function isBlacklistedWord(string calldata name) external view returns (bool);
+  function containsBlacklistedWord(string calldata name) external view returns (bool);
 
   /**
    * @notice Checks if a given name contains any invalid characters.

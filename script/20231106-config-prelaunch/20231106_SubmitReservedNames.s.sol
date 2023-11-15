@@ -17,20 +17,18 @@ contract Migration__20231106_SubmitReservedNames is RNSDeploy {
 
     RNSUnified rns = RNSUnified(_config.getAddressFromCurrentNetwork(ContractKey.RNSUnified));
     address resolver = _config.getAddressFromCurrentNetwork(ContractKey.PublicResolver);
+    OwnedMulticaller multicall = OwnedMulticaller(_config.getAddressFromCurrentNetwork(ContractKey.OwnedMulticaller));
 
-    // deploy owned-multicaller
-    OwnedMulticaller multicall = new OwnedMulticallerDeploy().run();
+    console2.log(_config.getAddressFromCurrentNetwork(ContractKey.OwnedMulticaller));
 
-    vm.broadcast(rns.ownerOf(LibRNSDomain.RON_ID));
-    vm.resumeGasMetering();
-    rns.setApprovalForAll(address(multicall), true);
-    vm.pauseGasMetering();
+    // vm.broadcast(rns.ownerOf(LibRNSDomain.RON_ID));
+    // vm.resumeGasMetering();
+    // rns.setApprovalForAll(address(multicall), true);
+    // vm.pauseGasMetering();
 
     address[] memory tos;
     string[] memory labels;
-    (tos, labels) = _parseData("script/20231106-config-prelaunch/data/mock.json");
-    mintBatch(multicall, duration, rns, resolver, tos, labels);
-    (tos, labels) = _parseData("script/20231106-config-prelaunch/data/test.json");
+    (tos, labels) = _parseData("./script/20231106-config-prelaunch/data/finalReservedNames.json");
     mintBatch(multicall, duration, rns, resolver, tos, labels);
   }
 

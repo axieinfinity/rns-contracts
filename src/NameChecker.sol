@@ -45,14 +45,36 @@ contract NameChecker is Initializable, AccessControlEnumerable, INameChecker {
    * @inheritdoc INameChecker
    */
   function forbidden(string calldata name) public view returns (bool) {
-    return containsInvalidCharacter(name) || isBlacklistedWord(name);
+    return containsInvalidCharacter(name) || containsBlacklistedWord(name);
   }
 
   /**
    * @inheritdoc INameChecker
    */
-  function isBlacklistedWord(string calldata name) public view returns (bool) {
-    return _forbiddenWordMap.get(pack(name));
+  function containsBlacklistedWord(string calldata name) public view returns (bool) {
+    uint256 length = bytes(name).length;
+    bytes1 char;
+    uint256 i;
+    uint256 j;
+
+    unchecked {
+      for (i; i < length; i++) {
+        char = bytes(name)[i];
+
+        if (_isAlphabet(char)) {
+          for (j = i + 1; j < length; j++) {
+            if (!_isAlphabet(bytes(name)[j])) {
+              break;
+            }
+          }
+
+          if (_forbiddenWordMap.get(pack(name[i:j]))) return true;
+          i = j;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -68,8 +90,6 @@ contract NameChecker is Initializable, AccessControlEnumerable, INameChecker {
       // Check if the name is empty or starts or ends with a hyphen (-)
       if (length == 0 || bName[0] == 0x2d || bName[tail] == 0x2d) return true;
 
-      // [0x30, 0x39] => [0-9]
-      // [0x61, 0x7a] => [a-z]
       for (uint256 i; i < length; ++i) {
         char = bName[i];
         if (char == 0x2d) {
@@ -77,7 +97,7 @@ contract NameChecker is Initializable, AccessControlEnumerable, INameChecker {
           if (i != tail && bName[i + 1] == 0x2d) return true;
         }
         // Check for invalid character (not (-) || [0-9] || [a-z])
-        else if (!((char >= 0x30 && char <= 0x39) || (char >= 0x61 && char <= 0x7a))) {
+        else if (!(_isNumber(char) || _isAlphabet(char))) {
           return true;
         }
       }
@@ -194,5 +214,17 @@ contract NameChecker is Initializable, AccessControlEnumerable, INameChecker {
     require(min != 0 && min <= max, "NameChecker: min word length > max word length");
     _wordRange = LibSubString.WordRange(min, max);
     emit WordRangeUpdated(_msgSender(), min, max);
+  }
+
+  /// @dev Returns whether a char is in [a-z]
+  function _isAlphabet(bytes1 char) internal pure returns (bool) {
+    // [0x61, 0x7a] => [a-z]
+    return char >= 0x61 && char <= 0x7a;
+  }
+
+  /// @dev Returns whether a char is number [0-9]
+  function _isNumber(bytes1 char) internal pure returns (bool) {
+    // [0x30, 0x39] => [0-9]
+    return char >= 0x30 && char <= 0x39;
   }
 }

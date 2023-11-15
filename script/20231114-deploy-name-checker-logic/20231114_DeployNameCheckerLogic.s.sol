@@ -15,14 +15,17 @@ contract Migration__20231114_DeployNameCheckerLogic is RNSDeploy {
     address newLogic = _deployLogic(ContractKey.NameChecker);
 
     NameChecker currentNameChecker = NameChecker(_config.getAddressFromCurrentNetwork(ContractKey.NameChecker));
-    assertTrue(currentNameChecker.forbidden("hell"));
-    assertTrue(currentNameChecker.forbidden("hellscream"));
+    assertTrue(currentNameChecker.forbidden("hell"), "hell");
+    assertTrue(currentNameChecker.forbidden("hellscream"), "hellscream");
+    assertTrue(currentNameChecker.forbidden("hell123"), "hell123");
 
     address proxyAdmin = _getProxyAdmin(address(currentNameChecker));
     vm.prank(ProxyAdmin(proxyAdmin).owner());
     ProxyAdmin(proxyAdmin).upgrade(ITransparentUpgradeableProxy(address(currentNameChecker)), newLogic);
 
-    assertTrue(currentNameChecker.forbidden("hell"));
-    assertFalse(currentNameChecker.forbidden("hellscream"));
+    assertTrue(currentNameChecker.forbidden("hell"), "hell");
+    assertFalse(currentNameChecker.forbidden("hellscream"), "hellscream");
+    assertTrue(currentNameChecker.forbidden("hell123"), "hell123");
+    assertTrue(currentNameChecker.forbidden("heo123hell"), "heo123hell");
   }
 }

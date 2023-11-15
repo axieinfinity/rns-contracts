@@ -1,13 +1,13 @@
-RPC=https://saigon-archive.roninchain.com/rpc
-FROM=0x968D0Cd7343f711216817E617d3f92a23dC91c07
-TARGET=0x51cAF51678f469e9DD4c878a7b0ceBEbbd4A4AB5
+RPC=https://api.roninchain.com/rpc
+FROM=0x0f68edbe14c8f68481771016d7e2871d6a35de11
+TARGET=0x2BdC555A87Db9207E5d175f0c12B237736181675
 CURRENT_GAS_PRICE=$(cast gas-price --rpc-url $RPC)
 CURRENT_NONCE=$(cast nonce --rpc-url $RPC $FROM)
-PK=$(op read "op://SC Vault/Testnet Admin/private key")
-TX_EXPLORER=https://saigon-app.roninchain.com/tx/
+PK=$(op read "op://Private/Ronin Mainnet Deployer/private key")
+TX_EXPLORER=https://app.roninchain.com/tx/
 
 start=0
-end=6
+end=0
 # Loop through each index
 for index in $(seq $start $end); do
     (
@@ -16,7 +16,7 @@ for index in $(seq $start $end); do
         echo Nonce: $nextNonce
         labelhashResults=()
         # Read the JSON file
-        jsonData=$(cat "script/20231110-listing/data/FeeProtectedNames${index}.json")
+        jsonData=$(cat "../RNS-names/FeeProtectedNames10.json")
 
         echo FeeProtectedNames${index}
 
@@ -40,11 +40,7 @@ for index in $(seq $start $end); do
 
         # Loop through each label and call cast namehash
         for label in ${labels}; do
-            if [ "$label" == "0xak" ]; then
-                result="0x8028df340f8d924f15f36c880ac12966dec0ac8ac4f8f3f49cdb60a84e4eb083"
-            else
-                result=$(cast keccak "$label")
-            fi
+            result=$(cast keccak $(cast from-utf8 $label))
             echo "Label: $label, LabelHash: $result"
             labelhashResults+=($result)
         done
@@ -60,7 +56,6 @@ for index in $(seq $start $end); do
 
         # Execute shell command
         txHash=$(cast s --private-key $PK --nonce $nextNonce --async --confirmations 0 --legacy --rpc-url $RPC $TARGET "bulkOverrideRenewalFees(bytes32[],uint256[])" "[$lbHash]" "[$fees]")
-
         echo ${TX_EXPLORER}${txHash}
     ) &
 done

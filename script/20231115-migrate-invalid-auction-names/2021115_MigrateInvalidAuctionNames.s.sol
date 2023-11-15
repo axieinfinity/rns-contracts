@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import { console2 } from "forge-std/console2.sol";
 import { INSAuction, EventRange, RNSAuction } from "@rns-contracts/RNSAuction.sol";
 import { ContractKey } from "foundry-deployment-kit/configs/ContractConfig.sol";
 import { RNSDeploy } from "script/RNSDeploy.s.sol";
@@ -19,9 +20,10 @@ contract Migration__20231115_MigrateInvalidAuctionNames is RNSDeploy {
 
     // create new auction
     vm.broadcast(auction.getRoleMember(0x0, 0));
-    bytes32 auctionId = auction.createAuctionEvent(
-      EventRange(block.timestamp + 365 days * 20, block.timestamp + 1 seconds + 365 days * 20)
-    );
+    bytes32 auctionId = auction.createAuctionEvent(EventRange(2332515600, 2332515600 + 1 days));
+
+    console2.logBytes32(auctionId);
+
     // relist ids to new auction
     vm.broadcast(auction.getRoleMember(auction.OPERATOR_ROLE(), 0));
     auction.listNamesForAuction(auctionId, ids, startingPrices);
