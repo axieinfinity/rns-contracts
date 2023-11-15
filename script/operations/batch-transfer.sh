@@ -42,7 +42,7 @@ for index in "${indices[@]}"; do
             echo "${namehashResults[*]}"
         )
 
-        broadcast $CURRENT_GAS_PRICE $nextNonce $ERC721_BATCH_TRANSFER $(cast calldata "safeBatchTransfer(address,uint256[],address[])" $RNS_UNIFIED "[$joinedString]" "[$addresses]")
+        execute $nextNonce $ERC721_BATCH_TRANSFER $(cast calldata "safeBatchTransfer(address,uint256[],address[])" $(loadAddress RNSUnifiedProxy) "[$joinedString]" "[$addresses]")
     ) &
 
     # Check if index is a multiple of 100, then wait

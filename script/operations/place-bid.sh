@@ -26,7 +26,7 @@ index=0
 for id in "${namehashResults[@]}"; do
     (
         nextNonce=$((CURRENT_NONCE + index))
-        broadcast $CURRENT_GAS_PRICE $nextNonce $RNS_AUCTION $(cast calldata "placeBid(uint256)" "$id")
+        execute $nextNonce $(loadAddress RNSAuctionProxy) $(cast calldata "placeBid(uint256)" "$id")
     ) &
 
     # Increment the index

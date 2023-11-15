@@ -37,7 +37,7 @@ for index in "${indices[@]}"; do
         echo auctionId $auctionId
         echo addresses $addresses
 
-        broadcast $CURRENT_GAS_PRICE $nextNonce $OWNED_MULTICALLER $(cast calldata "multiMint(address,uint256,address,uint64,address[],string[])" $RNS_UNIFIED $RON_ID $RESOLVER $DURATION "[$(IFS=, echo "${addresses[*]}")]" "[$(IFS=, echo "${labels[*]}")]")
+        execute $nextNonce $(loadAddress OwnedMulticaller) $(cast calldata "multiMint(address,uint256,address,uint64,address[],string[])" $(loadAddress RNSUnifiedProxy) $RON_ID $(loadAddress PublicResolverProxy) $DURATION "[$(IFS=, echo "${addresses[*]}")]" "[$(IFS=, echo "${labels[*]}")]")
     ) &
 
     # Check if index is a multiple of 100, then wait

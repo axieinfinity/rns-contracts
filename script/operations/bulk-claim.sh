@@ -39,7 +39,7 @@ for index in "${indices[@]}"; do
             echo "${namehashResults[*]}"
         )
 
-        broadcast $CURRENT_GAS_PRICE $nextNonce $RNS_AUCTION $(cast calldata "bulkClaimBidNames(uint256[])" "[$joinedString]")
+        execute $nextNonce $(loadAddress RNSUnifiedProxy) $(cast calldata "bulkClaimBidNames(uint256[])" "[$joinedString]")
     ) &
 
     # Check if index is a multiple of 100, then wait

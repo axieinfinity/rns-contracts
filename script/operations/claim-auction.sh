@@ -18,7 +18,7 @@ for index in {0..0}; do
 
         echo "Labels for AuctionNames${index}: $labelsString"
 
-        broadcast $CURRENT_GAS_PRICE $nextNonce $RNS_AUCTION $(cast calldata "bulkRegister(string[])" "[$labelsString]")
+        execute $nextNonce $(loadAddress RNSAuctionProxy) $(cast calldata "bulkRegister(string[])" "[$labelsString]")
     ) &
 
     # Check if index is a multiple of 100, then wait

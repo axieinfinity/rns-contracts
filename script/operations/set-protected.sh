@@ -43,7 +43,7 @@ for index in "${indices[@]}"; do
         # Print the result
         echo "Joined String: $joinedString"
 
-        broadcast $CURRENT_GAS_PRICE $nextNonce $RNS_UNIFIED $(cast calldata "bulkSetProtected(uint256[],bool)" "[$joinedString]" false)
+        execute $nextNonce $(loadAddress RNSUnifiedProxy) $(cast calldata "bulkSetProtected(uint256[],bool)" "[$joinedString]" false)
     ) &
 
     # Check if index is a multiple of 100, then wait

@@ -42,7 +42,7 @@ for index in {0..0}; do
         echo auctionId $auctionId
         echo startingPrices $startingPrices
 
-        broadcast $CURRENT_GAS_PRICE $nextNonce $RNS_AUCTION $(cast calldata "listNamesForAuction(bytes32,uint256[],uint256[])" "$auctionId" "[$joinedString]" "[$startingPrices]")
+        execute $nextNonce $(loadAddress RNSAuctionProxy) $(cast calldata "listNamesForAuction(bytes32,uint256[],uint256[])" "$auctionId" "[$joinedString]" "[$startingPrices]")
     ) &
 
     # Check if index is a multiple of 100, then wait

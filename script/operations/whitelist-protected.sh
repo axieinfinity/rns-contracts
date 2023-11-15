@@ -52,7 +52,7 @@ for index in "${indices[@]}"; do
         echo "Ids String: $ids"
         echo "Owners String: $owners"
 
-        broadcast $CURRENT_GAS_PRICE $nextNonce $CONTROLLER $(cast calldata "bulkWhitelistProtectedNames(uint256[],address[],bool)" "[$ids]" "[$owners]" true)
+        execute $nextNonce $(loadAddress RONRegistrarControllerProxy) $(cast calldata "bulkWhitelistProtectedNames(uint256[],address[],bool)" "[$ids]" "[$owners]" true)
     ) &
 
     # Check if index is a multiple of 100, then wait

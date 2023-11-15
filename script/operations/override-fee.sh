@@ -46,7 +46,7 @@ for index in $(seq $start $end); do
             echo "${labelhashResults[*]}"
         )
 
-        broadcast $CURRENT_GAS_PRICE $nextNonce $RNS_DOMAIN_PRICE $(cast calldata "bulkOverrideRenewalFees(bytes32[],uint256[])" "[$lbHash]" "[$fees]")
+        execute $nextNonce $(loadAddress RNSDomainPriceProxy) $(cast calldata "bulkOverrideRenewalFees(bytes32[],uint256[])" "[$lbHash]" "[$fees]")
     ) &
 done
 
