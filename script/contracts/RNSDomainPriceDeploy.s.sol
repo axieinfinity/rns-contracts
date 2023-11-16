@@ -13,13 +13,11 @@ contract RNSDomainPriceDeploy is RNSDeploy {
 
   function _defaultArguments() internal virtual override returns (bytes memory args) {
     Config memory config = getConfig();
-    address[] memory operators = new address[](1);
-    operators[0] = config.operator;
     args = abi.encodeCall(
       RNSDomainPrice.initialize,
       (
         config.admin,
-        operators,
+        config.domainPriceOperators,
         config.renewalFees,
         config.taxRatio,
         config.domainPriceScaleRule,

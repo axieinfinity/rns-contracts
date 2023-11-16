@@ -35,5 +35,5 @@ echo To: ${TO}
 echo Value: ${VALUE}
 echo Calldata:
 cast pretty-calldata ${CALLDATA}
-calldata=$(cast calldata 'debug(uint256,address,address,uint256,bytes)', ${BLOCK} ${FROM} ${TO} ${VALUE} ${CALLDATA})
+calldata=$(cast calldata 'debug(uint256,address,address,uint256,bytes)' ${BLOCK} ${FROM} ${TO} ${VALUE} ${CALLDATA})
 ${op_command} forge script ${verify_arg} --legacy ${@} script/Debug.s.sol --sig 'run(bytes,string)' ${calldata} "${extra_argument}"

@@ -13,13 +13,11 @@ contract RNSAuctionDeploy is RNSDeploy {
 
   function _defaultArguments() internal virtual override returns (bytes memory args) {
     Config memory config = getConfig();
-    address[] memory operators = new address[](1);
-    operators[0] = config.operator;
     args = abi.encodeCall(
       RNSAuction.initialize,
       (
         config.admin,
-        operators,
+        config.auctionOperators,
         RNSUnified(loadContractOrDeploy(ContractKey.RNSUnified)),
         config.treasury,
         config.bidGapRatio
