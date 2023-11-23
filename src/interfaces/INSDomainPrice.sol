@@ -200,6 +200,11 @@ interface INSDomainPrice {
   function OPERATOR_ROLE() external pure returns (bytes32);
 
   /**
+   * @dev Returns the overrider role.
+   */
+  function OVERRIDER_ROLE() external pure returns (bytes32);
+
+  /**
    * @dev Max percentage 100%. Values [0; 100_00] reflexes [0; 100%]
    */
   function MAX_PERCENTAGE() external pure returns (uint64);
