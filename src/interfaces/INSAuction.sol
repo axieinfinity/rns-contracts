@@ -8,7 +8,7 @@ interface INSAuction {
   error NotYetEnded();
   error NoOneBidded();
   error NullAssignment();
-  error AlreadyBidding();
+  error AlreadyBidding(uint256 id);
   error RatioIsTooLarge();
   error NameNotReserved();
   error InvalidEventRange();

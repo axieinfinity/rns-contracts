@@ -165,7 +165,7 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
       sAuction = _domainAuction[id];
       mAuctionId = sAuction.auctionId;
       if (!(mAuctionId == 0 || mAuctionId == auctionId || sAuction.bid.timestamp == 0)) {
-        revert AlreadyBidding();
+        revert AlreadyBidding(id);
       }
 
       sAuction.auctionId = auctionId;
@@ -232,7 +232,7 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
         rnsUnified.transferFrom(address(this), tos[i], id);
         claimeds[i] = true;
       } else if (!allowFailure) {
-        revert AlreadyBidding();
+        revert AlreadyBidding(id);
       }
 
       unchecked {

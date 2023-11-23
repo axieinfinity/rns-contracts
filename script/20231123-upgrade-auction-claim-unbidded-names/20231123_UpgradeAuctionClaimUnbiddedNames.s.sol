@@ -45,9 +45,16 @@ contract Migration__20231123_UpgradeAuctionClaimeUnbiddedNames is RNSDeploy {
     }
 
     vm.revertTo(snapshotId);
+    uint256 firstFailId;
+    for (uint256 i; i < domainAuctions.length; ++i) {
+      if (domainAuctions[i].bid.bidder != address(0x0)) {
+        firstFailId = reservedIds[i];
+        break;
+      }
+    }
     // !allowFailure
     vm.prank(operator);
-    vm.expectRevert(INSAuction.AlreadyBidding.selector);
+    vm.expectRevert(abi.encodeWithSelector(INSAuction.AlreadyBidding.selector, firstFailId));
     claimeds = auction.bulkClaimUnbiddedNames(tos, reservedIds, false);
   }
 }
