@@ -208,6 +208,42 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
   /**
    * @inheritdoc INSAuction
    */
+  function bulkClaimUnbiddedNames(address[] calldata tos, uint256[] calldata ids, bool allowFailure)
+    external
+    onlyRole(OPERATOR_ROLE)
+    returns (bool[] memory claimeds)
+  {
+    if (tos.length != ids.length) revert InvalidArrayLength();
+
+    uint64 expiry = uint64(block.timestamp.addWithUpperbound(DOMAIN_EXPIRY_DURATION, MAX_EXPIRY));
+    claimeds = new bool[](ids.length);
+    INSUnified rnsUnified = _rnsUnified;
+    DomainAuction memory auction;
+    uint256 id;
+
+    for (uint256 i; i < ids.length;) {
+      id = ids[i];
+      auction = _domainAuction[id];
+
+      if (auction.bid.bidder == address(0x0)) {
+        // remove id from auction
+        delete _domainAuction[id];
+        rnsUnified.setExpiry(id, expiry);
+        rnsUnified.transferFrom(address(this), tos[i], id);
+        claimeds[i] = true;
+      } else if (!allowFailure) {
+        revert AlreadyBidding();
+      }
+
+      unchecked {
+        ++i;
+      }
+    }
+  }
+
+  /**
+   * @inheritdoc INSAuction
+   */
   function bulkClaimBidNames(uint256[] calldata ids) external returns (uint256[] memory claimedAts) {
     uint256 id;
     uint256 accumulatedRON;
