@@ -10,7 +10,7 @@ import { INSAuction, RNSAuction } from "@rns-contracts/RNSAuction.sol";
 contract Migration__20231123_UpgradeAuctionClaimeUnbiddedNames is RNSDeploy {
   function run() public trySetUp {
     _upgradeProxy(ContractKey.RNSAuction, EMPTY_ARGS);
-    _validataBulkClaimUnbiddedNames({ size: 50 });
+    _validataBulkClaimUnbiddedNames({ size: 20 });
   }
 
   function _validataBulkClaimUnbiddedNames(uint256 size) internal logFn("_validataBulkClaimUnbiddedNames") {
