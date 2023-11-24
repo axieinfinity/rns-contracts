@@ -2,19 +2,23 @@
 pragma solidity ^0.8.19;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { INSUnified } from "../interfaces/INSUnified.sol";
 import { INSAuction } from "../interfaces/INSAuction.sol";
+import { INSDomainPrice } from "../interfaces/INSDomainPrice.sol";
 import { LibRNSDomain } from "../libraries/LibRNSDomain.sol";
 
 contract RNSOperation is Ownable {
   INSUnified public immutable rns;
   address public immutable resolver;
   INSAuction public immutable auction;
+  INSDomainPrice public immutable domainPrice;
 
-  constructor(INSUnified rns_, address resolver_, INSAuction auction_) {
+  constructor(INSUnified rns_, address resolver_, INSAuction auction_, INSDomainPrice domainPrice_) {
     rns = rns_;
     auction = auction_;
     resolver = resolver_;
+    domainPrice = domainPrice_;
   }
 
   /**
@@ -38,6 +42,27 @@ contract RNSOperation is Ownable {
    */
   function bulkSetProtected(string[] calldata labels, bool shouldProtect) external onlyOwner {
     rns.bulkSetProtected(toIds(labels), shouldProtect);
+  }
+
+  /**
+   * @dev Allows the owner to bulk override the renewal fees for specified RNS domains.
+   * @param labels The array of labels for the RNS domains.
+   * @param yearlyUSDPrices The array of yearly renewal fees in USD (no decimals) for the corresponding RNS domains.
+   * @dev The `yearlyUSDPrices` array should represent the yearly renewal fees in USD for each domain.
+   */
+  function bulkOverrideRenewalFees(string[] calldata labels, uint256[] calldata yearlyUSDPrices) external onlyOwner {
+    require(labels.length == yearlyUSDPrices.length, "RNSOperation: length mismatch");
+
+    bytes32[] memory lbHashes = new bytes32[](labels.length);
+    for (uint256 i; i < lbHashes.length; ++i) {
+      lbHashes[i] = keccak256(bytes(labels[i]));
+    }
+    uint256[] memory usdPrices = new uint256[](yearlyUSDPrices.length);
+    for (uint256 i; i < usdPrices.length; ++i) {
+      usdPrices[i] = Math.mulDiv(yearlyUSDPrices[i], 1 ether, 365 days);
+    }
+
+    domainPrice.bulkOverrideRenewalFees(lbHashes, usdPrices);
   }
 
   /**

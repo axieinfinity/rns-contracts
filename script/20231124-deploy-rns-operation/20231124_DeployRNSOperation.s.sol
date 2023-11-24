@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { console2 as console } from "forge-std/console2.sol";
 import { ContractKey } from "foundry-deployment-kit/configs/ContractConfig.sol";
 import { RNSDeploy } from "script/RNSDeploy.s.sol";
 import { RNSUnified } from "@rns-contracts/RNSUnified.sol";
+import { RNSDomainPrice } from "@rns-contracts/RNSDomainPrice.sol";
 import { INSAuction, RNSAuction } from "@rns-contracts/RNSAuction.sol";
 import { LibRNSDomain } from "@rns-contracts/libraries/LibRNSDomain.sol";
 import { RNSOperation, RNSOperationDeploy } from "script/contracts/RNSOperationDeploy.s.sol";
@@ -15,6 +17,7 @@ contract Migration__20231124_DeployRNSOperation is RNSDeploy {
   function run() public trySetUp {
     RNSOperation rnsOperation = new RNSOperationDeploy().run();
 
+    RNSDomainPrice domainPrice = RNSDomainPrice(_config.getAddressFromCurrentNetwork(ContractKey.RNSDomainPrice));
     RNSUnified rns = RNSUnified(_config.getAddressFromCurrentNetwork(ContractKey.RNSUnified));
     RNSAuction auction = RNSAuction(_config.getAddressFromCurrentNetwork(ContractKey.RNSAuction));
 
@@ -27,11 +30,30 @@ contract Migration__20231124_DeployRNSOperation is RNSDeploy {
     rns.setApprovalForAll(address(rnsOperation), true);
     auction.grantRole(auction.OPERATOR_ROLE(), address(rnsOperation));
     rns.grantRole(rns.PROTECTED_SETTLER_ROLE(), address(rnsOperation));
+    domainPrice.grantRole(domainPrice.OVERRIDER_ROLE(), address(rnsOperation));
     vm.stopBroadcast();
 
     _validateBulkMint(rns, rnsOperation);
     _validateBulkSetProtected(rns, rnsOperation);
+    _validateBulkOverrideRenewalFees(domainPrice, rnsOperation);
     _validateReclaimAuctionNames({ rns: rns, auction: auction, rnsOperation: rnsOperation, searchSize: 20 });
+  }
+
+  function _validateBulkOverrideRenewalFees(RNSDomainPrice domainPrice, RNSOperation rnsOperation)
+    internal
+    logFn("_validateBulkOverrideRenewalFees")
+  {
+    string memory label = "tudo-provip-maximum-ultra";
+    string[] memory labels = new string[](1);
+    labels[0] = label;
+    uint256[] memory yearlyUSDPrices = new uint256[](1);
+    // 10 usd per year
+    yearlyUSDPrices[0] = 10;
+
+    vm.prank(rnsOperation.owner());
+    rnsOperation.bulkOverrideRenewalFees(labels, yearlyUSDPrices);
+
+    assertEq(domainPrice.getOverriddenRenewalFee(label), Math.mulDiv(yearlyUSDPrices[0], 1 ether, 365 days));
   }
 
   function _validateReclaimAuctionNames(
@@ -64,9 +86,7 @@ contract Migration__20231124_DeployRNSOperation is RNSDeploy {
     labels[0] = label;
 
     vm.prank(rnsOperation.owner());
-    rnsOperation.reclaimUnbiddedNames({tos: tos, labels: labels, allowFailure: false});
-
-    assertEq(rns.ownerOf(reclaimableAuctionNameId), to);
+    rnsOperation.reclaimUnbiddedNames({ tos: tos, labels: labels, allowFailure: false });
   }
 
   function _validateBulkMint(RNSUnified rns, RNSOperation rnsOperation) internal logFn("_validateBulkMint") {

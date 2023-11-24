@@ -10,7 +10,8 @@ contract RNSOperationDeploy is RNSDeploy {
     args = abi.encode(
       _config.getAddressFromCurrentNetwork(ContractKey.RNSUnified),
       _config.getAddressFromCurrentNetwork(ContractKey.PublicResolver),
-      _config.getAddressFromCurrentNetwork(ContractKey.RNSAuction)
+      _config.getAddressFromCurrentNetwork(ContractKey.RNSAuction),
+      _config.getAddressFromCurrentNetwork(ContractKey.RNSDomainPrice)
     );
   }
 
