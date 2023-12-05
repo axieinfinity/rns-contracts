@@ -8,7 +8,7 @@ interface INSAuction {
   error NotYetEnded();
   error NoOneBidded();
   error NullAssignment();
-  error AlreadyBidding();
+  error AlreadyBidding(uint256 id);
   error RatioIsTooLarge();
   error NameNotReserved();
   error InvalidEventRange();
@@ -90,6 +90,21 @@ interface INSAuction {
    * @param id The namehash id of domain name. Eg, namehash('foo.ron') for 'foo.ron'
    */
   function reserved(uint256 id) external view returns (bool);
+
+  /**
+   * @dev Claim unbidded names and transfer them to the specified addresses.
+   *
+   * Requirements:
+   * - The method caller must be contract operator.
+   *
+   * @param tos The array of addresses to transfer domain names to.
+   * @param ids The id corresponding for namehash of domain names.
+   * @param allowFailure Flag to indicate whether to allow failure if a domain is already being bid on.
+   * @return claimeds An array indicating whether each domain name was successfully claimed.
+   */
+  function bulkClaimUnbiddedNames(address[] calldata tos, uint256[] calldata ids, bool allowFailure)
+    external
+    returns (bool[] memory claimeds);
 
   /**
    * @dev Creates a new auction to sale with a specific time period.

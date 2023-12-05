@@ -165,7 +165,7 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
       sAuction = _domainAuction[id];
       mAuctionId = sAuction.auctionId;
       if (!(mAuctionId == 0 || mAuctionId == auctionId || sAuction.bid.timestamp == 0)) {
-        revert AlreadyBidding();
+        revert AlreadyBidding(id);
       }
 
       sAuction.auctionId = auctionId;
@@ -203,6 +203,42 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
 
     // refund for previous bidder
     if (prvPrice != 0) RONTransferHelper.safeTransfer(prvBidder, prvPrice);
+  }
+
+  /**
+   * @inheritdoc INSAuction
+   */
+  function bulkClaimUnbiddedNames(address[] calldata tos, uint256[] calldata ids, bool allowFailure)
+    external
+    onlyRole(OPERATOR_ROLE)
+    returns (bool[] memory claimeds)
+  {
+    if (tos.length != ids.length) revert InvalidArrayLength();
+
+    uint64 expiry = uint64(block.timestamp.addWithUpperbound(DOMAIN_EXPIRY_DURATION, MAX_EXPIRY));
+    claimeds = new bool[](ids.length);
+    INSUnified rnsUnified = _rnsUnified;
+    DomainAuction memory auction;
+    uint256 id;
+
+    for (uint256 i; i < ids.length;) {
+      id = ids[i];
+      auction = _domainAuction[id];
+
+      if (auction.bid.bidder == address(0x0)) {
+        // remove id from auction
+        delete _domainAuction[id];
+        rnsUnified.setExpiry(id, expiry);
+        rnsUnified.transferFrom(address(this), tos[i], id);
+        claimeds[i] = true;
+      } else if (!allowFailure) {
+        revert AlreadyBidding(id);
+      }
+
+      unchecked {
+        ++i;
+      }
+    }
   }
 
   /**
