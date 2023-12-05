@@ -2,15 +2,38 @@
 pragma solidity ^0.8.19;
 
 import { console2 as console } from "forge-std/console2.sol";
+import { ITransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { ProxyAdmin } from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import { ContractKey } from "foundry-deployment-kit/configs/ContractConfig.sol";
-import { RNSDeploy } from "script/RNSDeploy.s.sol";
-import { RNSUnified } from "@rns-contracts/RNSUnified.sol";
-import { INSAuction, RNSAuction } from "@rns-contracts/RNSAuction.sol";
+import { Network, Config__Mainnet20231205 } from "script/20231205-deploy-upgrade-auction-and-deploy-rns-operation/20231205_MainnetConfig.s.sol";
+import { INSAuction, RNSAuction, RNSUnified, Migration__20231123_UpgradeAuctionClaimeUnbiddedNames as UpgradeAuctionScript } from "script/20231123-upgrade-auction-claim-unbidded-names/20231123_UpgradeAuctionClaimUnbiddedNames.s.sol";
+import { RNSOperation, Migration__20231124_DeployRNSOperation as DeployRNSOperationScript  } from "script/20231124-deploy-rns-operation/20231124_DeployRNSOperation.s.sol";
 
-contract Migration__20231123_UpgradeAuctionClaimeUnbiddedNames is RNSDeploy {
-  function run() public trySetUp {
-    _upgradeProxy(ContractKey.RNSAuction, EMPTY_ARGS);
+contract Migration__20231205_UpgradeRNSAuctionAndDeployRNSOperation is Config__Mainnet20231205 {
+  function run() public trySetUp onMainnet {
+    Config memory config = getConfig();
+
+    ProxyAdmin proxyAdmin = ProxyAdmin(_config.getAddressFromCurrentNetwork(ContractKey.ProxyAdmin));
+    address rnsAuctionProxy = _config.getAddressFromCurrentNetwork(ContractKey.RNSAuction);
+    address logic = _deployLogic(ContractKey.RNSAuction);
+
+    vm.prank(proxyAdmin.owner());
+    vm.resumeGasMetering();
+    ProxyAdmin(proxyAdmin).upgrade(ITransparentUpgradeableProxy(rnsAuctionProxy), logic);
+    vm.pauseGasMetering();
+
+    console.log("RNSAuction Logic is deployed at:", logic);
     _validataBulkClaimUnbiddedNames({ size: 20 });
+
+    // deploy rns operation contract
+    new DeployRNSOperationScript().run();
+    RNSOperation rnsOperation = RNSOperation(_config.getAddressFromCurrentNetwork(ContractKey.RNSOperation));
+
+    // transfer owner ship for RNSOperation
+    vm.broadcast(rnsOperation.owner());
+    rnsOperation.transferOwnership(config.rnsOperationOwner);
+
+    assertTrue(rnsOperation.owner() == config.rnsOperationOwner);
   }
 
   function _validataBulkClaimUnbiddedNames(uint256 size) internal logFn("_validataBulkClaimUnbiddedNames") {
