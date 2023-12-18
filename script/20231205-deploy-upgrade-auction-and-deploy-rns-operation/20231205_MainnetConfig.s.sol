@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { Network, RNSDeploy } from "script/RNSDeploy.s.sol";
+import { ISharedArgument, DefaultNetwork, Migration } from "script/Migration.s.sol";
 
-abstract contract Config__Mainnet20231205 is RNSDeploy {
-  function _buildMigrationConfig() internal view virtual override returns (Config memory config) {
-    config = super._buildMigrationConfig();
-    if (_network == Network.RoninMainnet) {
-      config.rnsOperationOwner = 0x1FF1edE0242317b8C4229fC59E64DD93952019ef;
+abstract contract Config__Mainnet20231205 is Migration {
+  function _sharedArguments() internal view virtual override returns (bytes memory rawArgs) {
+    rawArgs = super._sharedArguments();
+    ISharedArgument.SharedParameter memory param = abi.decode(rawArgs, (ISharedArgument.SharedParameter));
+
+    if (network() == DefaultNetwork.RoninMainnet.key()) {
+      param.rnsOperationOwner = 0x1FF1edE0242317b8C4229fC59E64DD93952019ef;
     } else {
-      revert("Missing config");
+      revert("Missing param");
     }
+
+    rawArgs = abi.encode(param);
   }
 }
