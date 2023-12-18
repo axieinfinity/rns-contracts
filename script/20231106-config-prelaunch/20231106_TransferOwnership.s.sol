@@ -1,33 +1,33 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { ContractKey } from "foundry-deployment-kit/configs/ContractConfig.sol";
-import { console2 } from "forge-std/console2.sol";
-import { RNSDeploy } from "script/RNSDeploy.s.sol";
+import { Contract } from "script/utils/Contract.sol";
+import { console2 as console } from "forge-std/console2.sol";
+import { Migration } from "script/Migration.s.sol";
 import { RNSUnified } from "@rns-contracts/RNSUnified.sol";
 import { OwnedMulticallerDeploy } from "script/contracts/OwnedMulticallerDeploy.s.sol";
 import { OwnedMulticaller } from "@rns-contracts/utils/OwnedMulticaller.sol";
 import { LibRNSDomain } from "@rns-contracts/libraries/LibRNSDomain.sol";
 
-contract Migration__20231106_TransferOwnership is RNSDeploy {
+contract Migration__20231106_TransferOwnership is Migration {
   function _injectDependencies() internal virtual override {
-    _setDependencyDeployScript(ContractKey.OwnedMulticaller, new OwnedMulticallerDeploy());
+    _setDependencyDeployScript(Contract.OwnedMulticaller.key(), new OwnedMulticallerDeploy());
   }
 
-  function run() public trySetUp {
+  function run() public {
     // fill in original owner
-    address originalOwner = _config.getSender();
+    address originalOwner = config.getSender();
 
-    RNSUnified rns = RNSUnified(_config.getAddressFromCurrentNetwork(ContractKey.RNSUnified));
-    OwnedMulticaller multicall = OwnedMulticaller(loadContractOrDeploy(ContractKey.OwnedMulticaller));
-    address auction = _config.getAddressFromCurrentNetwork(ContractKey.RNSAuction);
-    address ronController = _config.getAddressFromCurrentNetwork(ContractKey.RONRegistrarController);
-    address reverseRegistrar = _config.getAddressFromCurrentNetwork(ContractKey.RNSReverseRegistrar);
+    RNSUnified rns = RNSUnified(config.getAddressFromCurrentNetwork(Contract.RNSUnified.key()));
+    OwnedMulticaller multicall = OwnedMulticaller(loadContractOrDeploy(Contract.OwnedMulticaller.key()));
+    address auction = config.getAddressFromCurrentNetwork(Contract.RNSAuction.key());
+    address ronController = config.getAddressFromCurrentNetwork(Contract.RONRegistrarController.key());
+    address reverseRegistrar = config.getAddressFromCurrentNetwork(Contract.RNSReverseRegistrar.key());
 
     uint256 reverseId = uint256(LibRNSDomain.namehash("reverse"));
-    console2.log("reverseId", reverseId);
+    console.log("reverseId", reverseId);
     uint256 addrReverseId = uint256(LibRNSDomain.namehash("addr.reverse"));
-    console2.log("reverse.addr id", addrReverseId);
+    console.log("reverse.addr id", addrReverseId);
 
     address currentOwner = rns.ownerOf(LibRNSDomain.RON_ID);
     assertEq(currentOwner, rns.ownerOf(reverseId), "currentOwner != rns.ownerOf(reverseId)");
@@ -36,9 +36,7 @@ contract Migration__20231106_TransferOwnership is RNSDeploy {
     if (!rns.isApprovedForAll(currentOwner, address(multicall))) {
       // approve for owned-multicall contract
       vm.broadcast(currentOwner);
-      vm.resumeGasMetering();
       rns.setApprovalForAll(address(multicall), true);
-      vm.pauseGasMetering();
     }
 
     uint256[] memory values = new uint256[](3);
@@ -53,17 +51,15 @@ contract Migration__20231106_TransferOwnership is RNSDeploy {
     callDatas[2] = abi.encodeCall(rns.transferFrom, (currentOwner, originalOwner, LibRNSDomain.RON_ID));
 
     vm.broadcast(multicall.owner());
-    vm.resumeGasMetering();
     multicall.multicall(targets, callDatas, values);
-    vm.pauseGasMetering();
 
     vm.startBroadcast(originalOwner);
-    vm.resumeGasMetering();
+
     rns.setApprovalForAll(address(auction), true);
     rns.setApprovalForAll(address(ronController), true);
     rns.approve(address(reverseRegistrar), addrReverseId);
+
     vm.stopBroadcast();
-    vm.pauseGasMetering();
 
     assertTrue(
       rns.isApprovedForAll(originalOwner, address(auction)), "!rns.isApprovedForAll(originalOwner, address(auction))"

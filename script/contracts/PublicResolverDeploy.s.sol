@@ -1,29 +1,29 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { BaseDeploy, ContractKey } from "foundry-deployment-kit/BaseDeploy.s.sol";
+import { Migration } from "script/Migration.s.sol";
+import { Contract } from "script/utils/Contract.sol";
 import { PublicResolver } from "@rns-contracts/resolvers/PublicResolver.sol";
 import { RNSUnified, RNSUnifiedDeploy } from "./RNSUnifiedDeploy.s.sol";
 import { RNSReverseRegistrar, RNSReverseRegistrarDeploy } from "./RNSReverseRegistrarDeploy.s.sol";
-import { RNSDeploy } from "../RNSDeploy.s.sol";
 
-contract PublicResolverDeploy is RNSDeploy {
+contract PublicResolverDeploy is Migration {
   function _injectDependencies() internal virtual override {
-    _setDependencyDeployScript(ContractKey.RNSUnified, new RNSUnifiedDeploy());
-    _setDependencyDeployScript(ContractKey.RNSReverseRegistrar, new RNSReverseRegistrarDeploy());
+    _setDependencyDeployScript(Contract.RNSUnified.key(), new RNSUnifiedDeploy());
+    _setDependencyDeployScript(Contract.RNSReverseRegistrar.key(), new RNSReverseRegistrarDeploy());
   }
 
   function _defaultArguments() internal virtual override returns (bytes memory args) {
     args = abi.encodeCall(
       PublicResolver.initialize,
       (
-        RNSUnified(loadContractOrDeploy(ContractKey.RNSUnified)),
-        RNSReverseRegistrar(loadContractOrDeploy(ContractKey.RNSReverseRegistrar))
+        RNSUnified(loadContractOrDeploy(Contract.RNSUnified.key())),
+        RNSReverseRegistrar(loadContractOrDeploy(Contract.RNSReverseRegistrar.key()))
       )
     );
   }
 
-  function run() public virtual trySetUp returns (PublicResolver) {
-    return PublicResolver(_deployProxy(ContractKey.PublicResolver));
+  function run() public virtual returns (PublicResolver) {
+    return PublicResolver(_deployProxy(Contract.PublicResolver.key()));
   }
 }

@@ -4,41 +4,53 @@ pragma solidity ^0.8.19;
 import { console2 as console } from "forge-std/console2.sol";
 import { ITransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { ProxyAdmin } from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import { ContractKey } from "foundry-deployment-kit/configs/ContractConfig.sol";
-import { Network, Config__Mainnet20231205 } from "script/20231205-deploy-upgrade-auction-and-deploy-rns-operation/20231205_MainnetConfig.s.sol";
-import { INSAuction, RNSAuction, RNSUnified, Migration__20231123_UpgradeAuctionClaimeUnbiddedNames as UpgradeAuctionScript } from "script/20231123-upgrade-auction-claim-unbidded-names/20231123_UpgradeAuctionClaimUnbiddedNames.s.sol";
-import { RNSOperation, Migration__20231124_DeployRNSOperation as DeployRNSOperationScript  } from "script/20231124-deploy-rns-operation/20231124_DeployRNSOperation.s.sol";
+import { Contract } from "script/utils/Contract.sol";
+import { DefaultContract } from "foundry-deployment-kit/utils/DefaultContract.sol";
+import { ISharedArgument } from "script/interfaces/ISharedArgument.sol";
+import {
+  DefaultNetwork,
+  Config__Mainnet20231205
+} from "script/20231205-deploy-upgrade-auction-and-deploy-rns-operation/20231205_MainnetConfig.s.sol";
+import {
+  INSAuction,
+  RNSAuction,
+  RNSUnified,
+  Migration__20231123_UpgradeAuctionClaimeUnbiddedNames as UpgradeAuctionScript
+} from "script/20231123-upgrade-auction-claim-unbidded-names/20231123_UpgradeAuctionClaimUnbiddedNames.s.sol";
+import {
+  RNSOperation,
+  Migration__20231124_DeployRNSOperation as DeployRNSOperationScript
+} from "script/20231124-deploy-rns-operation/20231124_DeployRNSOperation.s.sol";
 
 contract Migration__20231205_UpgradeRNSAuctionAndDeployRNSOperation is Config__Mainnet20231205 {
-  function run() public trySetUp onMainnet {
-    Config memory config = getConfig();
+  function run() public onlyOn(DefaultNetwork.RoninMainnet.key()) {
+    ISharedArgument.SharedParameter memory param = config.sharedArguments();
 
-    ProxyAdmin proxyAdmin = ProxyAdmin(_config.getAddressFromCurrentNetwork(ContractKey.ProxyAdmin));
-    address rnsAuctionProxy = _config.getAddressFromCurrentNetwork(ContractKey.RNSAuction);
-    address logic = _deployLogic(ContractKey.RNSAuction);
+    ProxyAdmin proxyAdmin = ProxyAdmin(config.getAddressFromCurrentNetwork(DefaultContract.ProxyAdmin.key()));
+    address rnsAuctionProxy = config.getAddressFromCurrentNetwork(Contract.RNSAuction.key());
+    address logic = _deployLogic(Contract.RNSAuction.key());
 
     vm.prank(proxyAdmin.owner());
-    vm.resumeGasMetering();
+
     ProxyAdmin(proxyAdmin).upgrade(ITransparentUpgradeableProxy(rnsAuctionProxy), logic);
-    vm.pauseGasMetering();
 
     console.log("RNSAuction Logic is deployed at:", logic);
     _validataBulkClaimUnbiddedNames({ size: 20 });
 
     // deploy rns operation contract
     new DeployRNSOperationScript().run();
-    RNSOperation rnsOperation = RNSOperation(_config.getAddressFromCurrentNetwork(ContractKey.RNSOperation));
+    RNSOperation rnsOperation = RNSOperation(config.getAddressFromCurrentNetwork(Contract.RNSOperation.key()));
 
     // transfer owner ship for RNSOperation
     vm.broadcast(rnsOperation.owner());
-    rnsOperation.transferOwnership(config.rnsOperationOwner);
+    rnsOperation.transferOwnership(param.rnsOperationOwner);
 
-    assertTrue(rnsOperation.owner() == config.rnsOperationOwner);
+    assertTrue(rnsOperation.owner() == param.rnsOperationOwner);
   }
 
   function _validataBulkClaimUnbiddedNames(uint256 size) internal logFn("_validataBulkClaimUnbiddedNames") {
-    RNSAuction auction = RNSAuction(_config.getAddressFromCurrentNetwork(ContractKey.RNSAuction));
-    RNSUnified rns = RNSUnified(_config.getAddressFromCurrentNetwork(ContractKey.RNSUnified));
+    RNSAuction auction = RNSAuction(config.getAddressFromCurrentNetwork(Contract.RNSAuction.key()));
+    RNSUnified rns = RNSUnified(config.getAddressFromCurrentNetwork(Contract.RNSUnified.key()));
 
     uint256 auctionBalance = size;
     console.log("auctionBalance", auctionBalance);
