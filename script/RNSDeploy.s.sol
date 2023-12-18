@@ -13,6 +13,7 @@ abstract contract RNSDeploy is BaseDeploy {
     address controller;
     uint8 minWord;
     uint8 maxWord;
+    address rnsOperationOwner;
     address operator;
     address[] controllerOperators;
     address[] auctionOperators;
