@@ -1,13 +1,15 @@
 name: Merge release to network
 
 on:
-  push:
+  pull_request:
     branches:
-      - 'release/*'
+      - release/*
+    types:
+      - closed
 
 env:
   HEAD_BRANCH: ${{ github.head_ref || github.ref_name }}
-
+  RELEASE_BRANCH: ${{ github.event.pull_request.base.ref}}
 permissions:
   contents: write
   pull-requests: write
@@ -15,13 +17,13 @@ permissions:
 jobs:
   merge-release-to-network:
     runs-on: ubuntu-latest
-    if: ${{ contains(github.head_ref, 'release') }} || ${{ contains(github.ref_name, 'release') }}
+    if: (github.event.pull_request.merged == true) && (${{ contains(github.head_ref, 'deploy') }})
     steps:
     - name: Set Env
       run: |
         echo "PR_BRANCH=merge/${HEAD_BRANCH}" >> $GITHUB_ENV
-        echo "VERSION=$(echo -n ${{ env.HEAD_BRANCH }} | sed 's/release\///' | cut -d'-' -f1)" >> $GITHUB_ENV
-        echo "NETWORK=$(echo -n ${{ env.HEAD_BRANCH }} | sed 's/release\/v[0-9\.]*-\(.*\)/\1/')" >> $GITHUB_ENV
+        echo "VERSION=$(echo -n ${{ env.HEAD_BRANCH }} | sed 's/deploy\///' | cut -d'-' -f1)" >> $GITHUB_ENV
+        echo "NETWORK=$(echo -n ${{ env.HEAD_BRANCH }} | sed 's/deploy\/v[0-9\.]*-\(.*\)/\1/')" >> $GITHUB_ENV
 
     - name: Set Mainnet Tag
       if: ${{ env.NETWORK == 'mainnet' }}
@@ -51,7 +53,7 @@ jobs:
         delete-branch: true
         title: 'chore(`${{ env.NETWORK }}`): merge from `${{ env.HEAD_BRANCH}}`'
         body: ${{ steps.template.outputs.result }}
-        branch: ${{env.PR_BRANCH}}
+        branch: ${{ env.PR_BRANCH }}
 
     - name: Auto Merge
       id: automerge
