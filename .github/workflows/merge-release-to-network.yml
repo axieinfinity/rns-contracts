@@ -17,7 +17,7 @@ permissions:
 jobs:
   merge-release-to-network:
     runs-on: ubuntu-latest
-    if: (github.event.pull_request.merged == true) && (${{ contains(github.head_ref, 'deploy') }})
+    if: ${{ github.event.pull_request.merged == true && (contains(github.head_ref, 'deploy') || contains(github.ref_name, 'deploy')) }}
     steps:
     - name: Set Env
       run: |
