@@ -73,3 +73,5 @@ jobs:
             --repo="$GITHUB_REPOSITORY" \
             --title="${{ env.NETWORK }} - ${{ env.VERSION }}" \
             --generate-notes
+
+
