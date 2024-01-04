@@ -1,0 +1,73 @@
+name: Merge release to network
+
+on:
+  push:
+    branches:
+      - 'release/*'
+
+env:
+  HEAD_BRANCH: ${{ github.head_ref || github.ref_name }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  merge-release-to-network:
+    runs-on: ubuntu-latest
+    if: ${{ contains(github.head_ref, 'release') }} || ${{ contains(github.ref_name, 'release') }}
+    steps:
+    - name: Set Env
+      run: |
+        echo "PR_BRANCH=merge/${HEAD_BRANCH}" >> $GITHUB_ENV
+        echo "VERSION=$(echo -n ${{ env.HEAD_BRANCH }} | sed 's/release\///' | cut -d'-' -f1)" >> $GITHUB_ENV
+        echo "NETWORK=$(echo -n ${{ env.HEAD_BRANCH }} | sed 's/release\/v[0-9\.]*-\(.*\)/\1/')" >> $GITHUB_ENV
+
+    - name: Set Mainnet Tag
+      if: ${{ env.NETWORK == 'mainnet' }}
+      run: |
+        echo "TAG=${{ env.VERSION }}" >> $GITHUB_ENV
+    
+    - name: Set Testnet Tag
+      if: ${{ env.NETWORK == 'testnet' }}
+      run: |
+        echo "TAG=${{ env.VERSION }}-testnet" >> $GITHUB_ENV
+
+    - name: Checkout code
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      with:
+        ref: ${{ env.NETWORK }}
+
+    - name: Reset promotion branch
+      run: |
+        git fetch origin ${HEAD_BRANCH}:${HEAD_BRANCH}
+        git reset --hard ${HEAD_BRANCH}
+
+    - name: Create Pull Request
+      id: cpr
+      uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38 #v5.0.2
+      with:
+        labels: automated PR, automerge
+        delete-branch: true
+        title: 'chore(`${{ env.NETWORK }}`): merge from `${{ env.HEAD_BRANCH}}`'
+        body: ${{ steps.template.outputs.result }}
+        branch: ${{env.PR_BRANCH}}
+
+    - name: Auto Merge
+      id: automerge
+      uses: pascalgn/automerge-action@22948e0bc22f0aa673800da838595a3e7347e584
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        MERGE_METHOD: merge
+        MERGE_DELETE_BRANCH: true
+        PULL_REQUEST: ${{ steps.cpr.outputs.pull-request-number }}
+
+    - name: Create release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ env.TAG }}
+      run: |
+        gh release create "$tag" \
+            --repo="$GITHUB_REPOSITORY" \
+            --title="${{ env.NETWORK }} - ${{ env.VERSION }}" \
+            --generate-notes
