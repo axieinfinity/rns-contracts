@@ -74,4 +74,3 @@ jobs:
             --title="${{ env.NETWORK }} - ${{ env.VERSION }}" \
             --generate-notes
 
-
