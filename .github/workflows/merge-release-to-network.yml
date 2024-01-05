@@ -22,8 +22,8 @@ jobs:
     - name: Set Env
       run: |
         echo "PR_BRANCH=merge/${HEAD_BRANCH}" >> $GITHUB_ENV
-        echo "VERSION=$(echo -n ${{ env.HEAD_BRANCH }} | sed 's/deploy\///' | cut -d'-' -f1)" >> $GITHUB_ENV
-        echo "NETWORK=$(echo -n ${{ env.HEAD_BRANCH }} | sed 's/deploy\/v[0-9\.]*-\(.*\)/\1/')" >> $GITHUB_ENV
+        echo "VERSION=$(echo -n ${{ env.HEAD_BRANCH }} | sed 's/.*deploy\///' | cut -d'-' -f1)" >> $GITHUB_ENV
+        echo "NETWORK=$(echo -n ${{ env.HEAD_BRANCH }} | sed 's/.*deploy\/v[0-9\.]*-\(.*\)/\1/')" >> $GITHUB_ENV
 
     - name: Set Mainnet Tag
       if: ${{ env.NETWORK == 'mainnet' }}
@@ -72,4 +72,5 @@ jobs:
         gh release create "$tag" \
             --repo="$GITHUB_REPOSITORY" \
             --title="${{ env.NETWORK }} - ${{ env.VERSION }}" \
+            --notes-start-tag="v0.3.2-testnet" \
             --generate-notes
