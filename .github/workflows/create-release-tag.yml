@@ -10,6 +10,10 @@ on:
 env:
   HEAD_BRANCH: ${{ github.head_ref || github.ref_name }}
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   create-release-tag:
     runs-on: ubuntu-latest
@@ -24,6 +28,8 @@ jobs:
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
         ref: ${{ env.NETWORK }}
+        fetch-depth: 0
+        fetch-tags: 'true'
 
     - name: Set Mainnet Tag
       if: ${{ env.NETWORK == 'mainnet' }}
@@ -38,12 +44,12 @@ jobs:
     - name: Get Testnet Latest Tag
       if: ${{ env.NETWORK == 'testnet' }}
       run: |
-        echo "LATEST_TAG=$(git describe --tags --match "*testnet*" --abbrev=0)" >> $GITHUB_ENV
+        echo "LATESTTAG=$(git describe --tags --match "*testnet*" --abbrev=0)" >> $GITHUB_ENV
 
     - name: Get Mainnet Latest Tag
       if: ${{ env.NETWORK == 'mainnet' }}
       run: |
-        echo "LATEST_TAG=$(git describe --tags --match "*mainnet*" --abbrev=0)" >> $GITHUB_ENV
+        echo "LATESTTAG=$(git describe --tags --match "*mainnet*" --abbrev=0)" >> $GITHUB_ENV
 
     - name: Create release
       env:
@@ -54,5 +60,5 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --title "${{ env.NETWORK }} release ${{ env.VERSION }}" \
             --target "${{ env.NETWORK }}" \
-            --notes-start-tag "${{ env.LATEST_TAG }}" \
+            --notes-start-tag "${{ env.LATESTTAG }}" \
             --generate-notes
