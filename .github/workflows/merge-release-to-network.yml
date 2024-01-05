@@ -74,3 +74,4 @@ jobs:
             --title="${{ env.NETWORK }} - ${{ env.VERSION }}" \
             --notes-start-tag="v0.3.2-testnet" \
             --generate-notes
+
