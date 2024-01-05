@@ -1,0 +1,43 @@
+name: Create PR from release to network
+
+on:
+  pull_request:
+    branches:
+      - release/*
+    types:
+      - closed
+
+env:
+  HEAD_BRANCH: ${{ github.head_ref || github.ref_name }}
+  RELEASE_BRANCH: ${{ github.event.pull_request.base.ref}}
+
+jobs:
+  merge-release-to-network:
+    runs-on: ubuntu-latest
+    if: ${{ (github.event.pull_request.merged == true) && (contains(github.head_ref, 'deploy') || contains(github.ref_name, 'deploy')) }}
+    steps:
+    - name: Set Env
+      run: |
+        echo "PR_BRANCH=merge/${HEAD_BRANCH}" >> $GITHUB_ENV
+        echo "VERSION=$(echo -n ${{ env.HEAD_BRANCH }} | sed 's/.*deploy\///' | cut -d'-' -f1)" >> $GITHUB_ENV
+        echo "NETWORK=$(echo -n ${{ env.HEAD_BRANCH }} | sed 's/.*deploy\/v[0-9\.]*-\(.*\)/\1/')" >> $GITHUB_ENV
+
+    - name: Checkout code
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      with:
+        ref: ${{ env.NETWORK }}
+
+    - name: Reset promotion branch
+      run: |
+        git fetch origin ${RELEASE_BRANCH}:${RELEASE_BRANCH}
+        git reset --hard ${RELEASE_BRANCH}
+
+    - name: Create Pull Request
+      id: cpr
+      uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38 #v5.0.2
+      with:
+        labels: automated PR
+        delete-branch: true
+        title: 'chore(`${{ env.NETWORK }}`): merge from `${{ env.HEAD_BRANCH}}`'
+        body: ${{ steps.template.outputs.result }}
+        branch: ${{env.PR_BRANCH}}
