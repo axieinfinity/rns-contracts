@@ -7,6 +7,10 @@ on:
     types:
       - closed
 
+permissions:
+  contents: write
+  pull-requests: write
+
 env:
   HEAD_BRANCH: ${{ github.head_ref || github.ref_name }}
   RELEASE_BRANCH: ${{ github.event.pull_request.base.ref}}

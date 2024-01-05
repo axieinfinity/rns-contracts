@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - deploy/*
+  pull_request:
+    branches:
+      - deploy/*
 
 env:
   HEAD_BRANCH: ${{ github.head_ref || github.ref_name }}
@@ -25,11 +28,28 @@ jobs:
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
         ref: 'release/${{ env.VERSION }}'
+        fetch-depth: 0
+        fetch-tags: 'true'
+
+    - name: Get Testnet Latest Tag
+      if: ${{ env.NETWORK == 'testnet' }}
+      run: |
+        echo "LATESTTAG=$(git describe --tags --match "*testnet*" --abbrev=0)" >> $GITHUB_ENV
+
+    - name: Get Mainnet Latest Tag
+      if: ${{ env.NETWORK == 'mainnet' }}
+      run: |
+        echo "LATESTTAG=$(git describe --tags --match "*mainnet*" --abbrev=0)" >> $GITHUB_ENV
 
     - name: Reset promotion branch
       run: |
         git fetch origin ${HEAD_BRANCH}:${HEAD_BRANCH}
         git reset --hard ${HEAD_BRANCH}
+
+    - name: Generate Release note
+      id: template
+      run: |
+        echo "VERSION=${{ env.VERSION }} - SHA: ${{ github.sha }}" > CHANGELOG.md
 
     - name: Create Pull Request
       id: cpr
