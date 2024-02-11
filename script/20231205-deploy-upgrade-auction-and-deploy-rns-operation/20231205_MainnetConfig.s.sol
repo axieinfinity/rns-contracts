@@ -9,7 +9,7 @@ abstract contract Config__Mainnet20231205 is Migration {
     ISharedArgument.SharedParameter memory param = abi.decode(rawArgs, (ISharedArgument.SharedParameter));
 
     if (network() == DefaultNetwork.RoninMainnet.key()) {
-      param.rnsOperationOwner = 0x1FF1edE0242317b8C4229fC59E64DD93952019ef;
+      param.rnsOperation.admin = 0x1FF1edE0242317b8C4229fC59E64DD93952019ef;
     } else {
       revert("Missing param");
     }

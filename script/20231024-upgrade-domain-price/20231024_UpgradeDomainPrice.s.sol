@@ -8,10 +8,10 @@ import { ISharedArgument, Config__20231024 } from "./20231024_Config.s.sol";
 
 contract Migration__20231024_UpgradeDomainPrice is Config__20231024 {
   function run() public {
-    ISharedArgument.SharedParameter memory param = config.sharedArguments();
+    ISharedArgument.RNSDomainPriceParam memory param = config.sharedArguments().rnsDomainPrice;
     _upgradeProxy(Contract.RNSDomainPrice.key());
 
-    console.log("operator", param.operator);
+    console.log("operator", param.domainPriceOperators[0]);
     console.log("overrider", param.overrider);
 
     RNSDomainPrice domainPrice = RNSDomainPrice(config.getAddressFromCurrentNetwork(Contract.RNSDomainPrice.key()));

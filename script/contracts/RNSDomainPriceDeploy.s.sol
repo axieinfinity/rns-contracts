@@ -12,7 +12,7 @@ contract RNSDomainPriceDeploy is Migration {
   }
 
   function _defaultArguments() internal virtual override returns (bytes memory args) {
-    ISharedArgument.SharedParameter memory param = config.sharedArguments();
+    ISharedArgument.RNSDomainPriceParam memory param = config.sharedArguments().rnsDomainPrice;
     args = abi.encodeCall(
       RNSDomainPrice.initialize,
       (
@@ -22,7 +22,9 @@ contract RNSDomainPriceDeploy is Migration {
         param.taxRatio,
         param.domainPriceScaleRule,
         param.pyth,
-        RNSAuction(loadContractOrDeploy(Contract.RNSAuction.key())),
+        address(param.rnsAuction) == address(0x0)
+          ? RNSAuction(loadContractOrDeploy(Contract.RNSAuction.key()))
+          : param.rnsAuction,
         param.maxAcceptableAge,
         param.pythIdForRONUSD
       )

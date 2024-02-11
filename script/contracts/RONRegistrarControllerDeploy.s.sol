@@ -18,9 +18,7 @@ contract RONRegistrarControllerDeploy is Migration {
   }
 
   function _defaultArguments() internal virtual override returns (bytes memory args) {
-    ISharedArgument.SharedParameter memory param = config.sharedArguments();
-    address[] memory operators = new address[](1);
-    operators[0] = param.operator;
+    ISharedArgument.RONRegistrarControllerParam memory param = config.sharedArguments().ronRegistrarController;
     args = abi.encodeCall(
       RONRegistrarController.initialize,
       (
@@ -30,10 +28,18 @@ contract RONRegistrarControllerDeploy is Migration {
         param.maxAcceptableAge,
         param.minCommitmentAge,
         param.minRegistrationDuration,
-        RNSUnified(loadContractOrDeploy(Contract.RNSUnified.key())),
-        NameChecker(loadContractOrDeploy(Contract.NameChecker.key())),
-        RNSDomainPrice(loadContractOrDeploy(Contract.RNSDomainPrice.key())),
-        RNSReverseRegistrar(loadContractOrDeploy(Contract.RNSReverseRegistrar.key()))
+        address(param.rnsUnified) == address(0x0)
+          ? RNSUnified(loadContractOrDeploy(Contract.RNSUnified.key()))
+          : param.rnsUnified,
+        address(param.nameChecker) == address(0x0)
+          ? NameChecker(loadContractOrDeploy(Contract.NameChecker.key()))
+          : param.nameChecker,
+        address(param.rnsDomainPrice) == address(0x0)
+          ? RNSDomainPrice(loadContractOrDeploy(Contract.RNSDomainPrice.key()))
+          : param.rnsDomainPrice,
+        address(param.rnsReverseRegistrar) == address(0x0)
+          ? RNSReverseRegistrar(loadContractOrDeploy(Contract.RNSReverseRegistrar.key()))
+          : param.rnsReverseRegistrar
       )
     );
   }

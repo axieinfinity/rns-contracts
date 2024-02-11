@@ -10,7 +10,7 @@ abstract contract Config__20231024 is Migration {
     ISharedArgument.SharedParameter memory param = abi.decode(rawArgs, (ISharedArgument.SharedParameter));
 
     if (network() == DefaultNetwork.RoninTestnet.key()) {
-      param.overrider = param.operator;
+      param.rnsDomainPrice.overrider = param.rnsDomainPrice.domainPriceOperators[0];
     } else if (network() == DefaultNetwork.RoninMainnet.key()) {
       revert("Missing param");
     } else {

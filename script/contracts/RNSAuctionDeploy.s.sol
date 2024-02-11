@@ -12,13 +12,15 @@ contract RNSAuctionDeploy is Migration {
   }
 
   function _defaultArguments() internal virtual override returns (bytes memory args) {
-    ISharedArgument.SharedParameter memory param = config.sharedArguments();
+    ISharedArgument.RNSAuctionParam memory param = config.sharedArguments().rnsAuction;
     args = abi.encodeCall(
       RNSAuction.initialize,
       (
         param.admin,
         param.auctionOperators,
-        RNSUnified(loadContractOrDeploy(Contract.RNSUnified.key())),
+        address(param.rnsUnified) == address(0x0)
+          ? RNSUnified(loadContractOrDeploy(Contract.RNSUnified.key()))
+          : param.rnsUnified,
         param.treasury,
         param.bidGapRatio
       )
