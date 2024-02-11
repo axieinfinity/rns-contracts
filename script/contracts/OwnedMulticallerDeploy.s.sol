@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { BaseDeploy, ContractKey } from "foundry-deployment-kit/BaseDeploy.s.sol";
+import { ISharedArgument, Migration } from "script/Migration.s.sol";
+import { Contract } from "script/utils/Contract.sol";
 import { OwnedMulticaller } from "@rns-contracts/utils/OwnedMulticaller.sol";
-import { RNSDeploy } from "../RNSDeploy.s.sol";
 
-contract OwnedMulticallerDeploy is RNSDeploy {
+contract OwnedMulticallerDeploy is Migration {
   function _defaultArguments() internal virtual override returns (bytes memory args) {
-    args = abi.encode(_config.getSender());
+    args = abi.encode(config.getSender());
   }
 
-  function run() public virtual trySetUp returns (OwnedMulticaller) {
-    return OwnedMulticaller(_deployImmutable(ContractKey.OwnedMulticaller));
+  function run() public virtual returns (OwnedMulticaller) {
+    return OwnedMulticaller(_deployImmutable(Contract.OwnedMulticaller.key()));
   }
 }
