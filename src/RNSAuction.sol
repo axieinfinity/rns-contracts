@@ -309,7 +309,6 @@ contract RNSAuction is Initializable, AccessControlEnumerable, INSAuction {
   /**
    * @inheritdoc INSAuction
    */
-
   function setBidGapRatio(uint256 ratio) external onlyRole(DEFAULT_ADMIN_ROLE) {
     _setBidGapRatio(ratio);
   }

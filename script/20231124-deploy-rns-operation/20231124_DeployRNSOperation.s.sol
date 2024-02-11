@@ -14,12 +14,17 @@ import { RNSOperation, RNSOperationDeploy } from "script/contracts/RNSOperationD
 contract Migration__20231124_DeployRNSOperation is Migration {
   using LibRNSDomain for string;
 
-  function run() public {
-    RNSOperation rnsOperation = new RNSOperationDeploy().run();
+  RNSUnified private rns;
+  RNSAuction private auction;
+  RNSOperation private rnsOperation;
+  RNSDomainPrice private domainPrice;
 
-    RNSDomainPrice domainPrice = RNSDomainPrice(config.getAddressFromCurrentNetwork(Contract.RNSDomainPrice.key()));
-    RNSUnified rns = RNSUnified(config.getAddressFromCurrentNetwork(Contract.RNSUnified.key()));
-    RNSAuction auction = RNSAuction(config.getAddressFromCurrentNetwork(Contract.RNSAuction.key()));
+  function run() public {
+    rnsOperation = new RNSOperationDeploy().run();
+
+    domainPrice = RNSDomainPrice(config.getAddressFromCurrentNetwork(Contract.RNSDomainPrice.key()));
+    rns = RNSUnified(config.getAddressFromCurrentNetwork(Contract.RNSUnified.key()));
+    auction = RNSAuction(config.getAddressFromCurrentNetwork(Contract.RNSAuction.key()));
 
     address admin = rns.ownerOf(LibRNSDomain.RON_ID);
 
@@ -34,17 +39,16 @@ contract Migration__20231124_DeployRNSOperation is Migration {
     domainPrice.grantRole(domainPrice.OVERRIDER_ROLE(), address(rnsOperation));
 
     vm.stopBroadcast();
-
-    _validateBulkMint(rns, rnsOperation);
-    _validateBulkSetProtected(rns, rnsOperation);
-    _validateBulkOverrideRenewalFees(domainPrice, rnsOperation);
-    _validateReclaimAuctionNames({ rns: rns, auction: auction, rnsOperation: rnsOperation, searchSize: 20 });
   }
 
-  function _validateBulkOverrideRenewalFees(RNSDomainPrice domainPrice, RNSOperation rnsOperation)
-    internal
-    logFn("_validateBulkOverrideRenewalFees")
-  {
+  function _postCheck() internal override {
+    _validateBulkMint();
+    _validateBulkSetProtected();
+    _validateBulkOverrideRenewalFees();
+    _validateReclaimAuctionNames({ searchSize: 20 });
+  }
+
+  function _validateBulkOverrideRenewalFees() internal logFn("_validateBulkOverrideRenewalFees") {
     string memory label = "tudo-provip-maximum-ultra";
     string[] memory labels = new string[](1);
     labels[0] = label;
@@ -58,12 +62,7 @@ contract Migration__20231124_DeployRNSOperation is Migration {
     assertEq(domainPrice.getOverriddenRenewalFee(label), Math.mulDiv(yearlyUSDPrices[0], 1 ether, 365 days));
   }
 
-  function _validateReclaimAuctionNames(
-    RNSUnified rns,
-    RNSAuction auction,
-    RNSOperation rnsOperation,
-    uint256 searchSize
-  ) internal logFn("_validateReclaimAuctionNames") {
+  function _validateReclaimAuctionNames(uint256 searchSize) internal logFn("_validateReclaimAuctionNames") {
     INSAuction.DomainAuction[] memory domainAuctions = new INSAuction.DomainAuction[](searchSize);
     uint256[] memory reservedIds = new uint256[](searchSize);
     for (uint256 i; i < searchSize; ++i) {
@@ -91,7 +90,7 @@ contract Migration__20231124_DeployRNSOperation is Migration {
     rnsOperation.reclaimUnbiddedNames({ tos: tos, labels: labels, allowFailure: false });
   }
 
-  function _validateBulkMint(RNSUnified rns, RNSOperation rnsOperation) internal logFn("_validateBulkMint") {
+  function _validateBulkMint() internal logFn("_validateBulkMint") {
     address to = makeAddr("to");
     address[] memory tos = new address[](1);
     tos[0] = to;
@@ -106,10 +105,7 @@ contract Migration__20231124_DeployRNSOperation is Migration {
     assertEq(rns.ownerOf(id), to);
   }
 
-  function _validateBulkSetProtected(RNSUnified rns, RNSOperation rnsOperation)
-    internal
-    logFn("_validateBulkSetProtected")
-  {
+  function _validateBulkSetProtected() internal logFn("_validateBulkSetProtected") {
     string[] memory labels = new string[](1);
     labels[0] = "tudo-provip-maximum-utra";
 
