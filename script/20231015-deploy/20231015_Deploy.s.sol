@@ -23,6 +23,9 @@ contract Migration__20231015_Deploy is Migration {
   using Strings for *;
   using LibRNSDomain for string;
 
+  uint256 internal _ronId;
+  uint256 internal _addrReverseId;
+
   RNSUnified internal _rns;
   RNSAuction internal _auction;
   NameChecker internal _nameChecker;
@@ -55,27 +58,28 @@ contract Migration__20231015_Deploy is Migration {
     _rns.grantRole(_rns.RESERVATION_ROLE(), address(_auction));
     _rns.grantRole(_rns.CONTROLLER_ROLE(), address(_ronController));
 
-    (, uint256 ronId) = _rns.mint(0x0, "ron", address(0), admin, _rns.MAX_EXPIRY());
+    (, _ronId) = _rns.mint(0x0, "ron", address(0), admin, _rns.MAX_EXPIRY());
     (, uint256 reverseId) = _rns.mint(0x0, "reverse", address(0), admin, _rns.MAX_EXPIRY());
-    (, uint256 addrReverseId) = _rns.mint(reverseId, "addr", address(0), admin, _rns.MAX_EXPIRY());
+    (, _addrReverseId) = _rns.mint(reverseId, "addr", address(0), admin, _rns.MAX_EXPIRY());
 
     _rns.setApprovalForAll(address(_auction), true);
     _rns.setApprovalForAll(address(_ronController), true);
-    _rns.approve(address(_reverseRegistrar), addrReverseId);
+    _rns.approve(address(_reverseRegistrar), _addrReverseId);
 
     _reverseRegistrar.setDefaultResolver(_publicResolver);
     _nameChecker.setForbiddenWords({ packedWords: packedWords, shouldForbid: true });
 
     vm.stopBroadcast();
+  }
 
+  function _postCheck() internal override {
     _validateAuction();
     _validateController();
     _validateDomainPrice();
     _validateReverseRegistrar();
     _validateNameChecker();
-    _validateRNSUnified(ronId, addrReverseId);
-
-    console.log(StdStyle.green(unicode"✅ All checks are passed"));
+    _validateRNSUnified(_ronId, _addrReverseId);
+    console.log(unicode"✅ All checks are passed");
   }
 
   function _validateController() internal logFn("_validateController") {
