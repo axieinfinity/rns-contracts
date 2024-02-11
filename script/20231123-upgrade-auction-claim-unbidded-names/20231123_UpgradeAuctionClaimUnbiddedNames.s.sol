@@ -14,8 +14,8 @@ contract Migration__20231123_UpgradeAuctionClaimeUnbiddedNames is Migration {
   }
 
   function _validataBulkClaimUnbiddedNames(uint256 size) internal logFn("_validataBulkClaimUnbiddedNames") {
-    RNSAuction auction = RNSAuction(config.getAddressFromCurrentNetwork(Contract.RNSAuction.key()));
-    RNSUnified rns = RNSUnified(config.getAddressFromCurrentNetwork(Contract.RNSUnified.key()));
+    RNSAuction auction = RNSAuction(loadContract(Contract.RNSAuction.key()));
+    RNSUnified rns = RNSUnified(loadContract(Contract.RNSUnified.key()));
 
     uint256 auctionBalance = size;
     console.log("auctionBalance", auctionBalance);

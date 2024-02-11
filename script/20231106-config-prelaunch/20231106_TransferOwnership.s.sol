@@ -18,11 +18,11 @@ contract Migration__20231106_TransferOwnership is Migration {
     // fill in original owner
     address originalOwner = config.getSender();
 
-    RNSUnified rns = RNSUnified(config.getAddressFromCurrentNetwork(Contract.RNSUnified.key()));
+    RNSUnified rns = RNSUnified(loadContract(Contract.RNSUnified.key()));
     OwnedMulticaller multicall = OwnedMulticaller(loadContractOrDeploy(Contract.OwnedMulticaller.key()));
-    address auction = config.getAddressFromCurrentNetwork(Contract.RNSAuction.key());
-    address ronController = config.getAddressFromCurrentNetwork(Contract.RONRegistrarController.key());
-    address reverseRegistrar = config.getAddressFromCurrentNetwork(Contract.RNSReverseRegistrar.key());
+    address auction = loadContract(Contract.RNSAuction.key());
+    address ronController = loadContract(Contract.RONRegistrarController.key());
+    address reverseRegistrar = loadContract(Contract.RNSReverseRegistrar.key());
 
     uint256 reverseId = uint256(LibRNSDomain.namehash("reverse"));
     console.log("reverseId", reverseId);

@@ -22,9 +22,9 @@ contract Migration__20231124_DeployRNSOperation is Migration {
   function run() public {
     rnsOperation = new RNSOperationDeploy().run();
 
-    domainPrice = RNSDomainPrice(config.getAddressFromCurrentNetwork(Contract.RNSDomainPrice.key()));
-    rns = RNSUnified(config.getAddressFromCurrentNetwork(Contract.RNSUnified.key()));
-    auction = RNSAuction(config.getAddressFromCurrentNetwork(Contract.RNSAuction.key()));
+    domainPrice = RNSDomainPrice(loadContract(Contract.RNSDomainPrice.key()));
+    rns = RNSUnified(loadContract(Contract.RNSUnified.key()));
+    auction = RNSAuction(loadContract(Contract.RNSAuction.key()));
 
     address admin = rns.ownerOf(LibRNSDomain.RON_ID);
 

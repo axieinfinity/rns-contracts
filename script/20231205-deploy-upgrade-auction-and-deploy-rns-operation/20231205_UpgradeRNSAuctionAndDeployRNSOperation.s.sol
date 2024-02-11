@@ -26,8 +26,8 @@ contract Migration__20231205_UpgradeRNSAuctionAndDeployRNSOperation is Config__M
   function run() public onlyOn(DefaultNetwork.RoninMainnet.key()) {
     ISharedArgument.RNSOperationParam memory param = config.sharedArguments().rnsOperation;
 
-    ProxyAdmin proxyAdmin = ProxyAdmin(config.getAddressFromCurrentNetwork(DefaultContract.ProxyAdmin.key()));
-    address rnsAuctionProxy = config.getAddressFromCurrentNetwork(Contract.RNSAuction.key());
+    ProxyAdmin proxyAdmin = ProxyAdmin(loadContract(DefaultContract.ProxyAdmin.key()));
+    address rnsAuctionProxy = loadContract(Contract.RNSAuction.key());
     address logic = _deployLogic(Contract.RNSAuction.key());
 
     vm.prank(proxyAdmin.owner());
@@ -39,7 +39,7 @@ contract Migration__20231205_UpgradeRNSAuctionAndDeployRNSOperation is Config__M
 
     // deploy rns operation contract
     new DeployRNSOperationScript().run();
-    RNSOperation rnsOperation = RNSOperation(config.getAddressFromCurrentNetwork(Contract.RNSOperation.key()));
+    RNSOperation rnsOperation = RNSOperation(loadContract(Contract.RNSOperation.key()));
 
     // transfer owner ship for RNSOperation
     vm.broadcast(rnsOperation.owner());
@@ -49,8 +49,8 @@ contract Migration__20231205_UpgradeRNSAuctionAndDeployRNSOperation is Config__M
   }
 
   function _validataBulkClaimUnbiddedNames(uint256 size) internal logFn("_validataBulkClaimUnbiddedNames") {
-    RNSAuction auction = RNSAuction(config.getAddressFromCurrentNetwork(Contract.RNSAuction.key()));
-    RNSUnified rns = RNSUnified(config.getAddressFromCurrentNetwork(Contract.RNSUnified.key()));
+    RNSAuction auction = RNSAuction(loadContract(Contract.RNSAuction.key()));
+    RNSUnified rns = RNSUnified(loadContract(Contract.RNSUnified.key()));
 
     uint256 auctionBalance = size;
     console.log("auctionBalance", auctionBalance);

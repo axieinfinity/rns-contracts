@@ -8,7 +8,7 @@ import { Migration } from "script/Migration.s.sol";
 
 contract Migration__20231115_MigrateInvalidAuctionNames is Migration {
   function run() public {
-    RNSAuction auction = RNSAuction(config.getAddressFromCurrentNetwork(Contract.RNSAuction.key()));
+    RNSAuction auction = RNSAuction(loadContract(Contract.RNSAuction.key()));
 
     uint256[] memory ids = new uint256[](2);
     // namehash`pc.ron`

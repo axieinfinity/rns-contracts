@@ -14,7 +14,7 @@ contract Migration__20231024_UpgradeDomainPrice is Config__20231024 {
     console.log("operator", param.domainPriceOperators[0]);
     console.log("overrider", param.overrider);
 
-    RNSDomainPrice domainPrice = RNSDomainPrice(config.getAddressFromCurrentNetwork(Contract.RNSDomainPrice.key()));
+    RNSDomainPrice domainPrice = RNSDomainPrice(loadContract(Contract.RNSDomainPrice.key()));
     address admin = domainPrice.getRoleMember(0x00, 0);
     bytes32 overriderRole = domainPrice.OVERRIDER_ROLE();
     vm.broadcast(admin);

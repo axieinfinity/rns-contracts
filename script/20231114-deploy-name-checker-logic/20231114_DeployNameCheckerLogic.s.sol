@@ -17,7 +17,7 @@ contract Migration__20231114_DeployNameCheckerLogic is Migration {
   function run() public {
     address newLogic = _deployLogic(Contract.NameChecker.key());
 
-    NameChecker currentNameChecker = NameChecker(config.getAddressFromCurrentNetwork(Contract.NameChecker.key()));
+    NameChecker currentNameChecker = NameChecker(loadContract(Contract.NameChecker.key()));
     assertTrue(currentNameChecker.forbidden("hell"), "hell");
     assertTrue(currentNameChecker.forbidden("hellscream"), "hellscream");
     assertTrue(currentNameChecker.forbidden("hell123"), "hell123");
