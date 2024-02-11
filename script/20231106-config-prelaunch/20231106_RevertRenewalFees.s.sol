@@ -7,7 +7,7 @@ import { RNSDomainPrice } from "@rns-contracts/RNSDomainPrice.sol";
 
 contract Migration__20231106_RevertRenewalFees is Migration {
   function run() public {
-    RNSDomainPrice domainPrice = RNSDomainPrice(config.getAddressFromCurrentNetwork(Contract.RNSDomainPrice.key()));
+    RNSDomainPrice domainPrice = RNSDomainPrice(loadContract(Contract.RNSDomainPrice.key()));
 
     ISharedArgument.RNSDomainPriceParam memory param = config.sharedArguments().rnsDomainPrice;
     vm.broadcast(domainPrice.getRoleMember(domainPrice.DEFAULT_ADMIN_ROLE(), 0));

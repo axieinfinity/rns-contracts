@@ -15,11 +15,11 @@ contract Migration__20231106_SubmitReservedNames is Migration {
     // default duration is 1 year
     uint64 duration = uint64(365 days);
 
-    RNSUnified rns = RNSUnified(config.getAddressFromCurrentNetwork(Contract.RNSUnified.key()));
-    address resolver = config.getAddressFromCurrentNetwork(Contract.PublicResolver.key());
-    OwnedMulticaller multicall = OwnedMulticaller(config.getAddressFromCurrentNetwork(Contract.OwnedMulticaller.key()));
+    RNSUnified rns = RNSUnified(loadContract(Contract.RNSUnified.key()));
+    address resolver = loadContract(Contract.PublicResolver.key());
+    OwnedMulticaller multicall = OwnedMulticaller(loadContract(Contract.OwnedMulticaller.key()));
 
-    console.log(config.getAddressFromCurrentNetwork(Contract.OwnedMulticaller.key()));
+    console.log(loadContract(Contract.OwnedMulticaller.key()));
 
     // vm.broadcast(rns.ownerOf(LibRNSDomain.RON_ID));
     //
