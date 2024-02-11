@@ -24,7 +24,7 @@ import {
 
 contract Migration__20231205_UpgradeRNSAuctionAndDeployRNSOperation is Config__Mainnet20231205 {
   function run() public onlyOn(DefaultNetwork.RoninMainnet.key()) {
-    ISharedArgument.SharedParameter memory param = config.sharedArguments();
+    ISharedArgument.RNSOperationParam memory param = config.sharedArguments().rnsOperation;
 
     ProxyAdmin proxyAdmin = ProxyAdmin(config.getAddressFromCurrentNetwork(DefaultContract.ProxyAdmin.key()));
     address rnsAuctionProxy = config.getAddressFromCurrentNetwork(Contract.RNSAuction.key());
@@ -43,9 +43,9 @@ contract Migration__20231205_UpgradeRNSAuctionAndDeployRNSOperation is Config__M
 
     // transfer owner ship for RNSOperation
     vm.broadcast(rnsOperation.owner());
-    rnsOperation.transferOwnership(param.rnsOperationOwner);
+    rnsOperation.transferOwnership(param.admin);
 
-    assertTrue(rnsOperation.owner() == param.rnsOperationOwner);
+    assertTrue(rnsOperation.owner() == param.admin);
   }
 
   function _validataBulkClaimUnbiddedNames(uint256 size) internal logFn("_validataBulkClaimUnbiddedNames") {

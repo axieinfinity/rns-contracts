@@ -7,7 +7,8 @@ import { OwnedMulticaller } from "@rns-contracts/utils/OwnedMulticaller.sol";
 
 contract OwnedMulticallerDeploy is Migration {
   function _defaultArguments() internal virtual override returns (bytes memory args) {
-    args = abi.encode(config.getSender());
+    ISharedArgument.OwnedMulticallerParam memory param = config.sharedArguments().ownedMulticaller;
+    args = abi.encode(param.admin);
   }
 
   function run() public virtual returns (OwnedMulticaller) {

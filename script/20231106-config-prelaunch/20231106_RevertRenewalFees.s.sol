@@ -9,7 +9,7 @@ contract Migration__20231106_RevertRenewalFees is Migration {
   function run() public {
     RNSDomainPrice domainPrice = RNSDomainPrice(config.getAddressFromCurrentNetwork(Contract.RNSDomainPrice.key()));
 
-    ISharedArgument.SharedParameter memory param = config.sharedArguments();
+    ISharedArgument.RNSDomainPriceParam memory param = config.sharedArguments().rnsDomainPrice;
     vm.broadcast(domainPrice.getRoleMember(domainPrice.DEFAULT_ADMIN_ROLE(), 0));
     domainPrice.setRenewalFeeByLengths(param.renewalFees);
   }

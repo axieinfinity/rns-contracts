@@ -7,7 +7,7 @@ import { NameChecker } from "@rns-contracts/NameChecker.sol";
 
 contract NameCheckerDeploy is Migration {
   function _defaultArguments() internal virtual override returns (bytes memory args) {
-    ISharedArgument.SharedParameter memory param = config.sharedArguments();
+    ISharedArgument.NameCheckerParam memory param = config.sharedArguments().nameChecker;
     args = abi.encodeCall(NameChecker.initialize, (param.admin, param.minWord, param.maxWord));
   }
 

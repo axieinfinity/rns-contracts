@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { Migration } from "script/Migration.s.sol";
+import { Migration, ISharedArgument } from "script/Migration.s.sol";
 import { Contract } from "script/utils/Contract.sol";
 import { PublicResolver } from "@rns-contracts/resolvers/PublicResolver.sol";
 import { RNSUnified, RNSUnifiedDeploy } from "./RNSUnifiedDeploy.s.sol";
@@ -14,11 +14,16 @@ contract PublicResolverDeploy is Migration {
   }
 
   function _defaultArguments() internal virtual override returns (bytes memory args) {
+    ISharedArgument.PublicResolverParam memory param = config.sharedArguments().publicResolver;
     args = abi.encodeCall(
       PublicResolver.initialize,
       (
-        RNSUnified(loadContractOrDeploy(Contract.RNSUnified.key())),
-        RNSReverseRegistrar(loadContractOrDeploy(Contract.RNSReverseRegistrar.key()))
+        address(param.rnsUnified) == address(0x0)
+          ? RNSUnified(loadContractOrDeploy(Contract.RNSUnified.key()))
+          : param.rnsUnified,
+        address(param.rnsReverseRegistrar) == address(0x0)
+          ? RNSReverseRegistrar(loadContractOrDeploy(Contract.RNSReverseRegistrar.key()))
+          : param.rnsReverseRegistrar
       )
     );
   }

@@ -7,7 +7,7 @@ import { Contract } from "script/utils/Contract.sol";
 
 contract RNSUnifiedDeploy is Migration {
   function _defaultArguments() internal view override returns (bytes memory args) {
-    ISharedArgument.SharedParameter memory param = config.sharedArguments();
+    ISharedArgument.RNSUnifiedParam memory param = config.sharedArguments().rnsUnified;
     args = abi.encodeCall(
       RNSUnified.initialize,
       (param.admin, param.pauser, param.controller, param.protectedSettler, param.gracePeriod, param.baseTokenURI)

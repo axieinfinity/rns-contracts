@@ -12,11 +12,15 @@ contract RNSReverseRegistrarDeploy is Migration {
   }
 
   function _defaultArguments() internal virtual override returns (bytes memory args) {
-    ISharedArgument.SharedParameter memory param = config.sharedArguments();
-    address[] memory operators = new address[](1);
-    operators[0] = param.operator;
+    ISharedArgument.RNSReverseRegistrarParam memory param = config.sharedArguments().rnsReverseRegistrar;
     args = abi.encodeCall(
-      RNSReverseRegistrar.initialize, (param.admin, RNSUnified(loadContractOrDeploy(Contract.RNSUnified.key())))
+      RNSReverseRegistrar.initialize,
+      (
+        param.admin,
+        address(param.rnsUnified) == address(0x0)
+          ? RNSUnified(loadContractOrDeploy(Contract.RNSUnified.key()))
+          : param.rnsUnified
+      )
     );
   }
 
