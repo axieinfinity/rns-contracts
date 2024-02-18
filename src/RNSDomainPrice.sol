@@ -21,6 +21,10 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   using LibPeriodScaler for PeriodScaler;
   using PythConverter for PythStructs.Price;
 
+  /// @dev The threshold tier value (in USD) for Tier 1
+  uint256 private constant TIER_1_THRESHOLD = 200e18;
+  /// @dev The threshold tier value (in USD) for Tier 2
+  uint256 private constant TIER_2_THRESHOLD = 50e18;
   /// @inheritdoc INSDomainPrice
   uint8 public constant USD_DECIMALS = 18;
   /// @inheritdoc INSDomainPrice
@@ -281,9 +285,15 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
     if (overriddenTier != 0) return ~overriddenTier;
 
     uint256 renewalFeeByLength = _rnFee[Math.min(label.strlen(), _rnfMaxLength)];
-    uint256 domainPrice = _getDomainPrice(lbHash);
+    uint256 tierValue = renewalFeeByLength + _getDomainPrice(lbHash) / 2;
 
-    return renewalFeeByLength + domainPrice / 2;
+    if (tierValue > 200e18) {
+      return uint256(Tier.Tier1);
+    } else if (tierValue > 50e18) {
+      return uint256(Tier.Tier2);
+    } else {
+      return uint256(Tier.Tier3);
+    }
   }
 
   /**

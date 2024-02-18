@@ -10,6 +10,14 @@ interface INSDomainPrice {
   error TierIsNotOverriden();
   error ExceedAuctionDomainExpiry();
 
+  /// @dev The tier of a domain.
+  enum Tier {
+    Unknown,
+    Tier1,
+    Tier2,
+    Tier3
+  }
+
   struct RenewalFee {
     uint256 labelLength;
     uint256 fee;
