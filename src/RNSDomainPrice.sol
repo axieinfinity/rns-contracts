@@ -54,6 +54,8 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   mapping(bytes32 lbHash => TimestampWrapper usdPrice) internal _dp;
   /// @dev Mapping from name => inverse bitwise of renewal fee overriding.
   mapping(bytes32 lbHash => uint256 usdPrice) internal _rnFeeOverriding;
+  /// @dev Mapping from label hash to overriden tier
+  mapping(bytes32 lbHash => uint256 tier) _tierOverriding;
 
   constructor() payable {
     _disableInitializers();
@@ -170,6 +172,15 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   /**
    * @inheritdoc INSDomainPrice
    */
+  function getOverriddenTier(string calldata label) external view returns (uint256 tier) {
+    tier = _tierOverriding[label.hashLabel()];
+    if (tier == 0) revert TierIsNotOverriden();
+    return ~tier;
+  }
+
+  /**
+   * @inheritdoc INSDomainPrice
+   */
   function bulkOverrideRenewalFees(bytes32[] calldata lbHashes, uint256[] calldata usdPrices)
     external
     onlyRole(OVERRIDER_ROLE)
@@ -183,6 +194,26 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
       inverseBitwise = ~usdPrices[i];
       _rnFeeOverriding[lbHashes[i]] = inverseBitwise;
       emit RenewalFeeOverridingUpdated(operator, lbHashes[i], inverseBitwise);
+
+      unchecked {
+        ++i;
+      }
+    }
+  }
+
+  /**
+   * @inheritdoc INSDomainPrice
+   */
+  function bulkOverrideTiers(bytes32[] calldata lbHashes, uint256[] calldata tiers) external onlyRole(OVERRIDER_ROLE) {
+    uint256 length = lbHashes.length;
+    if (length == 0 || length != tiers.length) revert InvalidArrayLength();
+    uint256 inverseBitwise;
+    address operator = _msgSender();
+
+    for (uint256 i; i < length;) {
+      inverseBitwise = ~tiers[i];
+      _tierOverriding[lbHashes[i]] = inverseBitwise;
+      emit TierOverridingUpdated(operator, lbHashes[i], inverseBitwise);
 
       unchecked {
         ++i;
@@ -238,6 +269,21 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   function getDomainPrice(string memory label) public view returns (uint256 usdPrice, uint256 ronPrice) {
     usdPrice = _getDomainPrice(label.hashLabel());
     ronPrice = convertUSDToRON(usdPrice);
+  }
+
+  /**
+   * @inheritdoc INSDomainPrice
+   */
+  function getTier(string memory label) public view returns (uint256 tier) {
+    bytes32 lbHash = label.hashLabel();
+    uint256 overriddenTier = _tierOverriding[lbHash];
+
+    if (overriddenTier != 0) return ~overriddenTier;
+
+    uint256 renewalFeeByLength = _rnFee[Math.min(label.strlen(), _rnfMaxLength)];
+    uint256 domainPrice = _getDomainPrice(lbHash);
+
+    return renewalFeeByLength + domainPrice / 2;
   }
 
   /**
