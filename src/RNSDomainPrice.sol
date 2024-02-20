@@ -287,9 +287,9 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
     uint256 renewalFeeByLength = _rnFee[Math.min(label.strlen(), _rnfMaxLength)];
     uint256 tierValue = renewalFeeByLength + _getDomainPrice(lbHash) / 2;
 
-    if (tierValue > 200e18) {
+    if (tierValue > TIER_1_THRESHOLD) {
       return uint256(Tier.Tier1);
-    } else if (tierValue > 50e18) {
+    } else if (tierValue > TIER_2_THRESHOLD) {
       return uint256(Tier.Tier2);
     } else {
       return uint256(Tier.Tier3);
