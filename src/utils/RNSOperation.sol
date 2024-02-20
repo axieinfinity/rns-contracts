@@ -55,7 +55,7 @@ contract RNSOperation is Ownable {
 
     bytes32[] memory lbHashes = new bytes32[](labels.length);
     for (uint256 i; i < lbHashes.length; ++i) {
-      lbHashes[i] = keccak256(bytes(labels[i]));
+      lbHashes[i] = LibRNSDomain.hashLabel(labels[i]);
     }
     uint256[] memory usdPrices = new uint256[](yearlyUSDPrices.length);
     for (uint256 i; i < usdPrices.length; ++i) {
@@ -63,6 +63,23 @@ contract RNSOperation is Ownable {
     }
 
     domainPrice.bulkOverrideRenewalFees(lbHashes, usdPrices);
+  }
+
+  /**
+   * @dev Allows the owner to bulk override the tiers for specified RNS domains.
+   * @param labels The array of labels for the RNS domains.
+   * @param tiers The array of tiers for the corresponding RNS domains.
+   * @dev The `tiers` array should represent the tiers for each domain.
+   */
+  function bulkOverrideTiers(string[] calldata labels, uint256[] calldata tiers) external onlyOwner {
+    require(labels.length == tiers.length, "RNSOperation: length mismatch");
+
+    bytes32[] memory lbHashes = new bytes32[](labels.length);
+    for (uint256 i; i < lbHashes.length; ++i) {
+      lbHashes[i] = LibRNSDomain.hashLabel(labels[i]);
+    }
+
+    domainPrice.bulkOverrideTiers(lbHashes, tiers);
   }
 
   /**
