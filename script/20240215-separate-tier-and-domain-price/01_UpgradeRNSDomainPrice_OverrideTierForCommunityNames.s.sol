@@ -19,7 +19,6 @@ contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNS
     _domainPrice = RNSDomainPrice(_upgradeProxy(Contract.RNSDomainPrice.key()));
     _multicall = IMulticall3(loadContract(DefaultContract.Multicall3.key()));
 
-    (_labels, _tiers) = _parseData(DATA_PATH);
     _lbHashes = toLabelHashes(_labels);
 
     vm.broadcast(_domainPrice.getRoleMember(_domainPrice.OVERRIDER_ROLE(), 0));
