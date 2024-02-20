@@ -5,13 +5,12 @@ import { INSDomainPrice, RNSDomainPrice } from "@rns-contracts/RNSDomainPrice.so
 import { Contract } from "../utils/Contract.sol";
 import "./20240215_Migration.s.sol";
 
-contract Migration__01_ResetCommunityNamesRenewalFees_RNSDomainPrice is Migration__20240215 {
+contract Migration__02_ResetCommunityNamesRenewalFees_RNSDomainPrice is Migration__20240215 {
   bytes32[] internal _lbHashes;
 
   function run() external {
     RNSDomainPrice rnsDomainPrice = RNSDomainPrice(loadContract(Contract.RNSDomainPrice.key()));
 
-    (_labels,) = _parseData(DATA_PATH);
     _lbHashes = toLabelHashes(_labels);
 
     uint256[] memory renewalFees = new uint256[](_lbHashes.length);
@@ -23,7 +22,7 @@ contract Migration__01_ResetCommunityNamesRenewalFees_RNSDomainPrice is Migratio
     vm.stopBroadcast();
   }
 
-  function _postCheck() internal override {
+  function _postCheck() internal override logFn("_postChecking ...") {
     RNSDomainPrice rnsDomainPrice = RNSDomainPrice(loadContract(Contract.RNSDomainPrice.key()));
 
     for (uint256 i; i < _lbHashes.length; ++i) {

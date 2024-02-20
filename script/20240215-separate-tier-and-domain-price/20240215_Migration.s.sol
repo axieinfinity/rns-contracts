@@ -10,10 +10,14 @@ contract Migration__20240215 is Migration {
   using JSONParserLib for *;
   using LibRNSDomain for *;
 
-  string internal constant DATA_PATH = "script/20240215-separate-tier-and-domain-price/data/communityNames.json";
+  string internal constant DATA_PATH = "script/data/517 Community names (Tier 1) - _3 characters.json";
 
   uint256[] internal _tiers;
   string[] internal _labels;
+
+  constructor() {
+    (_labels, _tiers) = _parseData(DATA_PATH);
+  }
 
   function toLabelHashes(string[] memory labels) internal pure returns (bytes32[] memory) {
     bytes32[] memory hashes = new bytes32[](labels.length);
@@ -33,7 +37,7 @@ contract Migration__20240215 is Migration {
 
   function _parseData(string memory path) internal view returns (string[] memory labels, uint256[] memory tiers) {
     string memory raw = vm.readFile(path);
-    JSONParserLib.Item memory communityNames = raw.parse().at('"communityNames"');
+    JSONParserLib.Item memory communityNames = raw.parse();
     uint256 length = communityNames.size();
     console.log("length", length);
 
@@ -42,7 +46,7 @@ contract Migration__20240215 is Migration {
 
     for (uint256 i; i < length; ++i) {
       tiers[i] = vm.parseUint(communityNames.at(i).at('"tier"').value().decodeString());
-      labels[i] = (communityNames.at(i).at('"label"').value().decodeString());
+      labels[i] = (communityNames.at(i).at('"domain"').value().decodeString());
     }
   }
 }

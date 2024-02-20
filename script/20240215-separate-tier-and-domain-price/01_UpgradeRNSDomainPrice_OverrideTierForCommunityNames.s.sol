@@ -8,7 +8,7 @@ import { Contract } from "../utils/Contract.sol";
 import { INSDomainPrice, RNSDomainPrice } from "@rns-contracts/RNSDomainPrice.sol";
 import "./20240215_Migration.s.sol";
 
-contract Migration__02_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNSDomainPrice is Migration__20240215 {
+contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNSDomainPrice is Migration__20240215 {
   using LibString for *;
 
   RNSDomainPrice internal _domainPrice;
@@ -26,7 +26,7 @@ contract Migration__02_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNS
     _domainPrice.bulkOverrideTiers(_lbHashes, _tiers);
   }
 
-  function _postCheck() internal override {
+  function _postCheck() internal override logFn("_postChecking ...") {
     IMulticall3.Call[] memory calls = new IMulticall3.Call[](_lbHashes.length);
 
     for (uint256 i; i < _lbHashes.length; ++i) {
