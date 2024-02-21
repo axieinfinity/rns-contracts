@@ -284,11 +284,8 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
 
     if (overriddenTier != 0) return Tier(~overriddenTier);
 
-    uint256 overriddenRenewalFee = _rnFeeOverriding[lbHash];
-    uint256 yearlyRenewalFeeByLength = overriddenRenewalFee != 0
-      ? 365 days * ~overriddenRenewalFee
-      : 365 days * _rnFee[Math.min(label.strlen(), _rnfMaxLength)];
-    uint256 tierValue = yearlyRenewalFeeByLength + _getDomainPrice(lbHash) / 2;
+    (UnitPrice memory yearlyRenewalFeeByLength,,) = _tryGetRenewalFee({ label: label, duration: 365 days });
+    uint256 tierValue = yearlyRenewalFeeByLength.usd + _getDomainPrice(lbHash) / 2;
 
     if (tierValue > TIER_1_FROM_EXCLUDED_THRESHOLD) {
       return Tier.Tier1;
@@ -307,32 +304,14 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
     view
     returns (UnitPrice memory basePrice, UnitPrice memory tax)
   {
-    uint256 nameLen = label.strlen();
-    bytes32 lbHash = label.hashLabel();
-    uint256 overriddenRenewalFee = _rnFeeOverriding[lbHash];
-
-    if (overriddenRenewalFee != 0) {
-      basePrice.usd = duration * ~overriddenRenewalFee;
-    } else {
-      uint256 renewalFeeByLength = _rnFee[Math.min(nameLen, _rnfMaxLength)];
-      basePrice.usd = duration * renewalFeeByLength;
-      uint256 id = LibRNSDomain.toId(LibRNSDomain.RON_ID, label);
-      INSAuction auction = _auction;
-      if (auction.reserved(id)) {
-        INSUnified rns = auction.getRNSUnified();
-        uint256 expiry = LibSafeRange.addWithUpperbound(rns.getRecord(id).mut.expiry, duration, type(uint64).max);
-        (INSAuction.DomainAuction memory domainAuction,) = auction.getAuction(id);
-        uint256 claimedAt = domainAuction.bid.claimedAt;
-        if (claimedAt != 0 && expiry - claimedAt > auction.MAX_AUCTION_DOMAIN_EXPIRY()) {
-          revert ExceedAuctionDomainExpiry();
-        }
-        // Tax is added to the name reserved for the auction
-        tax.usd = Math.mulDiv(_taxRatio, _getDomainPrice(lbHash), MAX_PERCENTAGE);
+    bytes4 revertReason;
+    (basePrice, tax, revertReason) = _tryGetRenewalFee(label, duration);
+    if (revertReason != bytes4(0x0)) {
+      assembly ("memory-safe") {
+        mstore(0x0, revertReason)
+        revert(0x0, 0x04)
       }
     }
-
-    tax.ron = convertUSDToRON(tax.usd);
-    basePrice.ron = convertUSDToRON(basePrice.usd);
   }
 
   /**
@@ -455,6 +434,49 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
     _maxAcceptableAge = maxAcceptableAge;
     _pythIdForRONUSD = pythIdForRONUSD;
     emit PythOracleConfigUpdated(_msgSender(), pyth, maxAcceptableAge, pythIdForRONUSD);
+  }
+
+  /**
+   * @dev Tries to get the renewal fee for a given domain label and duration.
+   * It returns the base price, tax, and a revert reason if applicable.
+   * @param label The domain label.
+   * @param duration The duration for which the domain is being renewed.
+   * @return basePrice The base price in USD for ˝renewing the domain.
+   * @return tax The tax amount in USD for renewing the domain.
+   * @return revertReason The revert reason if the renewal fee exceeds the auction domain expiry.
+   */
+  function _tryGetRenewalFee(string memory label, uint256 duration)
+    internal
+    view
+    returns (UnitPrice memory basePrice, UnitPrice memory tax, bytes4 revertReason)
+  {
+    uint256 nameLen = label.strlen();
+    bytes32 lbHash = label.hashLabel();
+    uint256 overriddenRenewalFee = _rnFeeOverriding[lbHash];
+
+    if (overriddenRenewalFee != 0) {
+      basePrice.usd = duration * ~overriddenRenewalFee;
+    } else {
+      uint256 renewalFeeByLength = _rnFee[Math.min(nameLen, _rnfMaxLength)];
+      basePrice.usd = duration * renewalFeeByLength;
+      uint256 id = LibRNSDomain.toId(LibRNSDomain.RON_ID, label);
+      INSAuction auction = _auction;
+      if (auction.reserved(id)) {
+        INSUnified rns = auction.getRNSUnified();
+        uint256 expiry = LibSafeRange.addWithUpperbound(rns.getRecord(id).mut.expiry, duration, type(uint64).max);
+        (INSAuction.DomainAuction memory domainAuction,) = auction.getAuction(id);
+        uint256 claimedAt = domainAuction.bid.claimedAt;
+        if (claimedAt != 0 && expiry - claimedAt > auction.MAX_AUCTION_DOMAIN_EXPIRY()) {
+          revertReason = ExceedAuctionDomainExpiry.selector;
+          return (basePrice, tax, revertReason);
+        }
+        // Tax is added to the name reserved for the auction
+        tax.usd = Math.mulDiv(_taxRatio, _getDomainPrice(lbHash), MAX_PERCENTAGE);
+      }
+    }
+
+    tax.ron = convertUSDToRON(tax.usd);
+    basePrice.ron = convertUSDToRON(basePrice.usd);
   }
 
   /**

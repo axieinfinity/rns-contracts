@@ -96,7 +96,13 @@ abstract contract RNSUnifiedTest is Test {
     address logic = address(new RNSUnified());
     _rns = RNSUnified(
       address(
-        new TransparentUpgradeableProxy(logic, _proxyAdmin, abi.encodeCall(RNSUnified.initialize, (_admin, _pauser, _controller, _protectedSettler, GRACE_PERIOD, BASE_URI)))
+        new TransparentUpgradeableProxy(
+          logic,
+          _proxyAdmin,
+          abi.encodeCall(
+            RNSUnified.initialize, (_admin, _pauser, _controller, _protectedSettler, GRACE_PERIOD, BASE_URI)
+          )
+        )
       )
     );
 
