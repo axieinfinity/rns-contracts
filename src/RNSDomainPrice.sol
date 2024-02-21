@@ -284,8 +284,11 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
 
     if (overriddenTier != 0) return ~overriddenTier;
 
-    uint256 renewalFeeByLength = _rnFee[Math.min(label.strlen(), _rnfMaxLength)];
-    uint256 tierValue = renewalFeeByLength * 365 days + _getDomainPrice(lbHash) * 365 days / 2;
+    uint256 overriddenRenewalFee = _rnFeeOverriding[lbHash];
+    uint256 yearlyRenewalFeeByLength = overriddenRenewalFee != 0
+      ? 365 days * ~overriddenRenewalFee
+      : 365 days * _rnFee[Math.min(label.strlen(), _rnfMaxLength)];
+    uint256 tierValue = yearlyRenewalFeeByLength + _getDomainPrice(lbHash) / 2;
 
     if (tierValue > TIER_1_THRESHOLD) {
       return uint256(Tier.Tier1);
