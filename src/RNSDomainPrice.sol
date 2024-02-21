@@ -21,9 +21,9 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   using LibPeriodScaler for PeriodScaler;
   using PythConverter for PythStructs.Price;
 
-  /// @dev The threshold tier value (in USD) for Tier 1
+  /// @dev The threshold tier value (in USD) for Tier 1: > $200
   uint256 private constant TIER_1_FROM_EXCLUDED_THRESHOLD = 200e18;
-  /// @dev The threshold tier value (in USD) for Tier 2
+  /// @dev The threshold tier value (in USD) for Tier 2 in range of ($50; $200]
   uint256 private constant TIER_2_FROM_EXCLUDED_THRESHOLD = 50e18;
   /// @inheritdoc INSDomainPrice
   uint8 public constant USD_DECIMALS = 18;
