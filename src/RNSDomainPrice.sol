@@ -467,8 +467,7 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
         (INSAuction.DomainAuction memory domainAuction,) = auction.getAuction(id);
         uint256 claimedAt = domainAuction.bid.claimedAt;
         if (claimedAt != 0 && expiry - claimedAt > auction.MAX_AUCTION_DOMAIN_EXPIRY()) {
-          revertReason = ExceedAuctionDomainExpiry.selector;
-          return (basePrice, tax, revertReason);
+          return (basePrice, tax, ExceedAuctionDomainExpiry.selector);
         }
         // Tax is added to the name reserved for the auction
         tax.usd = Math.mulDiv(_taxRatio, _getDomainPrice(lbHash), MAX_PERCENTAGE);
