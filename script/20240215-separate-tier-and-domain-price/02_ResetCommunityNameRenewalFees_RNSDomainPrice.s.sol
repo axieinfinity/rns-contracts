@@ -13,22 +13,36 @@ contract Migration__02_ResetCommunityNamesRenewalFees_RNSDomainPrice is Migratio
 
     _lbHashes = toLabelHashes(_labels);
 
-    uint256[] memory renewalFees = new uint256[](_lbHashes.length);
-
     address overrider = rnsDomainPrice.getRoleMember(rnsDomainPrice.OVERRIDER_ROLE(), 0);
-    vm.startBroadcast(overrider);
-    rnsDomainPrice.bulkOverrideRenewalFees(_lbHashes, renewalFees);
+    uint256 batchSize = 100;
+    uint256 totalBatches = (_lbHashes.length + batchSize - 1) / batchSize;
 
-    vm.stopBroadcast();
+    for (uint256 batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+      uint256 startIndex = batchIndex * batchSize;
+      uint256 endIndex = startIndex + batchSize;
+      if (endIndex > _lbHashes.length) {
+        endIndex = _lbHashes.length;
+      }
+
+      bytes32[] memory batchLbHashes = new bytes32[](endIndex - startIndex);
+      uint256[] memory batchRenewalFees = new uint256[](endIndex - startIndex);
+
+      for (uint256 i = startIndex; i < endIndex; i++) {
+        batchLbHashes[i - startIndex] = _lbHashes[i];
+        batchRenewalFees[i - startIndex] = type(uint256).max;
+      }
+
+      vm.broadcast(overrider);
+      rnsDomainPrice.bulkOverrideRenewalFees(batchLbHashes, batchRenewalFees);
+    }
   }
 
   function _postCheck() internal override logFn("_postChecking ...") {
     RNSDomainPrice rnsDomainPrice = RNSDomainPrice(loadContract(Contract.RNSDomainPrice.key()));
 
     for (uint256 i; i < _lbHashes.length; ++i) {
-      (INSDomainPrice.UnitPrice memory renewalFee,) = rnsDomainPrice.getRenewalFee(_labels[i], 1);
-      assertEq(renewalFee.usd, 0, "renewal fee not reset");
-      assertEq(renewalFee.ron, 0, "renewal fee not reset");
+      vm.expectRevert(INSDomainPrice.RenewalFeeIsNotOverriden.selector);
+      uint256 overridenRenewalFee = rnsDomainPrice.getOverriddenRenewalFee(_labels[i]);
     }
   }
 }
