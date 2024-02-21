@@ -22,9 +22,9 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   using PythConverter for PythStructs.Price;
 
   /// @dev The threshold tier value (in USD) for Tier 1
-  uint256 private constant TIER_1_THRESHOLD = 200e18;
+  uint256 private constant TIER_1_FROM_EXCLUDED_THRESHOLD = 200e18;
   /// @dev The threshold tier value (in USD) for Tier 2
-  uint256 private constant TIER_2_THRESHOLD = 50e18;
+  uint256 private constant TIER_2_FROM_EXCLUDED_THRESHOLD = 50e18;
   /// @inheritdoc INSDomainPrice
   uint8 public constant USD_DECIMALS = 18;
   /// @inheritdoc INSDomainPrice
@@ -59,7 +59,7 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   /// @dev Mapping from name => inverse bitwise of renewal fee overriding.
   mapping(bytes32 lbHash => uint256 usdPrice) internal _rnFeeOverriding;
   /// @dev Mapping from label hash to overriden tier
-  mapping(bytes32 lbHash => uint256 tier) _tierOverriding;
+  mapping(bytes32 lbHash => uint8 tier) internal _tierOverriding;
 
   constructor() payable {
     _disableInitializers();
@@ -176,10 +176,10 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   /**
    * @inheritdoc INSDomainPrice
    */
-  function getOverriddenTier(string calldata label) external view returns (uint256 tier) {
-    tier = _tierOverriding[label.hashLabel()];
-    if (tier == 0) revert TierIsNotOverriden();
-    return ~tier;
+  function getOverriddenTier(string calldata label) external view returns (Tier tier) {
+    uint8 tierValue = _tierOverriding[label.hashLabel()];
+    if (tierValue == 0) revert TierIsNotOverriden();
+    return Tier(~tierValue);
   }
 
   /**
@@ -208,16 +208,16 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   /**
    * @inheritdoc INSDomainPrice
    */
-  function bulkOverrideTiers(bytes32[] calldata lbHashes, uint256[] calldata tiers) external onlyRole(OVERRIDER_ROLE) {
+  function bulkOverrideTiers(bytes32[] calldata lbHashes, Tier[] calldata tiers) external onlyRole(OVERRIDER_ROLE) {
     uint256 length = lbHashes.length;
     if (length == 0 || length != tiers.length) revert InvalidArrayLength();
-    uint256 inverseBitwise;
+    uint8 inverseBitwise;
     address operator = _msgSender();
 
     for (uint256 i; i < length;) {
-      inverseBitwise = ~tiers[i];
+      inverseBitwise = ~uint8(tiers[i]);
       _tierOverriding[lbHashes[i]] = inverseBitwise;
-      emit TierOverridingUpdated(operator, lbHashes[i], inverseBitwise);
+      emit TierOverridingUpdated(operator, lbHashes[i], Tier(inverseBitwise));
 
       unchecked {
         ++i;
@@ -278,11 +278,11 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   /**
    * @inheritdoc INSDomainPrice
    */
-  function getTier(string memory label) public view returns (uint256 tier) {
+  function getTier(string memory label) public view returns (Tier tier) {
     bytes32 lbHash = label.hashLabel();
-    uint256 overriddenTier = _tierOverriding[lbHash];
+    uint8 overriddenTier = _tierOverriding[lbHash];
 
-    if (overriddenTier != 0) return ~overriddenTier;
+    if (overriddenTier != 0) return Tier(~overriddenTier);
 
     uint256 overriddenRenewalFee = _rnFeeOverriding[lbHash];
     uint256 yearlyRenewalFeeByLength = overriddenRenewalFee != 0
@@ -290,12 +290,12 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
       : 365 days * _rnFee[Math.min(label.strlen(), _rnfMaxLength)];
     uint256 tierValue = yearlyRenewalFeeByLength + _getDomainPrice(lbHash) / 2;
 
-    if (tierValue > TIER_1_THRESHOLD) {
-      return uint256(Tier.Tier1);
-    } else if (tierValue > TIER_2_THRESHOLD) {
-      return uint256(Tier.Tier2);
+    if (tierValue > TIER_1_FROM_EXCLUDED_THRESHOLD) {
+      return Tier.Tier1;
+    } else if (tierValue > TIER_2_FROM_EXCLUDED_THRESHOLD) {
+      return Tier.Tier2;
     } else {
-      return uint256(Tier.Tier3);
+      return Tier.Tier3;
     }
   }
 

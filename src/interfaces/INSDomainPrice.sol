@@ -37,7 +37,7 @@ interface INSDomainPrice {
   /// @dev Emitted when the renew fee of a domain is overridden. Value of `inverseRenewalFee` is 0 when not overridden.
   event RenewalFeeOverridingUpdated(address indexed operator, bytes32 indexed labelHash, uint256 inverseRenewalFee);
   /// @dev Emitted when the tier of a domain is overridden.
-  event TierOverridingUpdated(address indexed operator, bytes32 indexed labelHash, uint256 indexed tier);
+  event TierOverridingUpdated(address indexed operator, bytes32 indexed labelHash, Tier indexed tier);
 
   /// @dev Emitted when the domain price is updated.
   event DomainPriceUpdated(
@@ -135,7 +135,7 @@ interface INSDomainPrice {
    * @param label The domain label to register (Eg, 'foo' for 'foo.ron').
    * @return tier The tier of the label.
    */
-  function getTier(string calldata label) external view returns (uint256 tier);
+  function getTier(string calldata label) external view returns (Tier tier);
 
   /**
    * @dev Returns the renewal fee of a label. Reverts if not overridden.
@@ -149,7 +149,7 @@ interface INSDomainPrice {
    * @notice This method is to help developers check the domain tier overriding. Consider using method {getTier} instead
    * for full handling of tiers.
    */
-  function getOverriddenTier(string memory label) external view returns (uint256 tier);
+  function getOverriddenTier(string memory label) external view returns (Tier tier);
 
   /**
    * @dev Bulk override renewal fees.
@@ -177,7 +177,7 @@ interface INSDomainPrice {
    * @param lbHashes Array of label hashes. (Eg, ['foo'].map(keccak256) for 'foo.ron')
    * @param tiers Array of tiers. Leave 2^256 - 1 to remove overriding.
    */
-  function bulkOverrideTiers(bytes32[] calldata lbHashes, uint256[] calldata tiers) external;
+  function bulkOverrideTiers(bytes32[] calldata lbHashes, Tier[] calldata tiers) external;
 
   /**
    * @dev Bulk try to set domain prices. Returns a boolean array indicating whether domain prices at the corresponding

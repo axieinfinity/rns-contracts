@@ -71,7 +71,7 @@ contract RNSOperation is Ownable {
    * @param tiers The array of tiers for the corresponding RNS domains.
    * @dev The `tiers` array should represent the tiers for each domain.
    */
-  function bulkOverrideTiers(string[] calldata labels, uint256[] calldata tiers) external onlyOwner {
+  function bulkOverrideTiers(string[] calldata labels, INSDomainPrice.Tier[] calldata tiers) external onlyOwner {
     require(labels.length == tiers.length, "RNSOperation: length mismatch");
 
     bytes32[] memory lbHashes = new bytes32[](labels.length);
