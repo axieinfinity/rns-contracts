@@ -217,7 +217,7 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
     for (uint256 i; i < length;) {
       inverseBitwise = ~uint8(tiers[i]);
       _tierOverriding[lbHashes[i]] = inverseBitwise;
-      emit TierOverridingUpdated(operator, lbHashes[i], Tier(inverseBitwise));
+      emit TierOverridingUpdated(operator, lbHashes[i], tiers[i]);
 
       unchecked {
         ++i;
