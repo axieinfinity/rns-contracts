@@ -19,6 +19,9 @@ contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNS
   function run() external {
     _domainPrice = RNSDomainPrice(_upgradeProxy(Contract.RNSDomainPrice.key()));
     _multicall = IMulticall3(loadContract(DefaultContract.Multicall3.key()));
+
+    (_labels, _tiers) = _parseData(DATA_PATH);
+
     _lbHashes = toLabelHashes(_labels);
 
     uint256 batchSize = 100;
@@ -36,7 +39,7 @@ contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNS
       }
 
       bytes32[] memory batchHashes = new bytes32[](end - start);
-      uint256[] memory batchTiers = new uint256[](end - start);
+      INSDomainPrice.Tier[] memory batchTiers = new INSDomainPrice.Tier[](end - start);
 
       for (uint256 j = start; j < end; j++) {
         batchHashes[j - start] = _lbHashes[j];
@@ -55,14 +58,16 @@ contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNS
 
   function _validateOtherDomainTiers() internal logFn("_validating other domain tiers ...") {
     if (network() == DefaultNetwork.RoninMainnet.key()) {
-      assertEq(_domainPrice.getTier("tudo"), 2, "invalid tier for tudo");
-      assertEq(_domainPrice.getTier("duke"), 2, "invalid tier for duke");
-      assertEq(_domainPrice.getTier("ace"), 1, "invalid tier for ace");
-      assertEq(_domainPrice.getTier("dragon"), 2, "invalid tier for dragon");
-      assertEq(_domainPrice.getTier("tokuda"), 3, "invalid tier for tokuda");
-      assertEq(_domainPrice.getTier("metaverse"), 2, "invalid tier for metaverse");
-      assertEq(_domainPrice.getTier("nuke"), 2, "invalid tier for nuke");
-      assertEq(_domainPrice.getTier("merchandising"), 3, "invalid tier for merchandising");
+      assertEq(uint8(_domainPrice.getTier("tudo")), uint8(INSDomainPrice.Tier.Tier2), "invalid tier for tudo");
+      assertEq(uint8(_domainPrice.getTier("duke")), uint8(INSDomainPrice.Tier.Tier2), "invalid tier for duke");
+      assertEq(uint8(_domainPrice.getTier("ace")), uint8(INSDomainPrice.Tier.Tier1), "invalid tier for ace");
+      assertEq(uint8(_domainPrice.getTier("dragon")), uint8(INSDomainPrice.Tier.Tier2), "invalid tier for dragon");
+      assertEq(uint8(_domainPrice.getTier("tokuda")), uint8(INSDomainPrice.Tier.Tier3), "invalid tier for tokuda");
+      assertEq(uint8(_domainPrice.getTier("metaverse")), uint8(INSDomainPrice.Tier.Tier2), "invalid tier for metaverse");
+      assertEq(uint8(_domainPrice.getTier("nuke")), uint8(INSDomainPrice.Tier.Tier2), "invalid tier for nuke");
+      assertEq(
+        uint8(_domainPrice.getTier("merchandising")), uint8(INSDomainPrice.Tier.Tier3), "invalid tier for merchandising"
+      );
     }
   }
 
@@ -77,11 +82,11 @@ contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNS
     }
 
     (, bytes[] memory returnData) = _multicall.aggregate(calls);
-    uint256[] memory tiers = new uint256[](_lbHashes.length);
+    INSDomainPrice.Tier[] memory tiers = new INSDomainPrice.Tier[](_lbHashes.length);
 
     for (uint256 i; i < _lbHashes.length; ++i) {
-      tiers[i] = abi.decode(returnData[i], (uint256));
-      assertEq(tiers[i], _tiers[i], string.concat("tier not set", vm.toString(i)));
+      tiers[i] = abi.decode(returnData[i], (INSDomainPrice.Tier));
+      assertEq(uint8(tiers[i]), uint8(_tiers[i]), string.concat("tier not set", vm.toString(i)));
     }
   }
 }

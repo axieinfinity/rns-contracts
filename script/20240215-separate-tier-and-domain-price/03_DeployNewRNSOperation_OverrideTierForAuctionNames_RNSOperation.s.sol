@@ -6,7 +6,7 @@ import { console2 as console } from "forge-std/console2.sol";
 import { Contract } from "script/utils/Contract.sol";
 import { Migration } from "script/Migration.s.sol";
 import { RNSUnified } from "@rns-contracts/RNSUnified.sol";
-import { RNSDomainPrice } from "@rns-contracts/RNSDomainPrice.sol";
+import { INSDomainPrice, RNSDomainPrice } from "@rns-contracts/RNSDomainPrice.sol";
 import { INSAuction, RNSAuction } from "@rns-contracts/RNSAuction.sol";
 import { LibRNSDomain } from "@rns-contracts/libraries/LibRNSDomain.sol";
 import { RNSOperation, RNSOperationDeploy } from "script/contracts/RNSOperationDeploy.s.sol";
@@ -58,7 +58,11 @@ contract Migration_03_DeployNewRNSOperation_OverrideTierForAuctionNames_RNSOpera
     labels[4] = "slim";
 
     for (uint256 i; i < labels.length; ++i) {
-      assertEq(domainPrice.getTier(labels[i]), 1, string.concat("invalid tier for auction label ", labels[i]));
+      assertEq(
+        uint8(domainPrice.getTier(labels[i])),
+        uint8(INSDomainPrice.Tier.Tier1),
+        string.concat("invalid tier for auction label ", labels[i])
+      );
     }
   }
 
