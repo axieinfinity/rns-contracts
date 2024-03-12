@@ -40,7 +40,7 @@ contract Migration__20240215 is Migration {
     returns (string[] memory labels, INSDomainPrice.Tier[] memory tiers)
   {
     string memory raw = vm.readFile(path);
-    JSONParserLib.Item memory communityNames = raw.parse();
+    JSONParserLib.Item memory communityNames = raw.parse().at('"communityNames"');
     uint256 length = communityNames.size();
     console.log("length", length);
 

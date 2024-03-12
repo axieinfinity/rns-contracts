@@ -116,6 +116,7 @@ abstract contract Migration is BaseMigration {
 
       // RNSDomainPrice
       param.rnsDomainPrice.admin = temporaryAdmin;
+      param.rnsDomainPrice.overrider = duke;
       param.rnsDomainPrice.domainPriceOperators = _toSingletonArray(operator);
       param.rnsDomainPrice.renewalFees = new INSDomainPrice.RenewalFee[](4);
       param.rnsDomainPrice.renewalFees[0] = INSDomainPrice.RenewalFee(5, uint256(5e18) / 365 days);

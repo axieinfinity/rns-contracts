@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import { StdStyle } from "forge-std/StdStyle.sol";
 import { IMulticall3 } from "forge-std/interfaces/IMulticall3.sol";
 import { LibString } from "solady/utils/LibString.sol";
 import { DefaultNetwork } from "foundry-deployment-kit/utils/DefaultNetwork.sol";
@@ -10,6 +11,7 @@ import { INSDomainPrice, RNSDomainPrice } from "@rns-contracts/RNSDomainPrice.so
 import "./20240215_Migration.s.sol";
 
 contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNSDomainPrice is Migration__20240215 {
+  using StdStyle for *;
   using LibString for *;
 
   RNSDomainPrice internal _domainPrice;
@@ -29,14 +31,13 @@ contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNS
     uint256 totalBatches = (totalElements + batchSize - 1) / batchSize;
 
     address overrider = _domainPrice.getRoleMember(_domainPrice.OVERRIDER_ROLE(), 0);
+    console.log("Overrider".yellow(), overrider);
 
     for (uint256 i; i < totalBatches; i++) {
       console.log("Processing batch", i, "of", totalBatches);
       uint256 start = i * batchSize;
       uint256 end = (i + 1) * batchSize;
-      if (end > totalElements) {
-        end = totalElements;
-      }
+      if (end > totalElements) end = totalElements;
 
       bytes32[] memory batchHashes = new bytes32[](end - start);
       INSDomainPrice.Tier[] memory batchTiers = new INSDomainPrice.Tier[](end - start);
@@ -46,7 +47,7 @@ contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNS
         batchTiers[j - start] = _tiers[j];
       }
 
-      vm.broadcast(overrider);
+      vm.prank(overrider);
       _domainPrice.bulkOverrideTiers(batchHashes, batchTiers);
     }
   }
