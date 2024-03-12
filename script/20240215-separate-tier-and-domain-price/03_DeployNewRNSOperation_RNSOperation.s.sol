@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import { StdStyle } from "forge-std/StdStyle.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { console2 as console } from "forge-std/console2.sol";
 import { Contract } from "script/utils/Contract.sol";
@@ -11,8 +12,9 @@ import { INSAuction, RNSAuction } from "@rns-contracts/RNSAuction.sol";
 import { LibRNSDomain } from "@rns-contracts/libraries/LibRNSDomain.sol";
 import { RNSOperation, RNSOperationDeploy } from "script/contracts/RNSOperationDeploy.s.sol";
 
-contract Migration_03_DeployNewRNSOperation_OverrideTierForAuctionNames_RNSOperation is Migration {
+contract Migration_03_DeployNewRNSOperation_RNSOperation is Migration {
   using LibRNSDomain for string;
+  using StdStyle for *;
 
   RNSUnified private rns;
   RNSAuction private auction;
@@ -27,6 +29,7 @@ contract Migration_03_DeployNewRNSOperation_OverrideTierForAuctionNames_RNSOpera
     auction = RNSAuction(loadContract(Contract.RNSAuction.key()));
 
     address admin = rns.ownerOf(LibRNSDomain.RON_ID);
+    console.log("admin".yellow(), admin);
 
     vm.broadcast(rnsOperation.owner());
     rnsOperation.transferOwnership(admin);
