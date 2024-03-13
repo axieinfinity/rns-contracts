@@ -20,6 +20,9 @@ contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNS
 
   function run() external {
     _domainPrice = RNSDomainPrice(_upgradeProxy(Contract.RNSDomainPrice.key()));
+  }
+
+  function _postCheck() internal override logFn("_postChecking ...") {
     _multicall = IMulticall3(loadContract(DefaultContract.Multicall3.key()));
 
     (_labels, _tiers) = _parseData(DATA_PATH);
@@ -50,9 +53,7 @@ contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNS
       vm.prank(overrider);
       _domainPrice.bulkOverrideTiers(batchHashes, batchTiers);
     }
-  }
 
-  function _postCheck() internal override logFn("_postChecking ...") {
     _validateOverridenTiers();
     _validateOtherDomainTiers();
   }
