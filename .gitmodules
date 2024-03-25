@@ -22,3 +22,6 @@
 [submodule "lib/foundry-deployment-kit"]
 	path = lib/foundry-deployment-kit
 	url = https://github.com/axieinfinity/foundry-deployment-kit
+[submodule "lib/contract-libs"]
+	path = lib/contract-libs
+	url = https://github.com/axieinfinity/contract-libs

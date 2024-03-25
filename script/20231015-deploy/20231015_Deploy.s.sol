@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { console2 } from "forge-std/console2.sol";
+import { console2 as console } from "forge-std/console2.sol";
 import { StdStyle } from "forge-std/StdStyle.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { LibRNSDomain } from "@rns-contracts/libraries/LibRNSDomain.sol";
-import { ContractKey } from "foundry-deployment-kit/configs/ContractConfig.sol";
+import { Contract } from "script/utils/Contract.sol";
 import {
   RONRegistrarController, RONRegistrarControllerDeploy
 } from "script/contracts/RONRegistrarControllerDeploy.s.sol";
@@ -16,11 +16,15 @@ import { NameChecker, NameCheckerDeploy } from "script/contracts/NameCheckerDepl
 import { RNSDomainPrice, RNSDomainPriceDeploy } from "script/contracts/RNSDomainPriceDeploy.s.sol";
 import { PublicResolver, PublicResolverDeploy } from "script/contracts/PublicResolverDeploy.s.sol";
 import { RNSReverseRegistrar, RNSReverseRegistrarDeploy } from "script/contracts/RNSReverseRegistrarDeploy.s.sol";
-import { INSDomainPrice, RNSDeploy } from "../RNSDeploy.s.sol";
+import { DefaultNetwork, Migration } from "../Migration.s.sol";
+import { INSDomainPrice } from "script/interfaces/ISharedArgument.sol";
 
-contract Migration__20231015_Deploy is RNSDeploy {
+contract Migration__20231015_Deploy is Migration {
   using Strings for *;
   using LibRNSDomain for string;
+
+  uint256 internal _ronId;
+  uint256 internal _addrReverseId;
 
   RNSUnified internal _rns;
   RNSAuction internal _auction;
@@ -32,7 +36,7 @@ contract Migration__20231015_Deploy is RNSDeploy {
 
   string[] internal _blacklistedWords;
 
-  function run() public trySetUp {
+  function run() public onlyOn(DefaultNetwork.RoninTestnet.key()) {
     _rns = new RNSUnifiedDeploy().run();
     _auction = new RNSAuctionDeploy().run();
     _nameChecker = new NameCheckerDeploy().run();
@@ -48,35 +52,34 @@ contract Migration__20231015_Deploy is RNSDeploy {
     }
     uint256[] memory packedWords = _nameChecker.packBulk(_blacklistedWords);
 
-    vm.resumeGasMetering();
     vm.startBroadcast(admin);
 
     _rns.grantRole(_rns.CONTROLLER_ROLE(), address(_auction));
     _rns.grantRole(_rns.RESERVATION_ROLE(), address(_auction));
     _rns.grantRole(_rns.CONTROLLER_ROLE(), address(_ronController));
 
-    (, uint256 ronId) = _rns.mint(0x0, "ron", address(0), admin, _rns.MAX_EXPIRY());
+    (, _ronId) = _rns.mint(0x0, "ron", address(0), admin, _rns.MAX_EXPIRY());
     (, uint256 reverseId) = _rns.mint(0x0, "reverse", address(0), admin, _rns.MAX_EXPIRY());
-    (, uint256 addrReverseId) = _rns.mint(reverseId, "addr", address(0), admin, _rns.MAX_EXPIRY());
+    (, _addrReverseId) = _rns.mint(reverseId, "addr", address(0), admin, _rns.MAX_EXPIRY());
 
     _rns.setApprovalForAll(address(_auction), true);
     _rns.setApprovalForAll(address(_ronController), true);
-    _rns.approve(address(_reverseRegistrar), addrReverseId);
+    _rns.approve(address(_reverseRegistrar), _addrReverseId);
 
     _reverseRegistrar.setDefaultResolver(_publicResolver);
     _nameChecker.setForbiddenWords({ packedWords: packedWords, shouldForbid: true });
 
     vm.stopBroadcast();
-    vm.pauseGasMetering();
+  }
 
+  function _postCheck() internal override {
     _validateAuction();
     _validateController();
     _validateDomainPrice();
     _validateReverseRegistrar();
     _validateNameChecker();
-    _validateRNSUnified(ronId, addrReverseId);
-
-    console2.log(StdStyle.green(unicode"✅ All checks are passed"));
+    _validateRNSUnified(_ronId, _addrReverseId);
+    console.log(unicode"✅ All checks are passed");
   }
 
   function _validateController() internal logFn("_validateController") {
@@ -90,7 +93,7 @@ contract Migration__20231015_Deploy is RNSDeploy {
       _ronController.computeCommitment(domain, user.addr, duration, secret, address(_publicResolver), data, true);
 
     (, uint256 ronPrice) = _ronController.rentPrice(domain, duration);
-    console2.log("domain price:", ronPrice);
+    console.log("domain price:", ronPrice);
     vm.deal(user.addr, ronPrice);
 
     vm.startPrank(user.addr);
@@ -103,7 +106,7 @@ contract Migration__20231015_Deploy is RNSDeploy {
 
     uint256 expectedId = uint256(string.concat(domain, ".ron").namehash());
     assertEq(_rns.ownerOf(expectedId), user.addr);
-    console2.log(unicode"✅ Controller checks are passed");
+    console.log(unicode"✅ Controller checks are passed");
   }
 
   function _validateRNSUnified(uint256 ronId, uint256 addrReverseId) internal logFn("validateRNSUnified") {
@@ -113,7 +116,7 @@ contract Migration__20231015_Deploy is RNSDeploy {
     assertTrue(_rns.hasRole(_rns.RESERVATION_ROLE(), address(_auction)), "grant reservation role failed");
     assertEq(address(_ronController.getPriceOracle()), address(_domainPrice), "set price oracle failed");
 
-    console2.log(unicode"✅ RNSUnified checks are passed");
+    console.log(unicode"✅ RNSUnified checks are passed");
   }
 
   function _validateReverseRegistrar() internal logFn("validateReverseRegistrar") {
@@ -146,7 +149,7 @@ contract Migration__20231015_Deploy is RNSDeploy {
     assertTrue(_auction.reserved(id), "invalid bulkRegister");
     assertEq(_rns.getRecord(id).mut.expiry, _rns.MAX_EXPIRY(), "invalid expiry time");
 
-    console2.log(unicode"✅ Auction checks are passed");
+    console.log(unicode"✅ Auction checks are passed");
   }
 
   function _validateDomainPrice() internal logFn("validateDomainPrice") {
@@ -191,12 +194,12 @@ contract Migration__20231015_Deploy is RNSDeploy {
 
     vm.stopPrank();
 
-    console2.log("Tax Raio:", _domainPrice.getTaxRatio());
-    console2.log("Converting 1 USD (18 decimals) to RON:", _domainPrice.convertUSDToRON(1e18));
-    console2.log("Converting 1 RON to USD (18 decimals):", _domainPrice.convertRONToUSD(1 ether));
-    console2.log("Converting 1m USD (18 decimals) to RON:", _domainPrice.convertUSDToRON(1e18 * 1e6));
-    console2.log("Converting 1m RON to USD (18 decimals):", _domainPrice.convertRONToUSD(1 ether * 1e6));
-    console2.log(unicode"✅ Domain price checks are passed");
+    console.log("Tax Raio:", _domainPrice.getTaxRatio());
+    console.log("Converting 1 USD (18 decimals) to RON:", _domainPrice.convertUSDToRON(1e18));
+    console.log("Converting 1 RON to USD (18 decimals):", _domainPrice.convertRONToUSD(1 ether));
+    console.log("Converting 1m USD (18 decimals) to RON:", _domainPrice.convertUSDToRON(1e18 * 1e6));
+    console.log("Converting 1m RON to USD (18 decimals):", _domainPrice.convertRONToUSD(1 ether * 1e6));
+    console.log(unicode"✅ Domain price checks are passed");
   }
 
   function _validateNameChecker() internal logFn("validateNameChecker") {
@@ -208,9 +211,9 @@ contract Migration__20231015_Deploy is RNSDeploy {
     uint256 expectedMax;
     uint256 expectedMin = type(uint256).max;
 
-    console2.log(StdStyle.blue("Blacklisted words count"), blacklistedWords.length);
-    console2.log(StdStyle.blue("Word"), "RONRegistrarController::valid()", "NameChecker::forbidden()");
-    console2.log(StdStyle.blue("Word Range"), string.concat("min: ", min.toString(), " ", "max: ", max.toString()));
+    console.log(StdStyle.blue("Blacklisted words count"), blacklistedWords.length);
+    console.log(StdStyle.blue("Word"), "RONRegistrarController::valid()", "NameChecker::forbidden()");
+    console.log(StdStyle.blue("Word Range"), string.concat("min: ", min.toString(), " ", "max: ", max.toString()));
 
     for (uint256 i; i < blacklistedWords.length;) {
       word = blacklistedWords[i];
@@ -220,7 +223,7 @@ contract Migration__20231015_Deploy is RNSDeploy {
       forbidden = _nameChecker.forbidden(word);
 
       if (i % 50 == 0) {
-        console2.log(StdStyle.blue(word), valid ? unicode"✅" : unicode"❌", forbidden ? unicode"✅" : unicode"❌");
+        console.log(StdStyle.blue(word), valid ? unicode"✅" : unicode"❌", forbidden ? unicode"✅" : unicode"❌");
       }
 
       assertTrue(!valid);
@@ -234,6 +237,6 @@ contract Migration__20231015_Deploy is RNSDeploy {
     assertEq(min, expectedMin);
     assertEq(max, expectedMax);
 
-    console2.log(unicode"✅ NameChecker checks are passed");
+    console.log(unicode"✅ NameChecker checks are passed");
   }
 }

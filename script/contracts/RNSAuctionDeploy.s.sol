@@ -3,29 +3,31 @@ pragma solidity ^0.8.19;
 
 import { RNSAuction } from "@rns-contracts/RNSAuction.sol";
 import { RNSUnified, RNSUnifiedDeploy } from "./RNSUnifiedDeploy.s.sol";
-import { BaseDeploy, ContractKey } from "foundry-deployment-kit/BaseDeploy.s.sol";
-import { RNSDeploy } from "../RNSDeploy.s.sol";
+import { ISharedArgument, Migration } from "script/Migration.s.sol";
+import { Contract } from "script/utils/Contract.sol";
 
-contract RNSAuctionDeploy is RNSDeploy {
+contract RNSAuctionDeploy is Migration {
   function _injectDependencies() internal virtual override {
-    _setDependencyDeployScript(ContractKey.RNSUnified, new RNSUnifiedDeploy());
+    _setDependencyDeployScript(Contract.RNSUnified.key(), new RNSUnifiedDeploy());
   }
 
   function _defaultArguments() internal virtual override returns (bytes memory args) {
-    Config memory config = getConfig();
+    ISharedArgument.RNSAuctionParam memory param = config.sharedArguments().rnsAuction;
     args = abi.encodeCall(
       RNSAuction.initialize,
       (
-        config.admin,
-        config.auctionOperators,
-        RNSUnified(loadContractOrDeploy(ContractKey.RNSUnified)),
-        config.treasury,
-        config.bidGapRatio
+        param.admin,
+        param.auctionOperators,
+        address(param.rnsUnified) == address(0x0)
+          ? RNSUnified(loadContractOrDeploy(Contract.RNSUnified.key()))
+          : param.rnsUnified,
+        param.treasury,
+        param.bidGapRatio
       )
     );
   }
 
-  function run() public virtual trySetUp returns (RNSAuction) {
-    return RNSAuction(_deployProxy(ContractKey.RNSAuction));
+  function run() public virtual returns (RNSAuction) {
+    return RNSAuction(_deployProxy(Contract.RNSAuction.key()));
   }
 }
