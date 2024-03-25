@@ -21,3 +21,4 @@ node_modules/
 yarn-error.log
 .yarn
 .yarnrc.yml
+script/data/*
