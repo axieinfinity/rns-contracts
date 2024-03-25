@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { ContractKey } from "foundry-deployment-kit/configs/ContractConfig.sol";
-import { RNSDeploy } from "script/RNSDeploy.s.sol";
+import { Contract } from "script/utils/Contract.sol";
+import { Migration } from "script/Migration.s.sol";
 
-contract Migration__20231021_UpgradeDomainPriceAndAuction is RNSDeploy {
-  function run() public trySetUp {
-    _upgradeProxy(ContractKey.RNSAuction, EMPTY_ARGS);
-    _upgradeProxy(ContractKey.RNSDomainPrice, EMPTY_ARGS);
+contract Migration__20231021_UpgradeDomainPriceAndAuction is Migration {
+  function run() public {
+    _upgradeProxy(Contract.RNSAuction.key());
+    _upgradeProxy(Contract.RNSDomainPrice.key());
   }
 }

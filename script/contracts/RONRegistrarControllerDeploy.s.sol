@@ -6,39 +6,45 @@ import { RNSUnified, RNSUnifiedDeploy } from "./RNSUnifiedDeploy.s.sol";
 import { NameChecker, NameCheckerDeploy } from "./NameCheckerDeploy.s.sol";
 import { RNSDomainPrice, RNSDomainPriceDeploy } from "./RNSDomainPriceDeploy.s.sol";
 import { RNSReverseRegistrar, RNSReverseRegistrarDeploy } from "./RNSReverseRegistrarDeploy.s.sol";
-import { BaseDeploy, ContractKey } from "foundry-deployment-kit/BaseDeploy.s.sol";
-import { RNSDeploy } from "../RNSDeploy.s.sol";
+import { ISharedArgument, Migration } from "script/Migration.s.sol";
+import { Contract } from "script/utils/Contract.sol";
 
-contract RONRegistrarControllerDeploy is RNSDeploy {
+contract RONRegistrarControllerDeploy is Migration {
   function _injectDependencies() internal virtual override {
-    _setDependencyDeployScript(ContractKey.RNSUnified, new RNSUnifiedDeploy());
-    _setDependencyDeployScript(ContractKey.NameChecker, new NameCheckerDeploy());
-    _setDependencyDeployScript(ContractKey.RNSDomainPrice, new RNSDomainPriceDeploy());
-    _setDependencyDeployScript(ContractKey.RNSReverseRegistrar, new RNSReverseRegistrarDeploy());
+    _setDependencyDeployScript(Contract.RNSUnified.key(), new RNSUnifiedDeploy());
+    _setDependencyDeployScript(Contract.NameChecker.key(), new NameCheckerDeploy());
+    _setDependencyDeployScript(Contract.RNSDomainPrice.key(), new RNSDomainPriceDeploy());
+    _setDependencyDeployScript(Contract.RNSReverseRegistrar.key(), new RNSReverseRegistrarDeploy());
   }
 
   function _defaultArguments() internal virtual override returns (bytes memory args) {
-    Config memory config = getConfig();
-    address[] memory operators = new address[](1);
-    operators[0] = config.operator;
+    ISharedArgument.RONRegistrarControllerParam memory param = config.sharedArguments().ronRegistrarController;
     args = abi.encodeCall(
       RONRegistrarController.initialize,
       (
-        config.admin,
-        config.pauser,
-        config.treasury,
-        config.maxAcceptableAge,
-        config.minCommitmentAge,
-        config.minRegistrationDuration,
-        RNSUnified(loadContractOrDeploy(ContractKey.RNSUnified)),
-        NameChecker(loadContractOrDeploy(ContractKey.NameChecker)),
-        RNSDomainPrice(loadContractOrDeploy(ContractKey.RNSDomainPrice)),
-        RNSReverseRegistrar(loadContractOrDeploy(ContractKey.RNSReverseRegistrar))
+        param.admin,
+        param.pauser,
+        param.treasury,
+        param.maxAcceptableAge,
+        param.minCommitmentAge,
+        param.minRegistrationDuration,
+        address(param.rnsUnified) == address(0x0)
+          ? RNSUnified(loadContractOrDeploy(Contract.RNSUnified.key()))
+          : param.rnsUnified,
+        address(param.nameChecker) == address(0x0)
+          ? NameChecker(loadContractOrDeploy(Contract.NameChecker.key()))
+          : param.nameChecker,
+        address(param.rnsDomainPrice) == address(0x0)
+          ? RNSDomainPrice(loadContractOrDeploy(Contract.RNSDomainPrice.key()))
+          : param.rnsDomainPrice,
+        address(param.rnsReverseRegistrar) == address(0x0)
+          ? RNSReverseRegistrar(loadContractOrDeploy(Contract.RNSReverseRegistrar.key()))
+          : param.rnsReverseRegistrar
       )
     );
   }
 
-  function run() public virtual trySetUp returns (RONRegistrarController) {
-    return RONRegistrarController(_deployProxy(ContractKey.RONRegistrarController));
+  function run() public virtual returns (RONRegistrarController) {
+    return RONRegistrarController(_deployProxy(Contract.RONRegistrarController.key()));
   }
 }

@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { BaseDeploy, ContractKey } from "foundry-deployment-kit/BaseDeploy.s.sol";
+import { ISharedArgument, Migration } from "script/Migration.s.sol";
+import { Contract } from "script/utils/Contract.sol";
 import { NameChecker } from "@rns-contracts/NameChecker.sol";
-import { RNSDeploy } from "../RNSDeploy.s.sol";
 
-contract NameCheckerDeploy is RNSDeploy {
+contract NameCheckerDeploy is Migration {
   function _defaultArguments() internal virtual override returns (bytes memory args) {
-    Config memory config = getConfig();
-    args = abi.encodeCall(NameChecker.initialize, (config.admin, config.minWord, config.maxWord));
+    ISharedArgument.NameCheckerParam memory param = config.sharedArguments().nameChecker;
+    args = abi.encodeCall(NameChecker.initialize, (param.admin, param.minWord, param.maxWord));
   }
 
-  function run() public virtual trySetUp returns (NameChecker) {
-    return NameChecker(_deployProxy(ContractKey.NameChecker));
+  function run() public virtual returns (NameChecker) {
+    return NameChecker(_deployProxy(Contract.NameChecker.key()));
   }
 }
