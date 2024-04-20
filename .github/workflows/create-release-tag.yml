@@ -1,0 +1,64 @@
+name: Create Release Tag
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - mainnet
+      - testnet
+
+env:
+  HEAD_BRANCH: ${{ github.head_ref || github.ref_name }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-release-tag:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+    - name: Set Env
+      run: |
+        echo "VERSION=$(echo -n ${{ env.HEAD_BRANCH }} | sed 's/.*deploy\///' | cut -d'-' -f1)" >> $GITHUB_ENV
+        echo "NETWORK=$(echo -n ${{ env.HEAD_BRANCH }} | sed 's/.*deploy\/v[0-9\.]*-\(.*\)/\1/')" >> $GITHUB_ENV
+
+    - name: Checkout code
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      with:
+        ref: ${{ env.NETWORK }}
+        fetch-depth: 0
+        fetch-tags: 'true'
+
+    - name: Set Mainnet Tag
+      if: ${{ env.NETWORK == 'mainnet' }}
+      run: |
+        echo "TAG=${{ env.VERSION }}" >> $GITHUB_ENV
+    
+    - name: Set Testnet Tag
+      if: ${{ env.NETWORK == 'testnet' }}
+      run: |
+        echo "TAG=${{ env.VERSION }}-testnet" >> $GITHUB_ENV
+
+    - name: Get Testnet Latest Tag
+      if: ${{ env.NETWORK == 'testnet' }}
+      run: |
+        echo "LATESTTAG=$(git describe --tags --match "*testnet*" --abbrev=0)" >> $GITHUB_ENV
+
+    - name: Get Mainnet Latest Tag
+      if: ${{ env.NETWORK == 'mainnet' }}
+      run: |
+        echo "LATESTTAG=$(git describe --tags --match "*mainnet*" --abbrev=0)" >> $GITHUB_ENV
+
+    - name: Create release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ env.TAG }}
+      run: |
+        gh release create "$tag" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "${{ env.NETWORK }} release ${{ env.VERSION }}" \
+            --target "${{ env.NETWORK }}" \
+            --notes-start-tag "${{ env.LATESTTAG }}" \
+            --generate-notes

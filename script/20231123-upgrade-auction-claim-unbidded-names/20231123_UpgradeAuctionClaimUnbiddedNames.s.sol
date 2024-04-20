@@ -2,20 +2,20 @@
 pragma solidity ^0.8.19;
 
 import { console2 as console } from "forge-std/console2.sol";
-import { ContractKey } from "foundry-deployment-kit/configs/ContractConfig.sol";
-import { RNSDeploy } from "script/RNSDeploy.s.sol";
+import { Contract } from "script/utils/Contract.sol";
+import { Migration } from "script/Migration.s.sol";
 import { RNSUnified } from "@rns-contracts/RNSUnified.sol";
 import { INSAuction, RNSAuction } from "@rns-contracts/RNSAuction.sol";
 
-contract Migration__20231123_UpgradeAuctionClaimeUnbiddedNames is RNSDeploy {
-  function run() public trySetUp {
-    _upgradeProxy(ContractKey.RNSAuction, EMPTY_ARGS);
+contract Migration__20231123_UpgradeAuctionClaimeUnbiddedNames is Migration {
+  function run() public {
+    _upgradeProxy(Contract.RNSAuction.key());
     _validataBulkClaimUnbiddedNames({ size: 20 });
   }
 
   function _validataBulkClaimUnbiddedNames(uint256 size) internal logFn("_validataBulkClaimUnbiddedNames") {
-    RNSAuction auction = RNSAuction(_config.getAddressFromCurrentNetwork(ContractKey.RNSAuction));
-    RNSUnified rns = RNSUnified(_config.getAddressFromCurrentNetwork(ContractKey.RNSUnified));
+    RNSAuction auction = RNSAuction(loadContract(Contract.RNSAuction.key()));
+    RNSUnified rns = RNSUnified(loadContract(Contract.RNSUnified.key()));
 
     uint256 auctionBalance = size;
     console.log("auctionBalance", auctionBalance);
