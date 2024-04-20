@@ -28,7 +28,7 @@ loadConfig() {
         ERC721_BATCH_TRANSFER=0x2368dfed532842db89b470fde9fd584d48d4f644
 
         if [ "$MODE" == "broadcast" ]; then
-            PK=$TESTNET_PK
+            PK=$MAINNET_PK
         fi
     else
         RPC=$TESTNET_URL
@@ -37,18 +37,20 @@ loadConfig() {
         ERC721_BATCH_TRANSFER=0x2e889348bd37f192063bfec8ff39bd3635949e20
 
         if [ "$MODE" == "broadcast" ]; then
-            PK=$MAINNET_PK
+            PK=$TESTNET_PK
         fi
     fi
 
     if [ "$MODE" == "broadcast" ]; then
-        CURRENT_NONCE=$(cast nonce --rpc-url $RPC $FROM)
         CURRENT_GAS_PRICE=$(cast gas-price --rpc-url $RPC)
 
         if [[ "$PK" == op://* ]]; then
             PK=$(op read "$PK")
         fi
     fi
+
+    CURRENT_NONCE=$(cast nonce --rpc-url $RPC $FROM)
+    echo "Current nonce: $CURRENT_NONCE"
 }
 
 # Function to load address from deployment file
