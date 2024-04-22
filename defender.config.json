@@ -1,0 +1,7 @@
+{
+    "contract_inspector": {
+        "enabled": true,
+        "scan_directories": ["src/extensions"],
+        "exclude_rules": ["inconsistent-use-named-returns"]
+    }
+}
