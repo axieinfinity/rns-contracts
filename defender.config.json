@@ -1,7 +1,7 @@
 {
     "contract_inspector": {
         "enabled": true,
-        "scan_directories": ["src/libraries"],
+        "scan_directories": ["./src"],
         "exclude_rules": ["naming-convention"]
     }
 }
