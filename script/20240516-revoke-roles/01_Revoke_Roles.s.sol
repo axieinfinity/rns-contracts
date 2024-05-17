@@ -30,7 +30,6 @@ contract Migration__01_Revoke_Roles is Migration {
 
     for (uint256 i; i < contracts.length; i++) {
       AccessControlEnumerable(contracts[i]).grantRole(0x0, multisig);
-      AccessControlEnumerable(contracts[i]).renounceRole(0x0, duke);
 
       assertTrue(
         AccessControlEnumerable(contracts[i]).getRoleMemberCount(0x0) > 0,
