@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import { StdStyle } from "forge-std/StdStyle.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { console2 as console } from "forge-std/console2.sol";
 import { Contract } from "script/utils/Contract.sol";
 import { Migration } from "script/Migration.s.sol";
 import { RNSUnified } from "@rns-contracts/RNSUnified.sol";
-import { RNSDomainPrice } from "@rns-contracts/RNSDomainPrice.sol";
+import { INSDomainPrice, RNSDomainPrice } from "@rns-contracts/RNSDomainPrice.sol";
 import { INSAuction, RNSAuction } from "@rns-contracts/RNSAuction.sol";
 import { LibRNSDomain } from "@rns-contracts/libraries/LibRNSDomain.sol";
 import { RNSOperation, RNSOperationDeploy } from "script/contracts/RNSOperationDeploy.s.sol";
 
-contract Migration__20231124_DeployRNSOperation is Migration {
+contract Migration_03_DeployNewRNSOperation_RNSOperation is Migration {
   using LibRNSDomain for string;
+  using StdStyle for *;
 
   RNSUnified private rns;
   RNSAuction private auction;
@@ -27,6 +29,7 @@ contract Migration__20231124_DeployRNSOperation is Migration {
     auction = RNSAuction(loadContract(Contract.RNSAuction.key()));
 
     address admin = rns.ownerOf(LibRNSDomain.RON_ID);
+    console.log("admin".yellow(), admin);
 
     vm.broadcast(rnsOperation.owner());
     rnsOperation.transferOwnership(admin);
@@ -43,9 +46,27 @@ contract Migration__20231124_DeployRNSOperation is Migration {
 
   function _postCheck() internal override {
     _validateBulkMint();
+    _validateOverridenTiers();
     _validateBulkSetProtected();
     _validateBulkOverrideRenewalFees();
     _validateReclaimAuctionNames({ searchSize: 20 });
+  }
+
+  function _validateOverridenTiers() internal logFn("_validateOverridenTiers") {
+    string[] memory labels = new string[](5);
+    labels[0] = "heidi";
+    labels[1] = "luke";
+    labels[2] = "sophia";
+    labels[3] = "chief";
+    labels[4] = "slim";
+
+    for (uint256 i; i < labels.length; ++i) {
+      assertEq(
+        uint8(domainPrice.getTier(labels[i])),
+        uint8(INSDomainPrice.Tier.Tier1),
+        string.concat("invalid tier for auction label ", labels[i])
+      );
+    }
   }
 
   function _validateBulkOverrideRenewalFees() internal logFn("_validateBulkOverrideRenewalFees") {
