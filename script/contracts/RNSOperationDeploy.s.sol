@@ -1,21 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { ContractKey } from "foundry-deployment-kit/BaseDeploy.s.sol";
+import { Migration, ISharedArgument } from "script/Migration.s.sol";
+import { Contract } from "script/utils/Contract.sol";
 import { RNSOperation } from "@rns-contracts/utils/RNSOperation.sol";
-import { RNSDeploy } from "../RNSDeploy.s.sol";
 
-contract RNSOperationDeploy is RNSDeploy {
+contract RNSOperationDeploy is Migration {
   function _defaultArguments() internal virtual override returns (bytes memory args) {
+    ISharedArgument.RNSOperationParam memory param = config.sharedArguments().rnsOperation;
     args = abi.encode(
-      _config.getAddressFromCurrentNetwork(ContractKey.RNSUnified),
-      _config.getAddressFromCurrentNetwork(ContractKey.PublicResolver),
-      _config.getAddressFromCurrentNetwork(ContractKey.RNSAuction),
-      _config.getAddressFromCurrentNetwork(ContractKey.RNSDomainPrice)
+      param.rnsUnified == address(0x0) ? loadContract(Contract.RNSUnified.key()) : param.rnsUnified,
+      param.publicResolver == address(0x0) ? loadContract(Contract.PublicResolver.key()) : param.publicResolver,
+      param.rnsAuction == address(0x0) ? loadContract(Contract.RNSAuction.key()) : param.rnsAuction,
+      param.rnsDomainPrice == address(0x0) ? loadContract(Contract.RNSDomainPrice.key()) : param.rnsDomainPrice
     );
   }
 
-  function run() public virtual trySetUp returns (RNSOperation) {
-    return RNSOperation(_deployImmutable(ContractKey.RNSOperation));
+  function run() public virtual returns (RNSOperation) {
+    return RNSOperation(_deployImmutable(Contract.RNSOperation.key()));
   }
 }

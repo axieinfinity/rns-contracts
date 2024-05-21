@@ -2,19 +2,19 @@
 pragma solidity ^0.8.19;
 
 import { RNSUnified } from "@rns-contracts/RNSUnified.sol";
-import { BaseDeploy, ContractKey } from "foundry-deployment-kit/BaseDeploy.s.sol";
-import { RNSDeploy } from "../RNSDeploy.s.sol";
+import { ISharedArgument, Migration } from "script/Migration.s.sol";
+import { Contract } from "script/utils/Contract.sol";
 
-contract RNSUnifiedDeploy is RNSDeploy {
+contract RNSUnifiedDeploy is Migration {
   function _defaultArguments() internal view override returns (bytes memory args) {
-    Config memory config = getConfig();
+    ISharedArgument.RNSUnifiedParam memory param = config.sharedArguments().rnsUnified;
     args = abi.encodeCall(
       RNSUnified.initialize,
-      (config.admin, config.pauser, config.controller, config.protectedSettler, config.gracePeriod, config.baseTokenURI)
+      (param.admin, param.pauser, param.controller, param.protectedSettler, param.gracePeriod, param.baseTokenURI)
     );
   }
 
-  function run() public virtual trySetUp returns (RNSUnified) {
-    return RNSUnified(_deployProxy(ContractKey.RNSUnified));
+  function run() public virtual returns (RNSUnified) {
+    return RNSUnified(_deployProxy(Contract.RNSUnified.key()));
   }
 }
