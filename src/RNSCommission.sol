@@ -3,11 +3,11 @@ pragma solidity ^0.8.19;
 
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { AccessControlEnumerable } from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
-import { IRNSCommission } from "./interfaces/IRNSCommission.sol";
+import { INSCommission } from "./interfaces/INSCommission.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { RONTransferHelper } from "./libraries/transfers/RONTransferHelper.sol";
 
-contract RNSCommission is Initializable, AccessControlEnumerable, IRNSCommission {
+contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission {
   uint256 public constant MAX_PERCENTAGE = 100_00;
   bytes32 public constant COMMISSION_SETTER_ROLE = keccak256("COMMISSION_SETTER_ROLE");
 
@@ -37,17 +37,17 @@ contract RNSCommission is Initializable, AccessControlEnumerable, IRNSCommission
     _replaceTreasuries(treasuryCommission);
   }
 
-  /// @inheritdoc IRNSCommission
+  /// @inheritdoc INSCommission
   function getTreasuries() external view returns (Commission[] memory treasuriesInfo) {
     return _commissionInfo;
   }
 
-  /// @inheritdoc IRNSCommission
+  /// @inheritdoc INSCommission
   function replaceTreasuries(Commission[] calldata treasuriesInfo) external onlyRole(COMMISSION_SETTER_ROLE) {
     _replaceTreasuries(treasuriesInfo);
   }
 
-  /// @inheritdoc IRNSCommission
+  /// @inheritdoc INSCommission
   function changeTreasuryInfo(address payable newAddr, bytes calldata name, uint256 treasuryId)
     external
     onlyRole(COMMISSION_SETTER_ROLE)
@@ -93,7 +93,7 @@ contract RNSCommission is Initializable, AccessControlEnumerable, IRNSCommission
    * @dev Helper method to allocate commission and take fee into treasuries address.
    */
   function _allocateCommissionAndTransferToTreasury(uint256 ronAmount) internal {
-    IRNSCommission.Allocation[] memory allocs = _calcAllocations(ronAmount);
+    INSCommission.Allocation[] memory allocs = _calcAllocations(ronAmount);
     uint256 length = allocs.length;
 
     for (uint256 i = 0; i < length; ++i) {
