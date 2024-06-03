@@ -15,26 +15,42 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
   uint256[50] private ____gap;
 
   Commission[] internal _commissionInfo;
+  mapping(address => bool) public _allowedSenders;
 
   constructor() {
     _disableInitializers();
   }
 
   receive() external payable {
-    _allocateCommissionAndTransferToTreasury(msg.value);
+    if (_isAllowedSender(msg.sender)) {
+      _allocateCommissionAndTransferToTreasury(msg.value);
+    }
   }
 
-  function initialize(address admin, address[] calldata commissionSetters, Commission[] calldata treasuryCommission)
-    external
-    initializer
-  {
+  fallback() external payable {
+    if (_isAllowedSender(msg.sender)) {
+      _allocateCommissionAndTransferToTreasury(msg.value);
+    }
+  }
+
+  function initialize(
+    address admin,
+    address[] calldata commissionSetters,
+    Commission[] calldata treasuryCommission,
+    address[] calldata allowedSenders
+  ) external initializer {
     _setupRole(DEFAULT_ADMIN_ROLE, admin);
     uint256 length = commissionSetters.length;
     for (uint256 i; i < length; ++i) {
       _setupRole(COMMISSION_SETTER_ROLE, commissionSetters[i]);
     }
 
-    _replaceTreasuries(treasuryCommission);
+    uint256 sendersLength = allowedSenders.length;
+    for (uint256 i; i < sendersLength; ++i) {
+      _allowedSenders[allowedSenders[i]] = true;
+    }
+
+    _setTreasuries(treasuryCommission);
   }
 
   /// @inheritdoc INSCommission
@@ -43,8 +59,8 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
   }
 
   /// @inheritdoc INSCommission
-  function replaceTreasuries(Commission[] calldata treasuriesInfo) external onlyRole(COMMISSION_SETTER_ROLE) {
-    _replaceTreasuries(treasuriesInfo);
+  function setTreasuries(Commission[] calldata treasuriesInfo) external onlyRole(COMMISSION_SETTER_ROLE) {
+    _setTreasuries(treasuriesInfo);
   }
 
   /// @inheritdoc INSCommission
@@ -59,6 +75,11 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
     _commissionInfo[treasuryId].recipient = newAddr;
     _commissionInfo[treasuryId].name = name;
     emit TreasuryInfoUpdated(newAddr, name, treasuryId);
+  }
+
+  /// @inheritdoc INSCommission
+  function allowSender(address sender) external onlyRole(COMMISSION_SETTER_ROLE) {
+    _allowedSenders[sender] = true;
   }
 
   /**
@@ -83,7 +104,7 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
       sumValue += allocs[i].value;
     }
 
-    // Refund the remaining RON for the last treasury
+    // Refund the remaining RON to the last treasury
     if (sumValue < totalAmount) {
       allocs[lastIdx] = Allocation({ recipient: _commissionInfo[lastIdx].recipient, value: totalAmount - sumValue });
     }
@@ -104,7 +125,7 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
     }
   }
 
-  function _replaceTreasuries(Commission[] calldata treasuriesInfo) internal {
+  function _setTreasuries(Commission[] calldata treasuriesInfo) internal {
     uint256 length = treasuriesInfo.length;
     // treasuriesInfo[] can not be empty
     if (length < 1) revert InvalidArrayLength();
@@ -120,7 +141,12 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
 
     if (sum != MAX_PERCENTAGE) revert InvalidRatio();
 
-    emit TreasuriesReplaced(treasuriesInfo);
+    emit TreasuriesUpdated(treasuriesInfo);
+  }
+
+  /// Check if `sender` is allowed to send money
+  function _isAllowedSender(address sender) internal view returns (bool) {
+    return _allowedSenders[sender];
   }
 
   // Calculate amount of money based on treasury's ratio

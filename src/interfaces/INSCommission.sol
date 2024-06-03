@@ -13,8 +13,8 @@ interface INSCommission {
     uint256 value;
   }
 
-  /// @dev Emitted when all the treasury info info are replaced.
-  event TreasuriesReplaced(Commission[] treasuriesInfo);
+  /// @dev Emitted when all the treasury info info are updated.
+  event TreasuriesUpdated(Commission[] treasuriesInfo);
   /// @dev Emitted when specific treasury info are updated.
   event TreasuryInfoUpdated(address payable treasuryAddr, bytes name, uint256 treasuryId);
 
@@ -31,14 +31,14 @@ interface INSCommission {
   function getTreasuries() external view returns (Commission[] memory treasuriesInfo);
 
   /**
-   * @dev Replaces all treasuries information
+   * @dev Sets all treasuries information
    *
    * Requirements:
    * - The method caller is setter role.
    * - The total ratio must be equal to 100%.
-   * Emits the event `TreasuriesPreplaced`.
+   * Emits the event `TreasuriesUpdated`.
    */
-  function replaceTreasuries(Commission[] calldata treasuriesInfo) external;
+  function setTreasuries(Commission[] calldata treasuriesInfo) external;
 
   /**
    * @dev Sets for specific treasury information based on the treasury `id`.
@@ -48,4 +48,12 @@ interface INSCommission {
    * Emits the event `TreasuryInfoUpdated`.
    */
   function changeTreasuryInfo(address payable newAddr, bytes calldata name, uint256 treasuryId) external;
+
+  /**
+   * @dev Allows specific `sender` to send money to this contract, which will then be transferred to the treasuries.
+   *
+   * Requirements:
+   * - The method caller is setter role.
+   */
+  function allowSender(address sender) external;
 }
