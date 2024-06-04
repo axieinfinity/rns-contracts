@@ -14,9 +14,11 @@ interface INSCommission {
   }
 
   /// @dev Emitted when all the treasury info info are updated.
-  event TreasuriesUpdated(Commission[] treasuriesInfo);
+  event TreasuriesUpdated(address indexed updatedBy, Commission[] treasuriesInfo);
   /// @dev Emitted when specific treasury info are updated.
-  event TreasuryInfoUpdated(address payable treasuryAddr, bytes name, uint256 treasuryId);
+  event TreasuryInfoUpdated(
+    address indexed updatedBy, address payable treasuryAddr, bytes name, uint256 indexed treasuryId
+  );
 
   /// @dev Revert when index is out of range
   error InvalidArrayLength();
@@ -26,9 +28,9 @@ interface INSCommission {
   error InvalidAmountOfRON();
 
   /**
-   * @dev Returns all treasury.
+   * @dev Returns comissions information.
    */
-  function getTreasuries() external view returns (Commission[] memory treasuriesInfo);
+  function getCommissions() external view returns (Commission[] memory treasuriesInfo);
 
   /**
    * @dev Sets all treasuries information
@@ -47,13 +49,5 @@ interface INSCommission {
    * - The method caller is setter role.
    * Emits the event `TreasuryInfoUpdated`.
    */
-  function changeTreasuryInfo(address payable newAddr, bytes calldata name, uint256 treasuryId) external;
-
-  /**
-   * @dev Allows specific `sender` to send money to this contract, which will then be transferred to the treasuries.
-   *
-   * Requirements:
-   * - The method caller is setter role.
-   */
-  function allowSender(address sender) external;
+  function setTreasuryInfo(uint256 treasuryId, address payable newAddr, bytes calldata name) external;
 }

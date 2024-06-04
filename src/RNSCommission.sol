@@ -8,29 +8,28 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { RONTransferHelper } from "./libraries/transfers/RONTransferHelper.sol";
 
 contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission {
+  /// @dev Constant representing the maximum percentage value (100%).
   uint256 public constant MAX_PERCENTAGE = 100_00;
+  /// @dev Role for accounts that can set commissions infomation and grant or revoke `SENDER_ROLE`.
   bytes32 public constant COMMISSION_SETTER_ROLE = keccak256("COMMISSION_SETTER_ROLE");
+  /// @dev Role for accounts that can send RON for this contract.
+  bytes32 public constant SENDER_ROLE = keccak256("SENDER_ROLE");
 
   /// @dev Gap for upgradability.
   uint256[50] private ____gap;
 
-  Commission[] internal _commissionInfo;
-  mapping(address => bool) public _allowedSenders;
+  Commission[] internal _commissionInfos;
 
   constructor() {
     _disableInitializers();
   }
 
   receive() external payable {
-    if (_isAllowedSender(msg.sender)) {
-      _allocateCommissionAndTransferToTreasury(msg.value);
-    }
+    _fallback();
   }
 
   fallback() external payable {
-    if (_isAllowedSender(msg.sender)) {
-      _allocateCommissionAndTransferToTreasury(msg.value);
-    }
+    _fallback();
   }
 
   function initialize(
@@ -40,6 +39,7 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
     address[] calldata allowedSenders
   ) external initializer {
     _setupRole(DEFAULT_ADMIN_ROLE, admin);
+
     uint256 length = commissionSetters.length;
     for (uint256 i; i < length; ++i) {
       _setupRole(COMMISSION_SETTER_ROLE, commissionSetters[i]);
@@ -47,15 +47,16 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
 
     uint256 sendersLength = allowedSenders.length;
     for (uint256 i; i < sendersLength; ++i) {
-      _allowedSenders[allowedSenders[i]] = true;
+      _setupRole(SENDER_ROLE, allowedSenders[i]);
     }
 
+    _setRoleAdmin(SENDER_ROLE, COMMISSION_SETTER_ROLE);
     _setTreasuries(treasuryCommission);
   }
 
   /// @inheritdoc INSCommission
-  function getTreasuries() external view returns (Commission[] memory treasuriesInfo) {
-    return _commissionInfo;
+  function getCommissions() external view returns (Commission[] memory treasuriesInfo) {
+    return _commissionInfos;
   }
 
   /// @inheritdoc INSCommission
@@ -64,22 +65,17 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
   }
 
   /// @inheritdoc INSCommission
-  function changeTreasuryInfo(address payable newAddr, bytes calldata name, uint256 treasuryId)
+  function setTreasuryInfo(uint256 treasuryId, address payable newAddr, bytes calldata name)
     external
     onlyRole(COMMISSION_SETTER_ROLE)
   {
-    if (treasuryId < 0 || treasuryId > _commissionInfo.length - 1) {
+    if (treasuryId > _commissionInfos.length - 1) {
       revert InvalidArrayLength();
     }
 
-    _commissionInfo[treasuryId].recipient = newAddr;
-    _commissionInfo[treasuryId].name = name;
-    emit TreasuryInfoUpdated(newAddr, name, treasuryId);
-  }
-
-  /// @inheritdoc INSCommission
-  function allowSender(address sender) external onlyRole(COMMISSION_SETTER_ROLE) {
-    _allowedSenders[sender] = true;
+    _commissionInfos[treasuryId].recipient = newAddr;
+    _commissionInfos[treasuryId].name = name;
+    emit TreasuryInfoUpdated(msg.sender, newAddr, name, treasuryId);
   }
 
   /**
@@ -89,7 +85,7 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
     if (totalAmount == 0) {
       revert InvalidAmountOfRON();
     }
-    uint256 length = _commissionInfo.length;
+    uint256 length = _commissionInfos.length;
 
     allocs = new Allocation[](length);
 
@@ -98,15 +94,15 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
 
     for (uint256 i; i < lastIdx; ++i) {
       allocs[i] = Allocation({
-        recipient: _commissionInfo[i].recipient,
-        value: _computePercentage(totalAmount, _commissionInfo[i].ratio)
+        recipient: _commissionInfos[i].recipient,
+        value: _computePercentage(totalAmount, _commissionInfos[i].ratio)
       });
       sumValue += allocs[i].value;
     }
 
-    // Refund the remaining RON to the last treasury
+    // This code replaces value of the last recipient.
     if (sumValue < totalAmount) {
-      allocs[lastIdx] = Allocation({ recipient: _commissionInfo[lastIdx].recipient, value: totalAmount - sumValue });
+      allocs[lastIdx] = Allocation({ recipient: _commissionInfos[lastIdx].recipient, value: totalAmount - sumValue });
     }
   }
 
@@ -130,27 +126,28 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
     // treasuriesInfo[] can not be empty
     if (length < 1) revert InvalidArrayLength();
 
-    delete _commissionInfo;
+    delete _commissionInfos;
 
-    uint256 sum = 0;
+    uint256 sum;
 
     for (uint256 i = 0; i < length; ++i) {
       sum += treasuriesInfo[i].ratio;
-      _commissionInfo.push(treasuriesInfo[i]);
+      _commissionInfos.push(treasuriesInfo[i]);
     }
 
     if (sum != MAX_PERCENTAGE) revert InvalidRatio();
 
-    emit TreasuriesUpdated(treasuriesInfo);
-  }
-
-  /// Check if `sender` is allowed to send money
-  function _isAllowedSender(address sender) internal view returns (bool) {
-    return _allowedSenders[sender];
+    emit TreasuriesUpdated(msg.sender, treasuriesInfo);
   }
 
   // Calculate amount of money based on treasury's ratio
   function _computePercentage(uint256 value, uint256 percentage) internal pure virtual returns (uint256) {
     return Math.mulDiv(value, percentage, MAX_PERCENTAGE);
+  }
+
+  function _fallback() internal {
+    if (hasRole(SENDER_ROLE, msg.sender)) {
+      _allocateCommissionAndTransferToTreasury(msg.value);
+    }
   }
 }
