@@ -5,7 +5,7 @@ interface INSCommission {
   struct Commission {
     address payable recipient;
     uint256 ratio; // Values [0; 100_00] reflexes [0; 100%]
-    bytes name; // Treasury's name
+    string name; // Treasury's name
   }
 
   struct Allocation {
@@ -17,7 +17,7 @@ interface INSCommission {
   event TreasuriesUpdated(address indexed updatedBy, Commission[] treasuriesInfo);
   /// @dev Emitted when specific treasury info are updated.
   event TreasuryInfoUpdated(
-    address indexed updatedBy, address payable treasuryAddr, bytes name, uint256 indexed treasuryId
+    address indexed updatedBy, address payable treasuryAddr, string name, uint256 indexed treasuryId
   );
 
   /// @dev Revert when index is out of range
@@ -49,5 +49,5 @@ interface INSCommission {
    * - The method caller is setter role.
    * Emits the event `TreasuryInfoUpdated`.
    */
-  function setTreasuryInfo(uint256 treasuryId, address payable newAddr, bytes calldata name) external;
+  function setTreasuryInfo(uint256 treasuryId, address payable newAddr, string calldata name) external;
 }

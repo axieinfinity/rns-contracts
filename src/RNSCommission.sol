@@ -65,7 +65,7 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
   }
 
   /// @inheritdoc INSCommission
-  function setTreasuryInfo(uint256 treasuryId, address payable newAddr, bytes calldata name)
+  function setTreasuryInfo(uint256 treasuryId, address payable newAddr, string calldata name)
     external
     onlyRole(COMMISSION_SETTER_ROLE)
   {
@@ -113,7 +113,7 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
     INSCommission.Allocation[] memory allocs = _calcAllocations(ronAmount);
     uint256 length = allocs.length;
 
-    for (uint256 i = 0; i < length; ++i) {
+    for (uint256 i; i < length; ++i) {
       uint256 value = allocs[i].value;
       address payable recipient = allocs[i].recipient;
 
@@ -124,13 +124,13 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
   function _setTreasuries(Commission[] calldata treasuriesInfo) internal {
     uint256 length = treasuriesInfo.length;
     // treasuriesInfo[] can not be empty
-    if (length < 1) revert InvalidArrayLength();
+    if (length == 0) revert InvalidArrayLength();
 
     delete _commissionInfos;
 
     uint256 sum;
 
-    for (uint256 i = 0; i < length; ++i) {
+    for (uint256 i; i < length; ++i) {
       sum += treasuriesInfo[i].ratio;
       _commissionInfos.push(treasuriesInfo[i]);
     }
