@@ -5,7 +5,7 @@ interface INSCommission {
   struct Commission {
     address payable recipient;
     uint256 ratio; // Values [0; 100_00] reflexes [0; 100%]
-    string name; // Treasury's name
+    string name; // Commission's name
   }
 
   struct Allocation {
@@ -13,11 +13,11 @@ interface INSCommission {
     uint256 value;
   }
 
-  /// @dev Emitted when all the treasury info info are updated.
-  event TreasuriesUpdated(address indexed updatedBy, Commission[] treasuriesInfo);
-  /// @dev Emitted when specific treasury info are updated.
-  event TreasuryInfoUpdated(
-    address indexed updatedBy, address payable treasuryAddr, string name, uint256 indexed treasuryId
+  /// @dev Emitted when all the commission info is updated.
+  event CommissionsUpdated(address indexed updatedBy, Commission[] commissionInfo);
+  /// @dev Emitted when specific commission info is updated.
+  event CommissionInfoUpdated(
+    address indexed updatedBy, address payable newRecipient, string name, uint256 indexed commissionIdx
   );
 
   /// @dev Revert when index is out of range
@@ -30,24 +30,24 @@ interface INSCommission {
   /**
    * @dev Returns comissions information.
    */
-  function getCommissions() external view returns (Commission[] memory treasuriesInfo);
+  function getCommissions() external view returns (Commission[] memory commissionInfos);
 
   /**
-   * @dev Sets all treasuries information
+   * @dev Sets all commission information
    *
    * Requirements:
    * - The method caller is setter role.
    * - The total ratio must be equal to 100%.
-   * Emits the event `TreasuriesUpdated`.
+   * Emits the event `CommissionsUpdated`.
    */
-  function setTreasuries(Commission[] calldata treasuriesInfo) external;
+  function setCommissions(Commission[] calldata commissionInfos) external;
 
   /**
-   * @dev Sets for specific treasury information based on the treasury `id`.
+   * @dev Sets for specific commission information based on the `commissionIdx`.
    *
    * Requirements:
    * - The method caller is setter role.
-   * Emits the event `TreasuryInfoUpdated`.
+   * Emits the event `CommissionInfoUpdated`.
    */
-  function setTreasuryInfo(uint256 treasuryId, address payable newAddr, string calldata name) external;
+  function setCommissionInfo(uint256 commissionIdx, address payable newAddr, string calldata name) external;
 }

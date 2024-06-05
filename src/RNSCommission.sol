@@ -31,7 +31,7 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
   function initialize(
     address admin,
     address[] calldata commissionSetters,
-    Commission[] calldata treasuryCommission,
+    Commission[] calldata commissionInfos,
     address[] calldata allowedSenders
   ) external initializer {
     _setupRole(DEFAULT_ADMIN_ROLE, admin);
@@ -47,31 +47,31 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
     }
 
     _setRoleAdmin(SENDER_ROLE, COMMISSION_SETTER_ROLE);
-    _setTreasuries(treasuryCommission);
+    _setCommissions(commissionInfos);
   }
 
   /// @inheritdoc INSCommission
-  function getCommissions() external view returns (Commission[] memory treasuriesInfo) {
+  function getCommissions() external view returns (Commission[] memory commissionInfos) {
     return _commissionInfos;
   }
 
   /// @inheritdoc INSCommission
-  function setTreasuries(Commission[] calldata treasuriesInfo) external onlyRole(COMMISSION_SETTER_ROLE) {
-    _setTreasuries(treasuriesInfo);
+  function setCommissions(Commission[] calldata commissionInfos) external onlyRole(COMMISSION_SETTER_ROLE) {
+    _setCommissions(commissionInfos);
   }
 
   /// @inheritdoc INSCommission
-  function setTreasuryInfo(uint256 treasuryId, address payable newAddr, string calldata name)
+  function setCommissionInfo(uint256 commissionIdx, address payable newRecipient, string calldata name)
     external
     onlyRole(COMMISSION_SETTER_ROLE)
   {
-    if (treasuryId > _commissionInfos.length - 1) {
+    if (commissionIdx > _commissionInfos.length - 1) {
       revert InvalidArrayLength();
     }
 
-    _commissionInfos[treasuryId].recipient = newAddr;
-    _commissionInfos[treasuryId].name = name;
-    emit TreasuryInfoUpdated(msg.sender, newAddr, name, treasuryId);
+    _commissionInfos[commissionIdx].recipient = newRecipient;
+    _commissionInfos[commissionIdx].name = name;
+    emit CommissionInfoUpdated(msg.sender, newRecipient, name, commissionIdx);
   }
 
   /**
@@ -103,9 +103,9 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
   }
 
   /**
-   * @dev Helper method to allocate commission and take fee into treasuries address.
+   * @dev Helper method to allocate commission and take fee into recipient address.
    */
-  function _allocateCommissionAndTransferToTreasury(uint256 ronAmount) internal {
+  function _allocateCommissionAndTransferToRecipient(uint256 ronAmount) internal {
     INSCommission.Allocation[] memory allocs = _calcAllocations(ronAmount);
     uint256 length = allocs.length;
 
@@ -117,9 +117,9 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
     }
   }
 
-  function _setTreasuries(Commission[] calldata treasuriesInfo) internal {
-    uint256 length = treasuriesInfo.length;
-    // treasuriesInfo[] can not be empty
+  function _setCommissions(Commission[] calldata commissionInfos) internal {
+    uint256 length = commissionInfos.length;
+    // commissionInfos[] can not be empty
     if (length == 0) revert InvalidArrayLength();
 
     delete _commissionInfos;
@@ -127,23 +127,23 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
     uint256 sum;
 
     for (uint256 i; i < length; ++i) {
-      sum += treasuriesInfo[i].ratio;
-      _commissionInfos.push(treasuriesInfo[i]);
+      sum += commissionInfos[i].ratio;
+      _commissionInfos.push(commissionInfos[i]);
     }
 
     if (sum != MAX_PERCENTAGE) revert InvalidRatio();
 
-    emit TreasuriesUpdated(msg.sender, treasuriesInfo);
+    emit CommissionsUpdated(msg.sender, commissionInfos);
   }
 
-  // Calculate amount of money based on treasury's ratio
+  // Calculate amount of money based on commission's ratio
   function _computePercentage(uint256 value, uint256 percentage) internal pure virtual returns (uint256) {
     return Math.mulDiv(value, percentage, MAX_PERCENTAGE);
   }
 
   function _fallback() internal {
     if (hasRole(SENDER_ROLE, msg.sender)) {
-      _allocateCommissionAndTransferToTreasury(msg.value);
+      _allocateCommissionAndTransferToRecipient(msg.value);
     }
   }
 }
