@@ -28,10 +28,6 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
     _fallback();
   }
 
-  fallback() external payable {
-    _fallback();
-  }
-
   function initialize(
     address admin,
     address[] calldata commissionSetters,
