@@ -91,4 +91,3 @@ contract RNSCommissionTest is Test {
     assert(commissionInfo.length == 2);
   }
 }
-//asds
