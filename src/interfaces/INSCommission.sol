@@ -8,17 +8,14 @@ interface INSCommission {
     string name; // Commission's name
   }
 
-  struct Allocation {
-    address payable recipient;
-    uint256 value;
-  }
-
   /// @dev Emitted when all the commission info is updated.
   event CommissionsUpdated(address indexed updatedBy, Commission[] commissionInfos);
   /// @dev Emitted when specific commission info is updated.
   event CommissionInfoUpdated(
     address indexed updatedBy, uint256 indexed commissionIdx, address payable newRecipient, string newName
   );
+  /// @dev Emiited when transfer RON to commission's recipient.
+  event Transfer(address indexed recipient, uint256 commissionAmount);
 
   /// @dev Revert when index is out of range
   error InvalidArrayLength();
@@ -26,6 +23,16 @@ interface INSCommission {
   error InvalidRatio();
   /// @dev Revert when amount of RON is invalid
   error InvalidAmountOfRON();
+
+  /**
+   * @dev Maximum commission percentage.
+   */
+  function MAX_PERCENTAGE() external pure returns (uint256);
+
+  /**
+   * @dev Returns the sender role.
+   */
+  function SENDER_ROLE() external pure returns (bytes32);
 
   /**
    * @dev Returns comissions information.
