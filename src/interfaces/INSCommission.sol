@@ -15,7 +15,7 @@ interface INSCommission {
     address indexed updatedBy, uint256 indexed commissionIdx, address payable newRecipient, string newName
   );
   /// @dev Emiited when transfer RON to commission's recipient.
-  event Transfer(address indexed recipient, uint256 commissionAmount);
+  event Distributed(address indexed recipient, uint256 commissionAmount);
 
   /// @dev Revert when index is out of range
   error InvalidArrayLength();

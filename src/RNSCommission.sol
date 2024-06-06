@@ -78,13 +78,13 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
       sumValue += commissionAmount;
 
       RONTransferHelper.safeTransfer(_commissionInfos[i].recipient, commissionAmount);
-      emit Transfer(_commissionInfos[i].recipient, commissionAmount);
+      emit Distributed(_commissionInfos[i].recipient, commissionAmount);
     }
 
     // This code send the remaining RON to the last recipient.
     if (sumValue < ronAmount) {
       RONTransferHelper.safeTransfer(_commissionInfos[lastIdx].recipient, ronAmount - sumValue);
-      emit Transfer(_commissionInfos[lastIdx].recipient, ronAmount - sumValue);
+      emit Distributed(_commissionInfos[lastIdx].recipient, ronAmount - sumValue);
     }
   }
 
