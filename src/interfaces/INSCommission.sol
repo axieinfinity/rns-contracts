@@ -17,7 +17,7 @@ interface INSCommission {
   event CommissionsUpdated(address indexed updatedBy, Commission[] commissionInfos);
   /// @dev Emitted when specific commission info is updated.
   event CommissionInfoUpdated(
-    address indexed updatedBy, address payable newRecipient, string name, uint256 indexed commissionIdx
+    address indexed updatedBy, uint256 indexed commissionIdx, address payable newRecipient, string newName
   );
 
   /// @dev Revert when index is out of range

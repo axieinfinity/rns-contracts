@@ -4,7 +4,6 @@ pragma solidity ^0.8.19;
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { AccessControlEnumerable } from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import { INSCommission } from "./interfaces/INSCommission.sol";
-import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { RONTransferHelper } from "./libraries/transfers/RONTransferHelper.sol";
 
 contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission {
@@ -61,7 +60,7 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
   }
 
   /// @inheritdoc INSCommission
-  function setCommissionInfo(uint256 commissionIdx, address payable newRecipient, string calldata name)
+  function setCommissionInfo(uint256 commissionIdx, address payable newRecipient, string calldata newName)
     external
     onlyRole(COMMISSION_SETTER_ROLE)
   {
@@ -70,8 +69,8 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
     }
 
     _commissionInfos[commissionIdx].recipient = newRecipient;
-    _commissionInfos[commissionIdx].name = name;
-    emit CommissionInfoUpdated(msg.sender, newRecipient, name, commissionIdx);
+    _commissionInfos[commissionIdx].name = newName;
+    emit CommissionInfoUpdated(msg.sender, commissionIdx, newRecipient, newName);
   }
 
   /**
@@ -138,7 +137,7 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
 
   // Calculate amount of money based on commission's ratio
   function _computePercentage(uint256 value, uint256 percentage) internal pure virtual returns (uint256) {
-    return Math.mulDiv(value, percentage, MAX_PERCENTAGE);
+    return (value * percentage) / MAX_PERCENTAGE;
   }
 
   function _fallback() internal {
