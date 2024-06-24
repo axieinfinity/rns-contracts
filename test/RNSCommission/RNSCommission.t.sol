@@ -8,7 +8,7 @@ import { INSCommission } from "@rns-contracts/interfaces/INSCommission.sol";
 
 contract RNSCommissionTest is Test {
   event CommissionsUpdated(address indexed updatedBy, INSCommission.Commission[] commissionInfos);
-
+  event Distributed(address indexed recipient, uint256 commissionAmount);
   event CommissionInfoUpdated(
     address indexed updatedBy, uint256 indexed commissionIdx, address payable newRecipient, string newName
   );
@@ -22,9 +22,6 @@ contract RNSCommissionTest is Test {
   string[] internal _names;
   uint256 internal _skyMavisRatio;
   uint256 internal _roninRatio;
-  INSCommission.Commission[] internal _treasuryCommission;
-
-  mapping(bytes4 errorCode => string indentifier) internal _errorIndentifier;
 
   function setUp() public {
     _admin = makeAddr("admin");
@@ -48,10 +45,6 @@ contract RNSCommissionTest is Test {
       INSCommission.Commission({ recipient: _skyMavisTreasuryAddr, ratio: _skyMavisRatio, name: _names[0] });
     treasuryCommission[1] =
       INSCommission.Commission({ recipient: _roninNetworkTreasuryAddr, ratio: _roninRatio, name: _names[1] });
-
-    _errorIndentifier[INSCommission.InvalidAmountOfRON.selector] = "InvalidAmountOfRON";
-    _errorIndentifier[INSCommission.InvalidArrayLength.selector] = "InvalidArrayLength";
-    _errorIndentifier[INSCommission.InvalidRatio.selector] = "InvalidRatio";
 
     address payable logic = payable(address(new RNSCommission()));
 

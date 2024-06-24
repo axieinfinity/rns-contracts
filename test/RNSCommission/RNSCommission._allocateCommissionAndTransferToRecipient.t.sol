@@ -7,8 +7,15 @@ contract RNSCommisson__allocateCommissionAndTransferToRecipient_Test is RNSCommi
   function test__allocateCommissionAndTransferToRecipient_SenderRole_MultiRecipient(uint256 amountRON) external {
     vm.assume(amountRON > 0);
     vm.assume(amountRON < 1e9 * 1e18);
+    RNSCommission.Commission[] memory commissionInfos = _rnsCommission.getCommissions();
 
     vm.deal(_senders[0], amountRON);
+
+    for (uint256 i; i < commissionInfos.length; i++) {
+      vm.expectEmit(true, false, false, false);
+      emit Distributed(commissionInfos[i].recipient, (amountRON * commissionInfos[i].ratio) / 100_00);
+    }
+
     bool sent;
     vm.prank(_senders[0]);
     (sent,) = address(_rnsCommission).call{ value: amountRON }(new bytes(0));
@@ -37,6 +44,9 @@ contract RNSCommisson__allocateCommissionAndTransferToRecipient_Test is RNSCommi
 
     vm.deal(_senders[0], amountRON);
     bool sent;
+    vm.expectEmit(true, false, false, true);
+    emit Distributed(recipient, amountRON);
+
     vm.prank(_senders[0]);
     (sent,) = address(_rnsCommission).call{ value: amountRON }(new bytes(0));
 
