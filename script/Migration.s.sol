@@ -80,11 +80,11 @@ abstract contract Migration is BaseMigration {
       param.rnsCommission.allowedSenders = new address[](2);
 
       param.rnsCommission.treasuryCommission = new INSCommission.Commission[](2);
-      param.rnsCommission.treasuryCommission[0].recipient = payable(0x32f830633DfC64E213EAC4f80660B65CF722dD0B);
+      param.rnsCommission.treasuryCommission[0].recipient = payable(defaultAdmin);
       param.rnsCommission.treasuryCommission[0].ratio = 70_00;
       param.rnsCommission.treasuryCommission[0].name = "Sky Mavis";
 
-      param.rnsCommission.treasuryCommission[1].recipient = payable(0x407E58588c983643a0A121eeaCB3661289235327);
+      param.rnsCommission.treasuryCommission[1].recipient = payable(defaultAdmin);
       param.rnsCommission.treasuryCommission[1].ratio = 30_00;
       param.rnsCommission.treasuryCommission[1].name = "Ronin";
     } else if (network() == DefaultNetwork.RoninMainnet.key()) {
