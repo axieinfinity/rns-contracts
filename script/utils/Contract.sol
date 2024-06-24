@@ -13,7 +13,8 @@ enum Contract {
   PublicResolver,
   OwnedMulticaller,
   RNSReverseRegistrar,
-  RONRegistrarController
+  RONRegistrarController,
+  RNSCommission
 }
 
 using { key, name } for Contract global;
@@ -32,5 +33,6 @@ function name(Contract contractEnum) pure returns (string memory) {
   if (contractEnum == Contract.OwnedMulticaller) return "OwnedMulticaller";
   if (contractEnum == Contract.RNSReverseRegistrar) return "RNSReverseRegistrar";
   if (contractEnum == Contract.RONRegistrarController) return "RONRegistrarController";
+  if (contractEnum == Contract.RNSCommission) return "RNSCommission";
   revert("Contract: Unknown contract");
 }
