@@ -71,6 +71,22 @@ abstract contract Migration is BaseMigration {
       param.rnsUnified.protectedSettler = defaultAdmin;
       param.rnsUnified.gracePeriod = 90 days;
       param.rnsUnified.baseTokenURI = "https://metadata-rns.skymavis.one/saigon/";
+
+      // RNSCommission
+      param.rnsCommission.admin = defaultAdmin;
+      param.rnsCommission.commissionSetters = new address[](1);
+      param.rnsCommission.commissionSetters[0] = defaultAdmin;
+
+      param.rnsCommission.allowedSenders = new address[](2);
+
+      param.rnsCommission.treasuryCommission = new INSCommission.Commission[](2);
+      param.rnsCommission.treasuryCommission[0].recipient = payable(defaultAdmin);
+      param.rnsCommission.treasuryCommission[0].ratio = 70_00;
+      param.rnsCommission.treasuryCommission[0].name = "Sky Mavis";
+
+      param.rnsCommission.treasuryCommission[1].recipient = payable(defaultAdmin);
+      param.rnsCommission.treasuryCommission[1].ratio = 30_00;
+      param.rnsCommission.treasuryCommission[1].name = "Ronin";
     } else if (network() == DefaultNetwork.RoninMainnet.key()) {
       address duke = 0x0F68eDBE14C8f68481771016d7E2871d6a35DE11;
       address andy = 0xEd4A9F48a62Fb6FdcfB45Bb00C9f61D1A436E58C;
