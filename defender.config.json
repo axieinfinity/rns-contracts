@@ -1,0 +1,18 @@
+{
+    "contract_inspector": {
+        "enabled": true,
+        "scan_directories": ["src"],
+        "exclude_rules": [
+            "inconsistent-use-named-returns", 
+            "unused-named-returns",
+            "different-pragma-directives",
+            "floating-pragma",
+            "missing-docstrings",
+            "require-multiple-conditions",
+            "unchecked-increment",
+            "lack-of-gap-variable",
+            "lack-of-security-contact",
+            "non-explicit-imports"
+        ]
+    }
+}
