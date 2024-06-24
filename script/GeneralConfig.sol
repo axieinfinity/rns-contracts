@@ -17,6 +17,7 @@ contract GeneralConfig is BaseGeneralConfig {
     _mapContractName(Contract.OwnedMulticaller);
     _mapContractName(Contract.RNSReverseRegistrar);
     _mapContractName(Contract.RONRegistrarController);
+    _mapContractName(Contract.RNSCommission);
   }
 
   function _mapContractName(Contract contractEnum) internal {
