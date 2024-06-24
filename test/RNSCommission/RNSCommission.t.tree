@@ -1,0 +1,21 @@
+RNSCommission
+    setCommissions
+        emit CommissionsUpdated
+        revert if 
+            commissions length is 0
+            sum commissions ratio is not 100 percent
+        can set commissions with only one commission
+
+    setCommissionInfo
+        emit CommissionInfoUpdated
+        revert if index of update commission is out of range
+
+    _allocateCommissionAndTransferToRecipient
+        emit Distributed for each success transfer
+        revert if
+            amount of Ron need to transfer is 0
+            commissions length is 0
+        can transfer even if there is only 1 commission
+        if sender does not have `SENDER_ROLE` sender's money will remain in the contract
+
+    
