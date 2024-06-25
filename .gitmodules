@@ -1,9 +1,3 @@
-[submodule "lib/forge-std"]
-	path = lib/forge-std
-	url = https://github.com/foundry-rs/forge-std
-[submodule "lib/openzeppelin-contracts"]
-	path = lib/openzeppelin-contracts
-	url = https://github.com/openzeppelin/openzeppelin-contracts
 [submodule "lib/contract-template"]
 	path = lib/contract-template
 	url = https://github.com/axieinfinity/contract-template
@@ -13,15 +7,6 @@
 [submodule "lib/buffer"]
 	path = lib/buffer
 	url = https://github.com/ensdomains/buffer
-[submodule "lib/pyth-sdk-solidity"]
-	path = lib/pyth-sdk-solidity
-	url = https://github.com/pyth-network/pyth-sdk-solidity
-[submodule "lib/solady"]
-	path = lib/solady
-	url = https://github.com/vectorized/solady
-[submodule "lib/foundry-deployment-kit"]
-	path = lib/foundry-deployment-kit
-	url = https://github.com/axieinfinity/foundry-deployment-kit
 [submodule "lib/contract-libs"]
 	path = lib/contract-libs
 	url = https://github.com/axieinfinity/contract-libs

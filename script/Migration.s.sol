@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { BaseMigration } from "foundry-deployment-kit/BaseMigration.s.sol";
-import { DefaultNetwork } from "foundry-deployment-kit/utils/DefaultNetwork.sol";
+import { BaseMigration } from "@fdk/BaseMigration.s.sol";
+import { DefaultNetwork } from "@fdk/utils/DefaultNetwork.sol";
 import { GeneralConfig } from "./GeneralConfig.sol";
 import "./interfaces/ISharedArgument.sol";
 

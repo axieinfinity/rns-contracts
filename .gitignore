@@ -22,3 +22,5 @@ yarn-error.log
 .yarn
 .yarnrc.yml
 script/data/*
+dependencies
+deployments/**/exported_address

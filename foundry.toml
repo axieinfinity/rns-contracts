@@ -28,3 +28,7 @@ runs = 256
 
 [invariant]
 runs = 256
+[dependencies]
+"@fdk" = { version = "0.3.0-beta", url = "https://github.com/axieinfinity/foundry-deployment-kit/archive/refs/tags/v0.3.0-beta.zip" }
+"@pythnetwork-pyth-sdk-solidity" = { version = "2.2.0" }
+"@openzeppelin-contracts" = { version = "4.9.3" }

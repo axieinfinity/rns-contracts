@@ -6,7 +6,7 @@ import {
   ITransparentUpgradeableProxy,
   TransparentUpgradeableProxy
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import { LibProxy } from "foundry-deployment-kit/libraries/LibProxy.sol";
+import { LibProxy } from "@fdk/libraries/LibProxy.sol";
 import { NameChecker } from "@rns-contracts/NameChecker.sol";
 import { Contract } from "script/utils/Contract.sol";
 import { Migration } from "script/Migration.s.sol";

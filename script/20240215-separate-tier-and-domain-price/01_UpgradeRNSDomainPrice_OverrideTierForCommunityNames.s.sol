@@ -3,9 +3,9 @@ pragma solidity ^0.8.19;
 
 import { StdStyle } from "forge-std/StdStyle.sol";
 import { IMulticall3 } from "forge-std/interfaces/IMulticall3.sol";
-import { LibString } from "solady/utils/LibString.sol";
-import { DefaultNetwork } from "foundry-deployment-kit/utils/DefaultNetwork.sol";
-import { DefaultContract } from "foundry-deployment-kit/utils/DefaultContract.sol";
+import { LibString } from "@solady/utils/LibString.sol";
+import { DefaultNetwork } from "@fdk/utils/DefaultNetwork.sol";
+import { DefaultContract } from "@fdk/utils/DefaultContract.sol";
 import { Contract } from "../utils/Contract.sol";
 import { INSDomainPrice, RNSDomainPrice } from "@rns-contracts/RNSDomainPrice.sol";
 import "./20240215_Migration.s.sol";

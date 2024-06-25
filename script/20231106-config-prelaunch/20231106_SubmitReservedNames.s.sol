@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import { console2 as console } from "forge-std/console2.sol";
 import { Contract } from "script/utils/Contract.sol";
-import { JSONParserLib } from "solady/utils/JSONParserLib.sol";
+import { JSONParserLib } from "@solady/utils/JSONParserLib.sol";
 import { Migration } from "script/Migration.s.sol";
 import { LibRNSDomain, RNSUnified } from "@rns-contracts/RNSUnified.sol";
 import { OwnedMulticaller, OwnedMulticallerDeploy } from "script/contracts/OwnedMulticallerDeploy.s.sol";
