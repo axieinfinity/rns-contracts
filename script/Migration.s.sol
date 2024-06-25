@@ -16,7 +16,7 @@ abstract contract Migration is BaseMigration {
   function _sharedArguments() internal view virtual override returns (bytes memory rawArgs) {
     ISharedArgument.SharedParameter memory param;
 
-    if (network() == DefaultNetwork.RoninTestnet.key()) {
+    if (network() == DefaultNetwork.RoninTestnet.key() || network() == DefaultNetwork.LocalHost.key()) {
       address defaultAdmin = 0x968D0Cd7343f711216817E617d3f92a23dC91c07;
       address defaultPauser = defaultAdmin;
       address defaultOperator = defaultAdmin;
