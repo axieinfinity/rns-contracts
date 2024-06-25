@@ -14,7 +14,7 @@ interface INSCommission {
   event CommissionInfoUpdated(
     address indexed updatedBy, uint256 indexed commissionIdx, address payable newRecipient, string newName
   );
-  /// @dev Emiited when transfer RON to commission's recipient.
+  /// @dev Emitted when transfer RON to commission's recipient.
   event Distributed(address indexed recipient, uint256 commissionAmount);
 
   /// @dev Revert when index is out of range
@@ -23,6 +23,8 @@ interface INSCommission {
   error InvalidRatio();
   /// @dev Revert when amount of RON is invalid
   error InvalidAmountOfRON();
+  /// @dev Revert when recipient address is null
+  error NullAddress();
 
   /**
    * @dev Maximum commission percentage.
@@ -35,7 +37,7 @@ interface INSCommission {
   function SENDER_ROLE() external pure returns (bytes32);
 
   /**
-   * @dev Returns comissions information.
+   * @dev Returns commissions information.
    */
   function getCommissions() external view returns (Commission[] memory commissionInfos);
 

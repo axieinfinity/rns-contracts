@@ -12,9 +12,9 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
   /// @dev Role for accounts that can send RON for this contract.
   bytes32 public constant SENDER_ROLE = keccak256("SENDER_ROLE");
 
-  /// @dev Gap for upgradability.
+  /// @dev Gap for upgradeability.
   uint256[50] private ____gap;
-  /// @dev Array of `Commission` structs that store commissions infomation.
+  /// @dev Array of `Commission` structs that store commissions information.
   Commission[] internal _commissionInfos;
 
   constructor() {
@@ -55,6 +55,8 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
     onlyRole(DEFAULT_ADMIN_ROLE)
   {
     if (commissionIdx >= _commissionInfos.length) revert InvalidArrayLength();
+    // TODO: should fix to not duplicate logic in set commision info
+    if (newRecipient == address(0)) revert NullAddress();
 
     _commissionInfos[commissionIdx].recipient = newRecipient;
     _commissionInfos[commissionIdx].name = newName;
@@ -98,6 +100,8 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
     uint256 sum;
 
     for (uint256 i; i < length; ++i) {
+      if (commissionInfos[i].recipient == address(0)) revert NullAddress();
+
       sum += commissionInfos[i].ratio;
       _commissionInfos.push(commissionInfos[i]);
     }
