@@ -16,8 +16,8 @@ contract Migration__20240624_MigrateAuctionAndControllerTreasuryAndDeployRNSComm
   address private _defaultAdmin;
 
   function run() public {
-    _controller = RONRegistrarController(loadContract(Contract.RONRegistrarController.key()));
     _auction = RNSAuction(loadContract(Contract.RNSAuction.key()));
+    _controller = RONRegistrarController(_upgradeProxy(Contract.RONRegistrarController.key()));
 
     _rnsCommission = new RNSCommissionDeploy().run();
     _defaultAdmin = 0x968D0Cd7343f711216817E617d3f92a23dC91c07;
