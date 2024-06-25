@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { BaseMigration } from "foundry-deployment-kit/BaseMigration.s.sol";
-import { DefaultNetwork } from "foundry-deployment-kit/utils/DefaultNetwork.sol";
+import { BaseMigration } from "@fdk/BaseMigration.s.sol";
+import { DefaultNetwork } from "@fdk/utils/DefaultNetwork.sol";
 import { GeneralConfig } from "./GeneralConfig.sol";
 import "./interfaces/ISharedArgument.sol";
 
@@ -16,7 +16,7 @@ abstract contract Migration is BaseMigration {
   function _sharedArguments() internal view virtual override returns (bytes memory rawArgs) {
     ISharedArgument.SharedParameter memory param;
 
-    if (network() == DefaultNetwork.RoninTestnet.key()) {
+    if (network() == DefaultNetwork.RoninTestnet.key() || network() == DefaultNetwork.LocalHost.key()) {
       address defaultAdmin = 0x968D0Cd7343f711216817E617d3f92a23dC91c07;
       address defaultPauser = defaultAdmin;
       address defaultOperator = defaultAdmin;

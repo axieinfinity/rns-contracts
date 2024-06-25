@@ -3,9 +3,9 @@ pragma solidity ^0.8.19;
 
 import { StdStyle } from "forge-std/StdStyle.sol";
 import { IMulticall3 } from "forge-std/interfaces/IMulticall3.sol";
-import { LibString } from "solady/utils/LibString.sol";
-import { DefaultNetwork } from "foundry-deployment-kit/utils/DefaultNetwork.sol";
-import { DefaultContract } from "foundry-deployment-kit/utils/DefaultContract.sol";
+import { LibString } from "@solady/utils/LibString.sol";
+import { DefaultNetwork } from "@fdk/utils/DefaultNetwork.sol";
+import { DefaultContract } from "@fdk/utils/DefaultContract.sol";
 import { Contract } from "../utils/Contract.sol";
 import { INSDomainPrice, RNSDomainPrice } from "@rns-contracts/RNSDomainPrice.sol";
 import "./20240215_Migration.s.sol";
@@ -58,7 +58,7 @@ contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNS
     _validateOtherDomainTiers();
   }
 
-  function _validateOtherDomainTiers() internal logFn("_validating other domain tiers ...") {
+  function _validateOtherDomainTiers() internal view logFn("_validating other domain tiers ...") {
     if (network() == DefaultNetwork.RoninMainnet.key()) {
       assertEq(uint8(_domainPrice.getTier("tudo")), uint8(INSDomainPrice.Tier.Tier2), "invalid tier for tudo");
       assertEq(uint8(_domainPrice.getTier("duke")), uint8(INSDomainPrice.Tier.Tier2), "invalid tier for duke");
