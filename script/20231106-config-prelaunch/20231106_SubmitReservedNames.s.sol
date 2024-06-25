@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { console2 as console } from "forge-std/console2.sol";
+import { console } from "forge-std/console.sol";
 import { Contract } from "script/utils/Contract.sol";
 import { JSONParserLib } from "@solady/utils/JSONParserLib.sol";
 import { Migration } from "script/Migration.s.sol";

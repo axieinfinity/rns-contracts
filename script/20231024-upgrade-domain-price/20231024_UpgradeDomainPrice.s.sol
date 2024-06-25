@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { console2 as console } from "forge-std/console2.sol";
+import { console } from "forge-std/console.sol";
 import { Contract } from "script/utils/Contract.sol";
 import { RNSDomainPrice } from "@rns-contracts/RNSDomainPrice.sol";
 import { ISharedArgument, Config__20231024 } from "./20231024_Config.s.sol";

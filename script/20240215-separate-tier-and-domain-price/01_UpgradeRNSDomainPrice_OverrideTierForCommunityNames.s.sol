@@ -58,7 +58,7 @@ contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNS
     _validateOtherDomainTiers();
   }
 
-  function _validateOtherDomainTiers() internal logFn("_validating other domain tiers ...") {
+  function _validateOtherDomainTiers() internal view logFn("_validating other domain tiers ...") {
     if (network() == DefaultNetwork.RoninMainnet.key()) {
       assertEq(uint8(_domainPrice.getTier("tudo")), uint8(INSDomainPrice.Tier.Tier2), "invalid tier for tudo");
       assertEq(uint8(_domainPrice.getTier("duke")), uint8(INSDomainPrice.Tier.Tier2), "invalid tier for duke");

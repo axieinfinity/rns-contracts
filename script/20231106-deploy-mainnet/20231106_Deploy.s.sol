@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { console2 as console } from "forge-std/console2.sol";
+import { console } from "forge-std/console.sol";
 import { StdStyle } from "forge-std/StdStyle.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
