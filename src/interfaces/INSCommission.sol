@@ -23,6 +23,8 @@ interface INSCommission {
   error InvalidRatio();
   /// @dev Revert when amount of RON is invalid
   error InvalidAmountOfRON();
+  /// @dev Revert when recipient address is null
+  error NullAddress();
 
   /**
    * @dev Maximum commission percentage.
