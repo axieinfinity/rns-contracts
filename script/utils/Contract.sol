@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { LibString } from "lib/solady/src/utils/LibString.sol";
-import { TContract } from "foundry-deployment-kit/types/Types.sol";
+import { LibString } from "@solady/utils/LibString.sol";
+import { TContract } from "@fdk/types/Types.sol";
 
 enum Contract {
   RNSUnified,

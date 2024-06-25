@@ -1,1 +1,1 @@
-source lib/foundry-deployment-kit/debug.sh
+source dependencies/@fdk-0.3.0-beta/debug.sh
