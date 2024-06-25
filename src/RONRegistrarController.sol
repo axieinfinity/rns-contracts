@@ -92,8 +92,8 @@ contract RONRegistrarController is
     _setPriceOracle(priceOracle);
     _setMinRegistrationDuration(minRegistrationDuration);
     _setCommitmentAge(minCommitmentAge, maxCommitmentAge);
+    _setTreasury(treasury);
 
-    _treasury = treasury;
     _rnsUnified = rnsUnified;
     _nameChecker = nameChecker;
     _reverseRegistrar = reverseRegistrar;
@@ -281,7 +281,7 @@ contract RONRegistrarController is
    * @inheritdoc IRONRegistrarController
    */
   function setTreasury(address payable addr) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    _treasury = addr;
+    _setTreasury(addr);
   }
 
   /**
@@ -450,6 +450,19 @@ contract RONRegistrarController is
   function _setPriceOracle(INSDomainPrice priceOracle) internal {
     _priceOracle = priceOracle;
     emit DomainPriceUpdated(_msgSender(), priceOracle);
+  }
+
+  /**
+   * @dev Helper method to update treasury address.
+   *
+   * Emits an event {TreasuryUpdated}.
+   */
+  function _setTreasury(address payable addr) internal {
+    if (addr == address(0x0)) revert NullAddress();
+
+    _treasury = addr;
+
+    emit TreasuryUpdated(addr);
   }
 
   /**
