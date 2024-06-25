@@ -38,6 +38,8 @@ interface IRONRegistrarController {
   error ErrInvalidRegisterProtectedName(string name, address requestOwner, bool nameProtected, bool ownerWhitelisted);
   /// @dev Thrown when received invalid array length
   error InvalidArrayLength();
+  /// @dev Thrown when treasury address is set to null
+  error NullAddress();
 
   /**
    * @dev Emitted when the min registration duration is updated.
@@ -45,6 +47,9 @@ interface IRONRegistrarController {
    * @param duration The new duration in seconds.
    */
   event MinRegistrationDurationUpdated(address indexed operator, uint256 duration);
+
+  /// @dev Emitted when the treasury is updated.
+  event TreasuryUpdated(address indexed addr);
 
   /**
    * @dev Emitted when RNSDomainPrice contract is updated.
