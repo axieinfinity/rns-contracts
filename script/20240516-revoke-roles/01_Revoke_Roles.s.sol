@@ -7,7 +7,7 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { AccessControlEnumerable } from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import { LibRNSDomain } from "src/libraries/LibRNSDomain.sol";
-import { DefaultNetwork } from "foundry-deployment-kit/utils/DefaultNetwork.sol";
+import { DefaultNetwork } from "@fdk/utils/DefaultNetwork.sol";
 
 contract Migration__01_Revoke_Roles is Migration {
   address duke = 0x0F68eDBE14C8f68481771016d7E2871d6a35DE11;
