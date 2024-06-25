@@ -18,6 +18,13 @@ for dir in */; do
     echo "Updating dependencies in: $dir"
     cd "$dir" || exit 1
 
+    # Check if soldeer.lock exists
+    if [ ! -f "soldeer.lock" ]; then
+      echo "soldeer.lock does not exist in: $dir"
+      cd ..
+      continue
+    fi
+
     # Run soldeer update
     forge soldeer update
 
