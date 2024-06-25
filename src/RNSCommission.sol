@@ -55,6 +55,7 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
     onlyRole(DEFAULT_ADMIN_ROLE)
   {
     if (commissionIdx >= _commissionInfos.length) revert InvalidArrayLength();
+    // TODO: should fix to not duplicate logic in set commision info
     if (newRecipient == address(0)) revert NullAddress();
 
     _commissionInfos[commissionIdx].recipient = newRecipient;
