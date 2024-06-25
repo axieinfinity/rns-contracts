@@ -7,6 +7,3 @@
 [submodule "lib/buffer"]
 	path = lib/buffer
 	url = https://github.com/ensdomains/buffer
-[submodule "lib/contract-libs"]
-	path = lib/contract-libs
-	url = https://github.com/axieinfinity/contract-libs
