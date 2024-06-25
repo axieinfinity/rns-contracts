@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { BaseGeneralConfig } from "foundry-deployment-kit/BaseGeneralConfig.sol";
+import { BaseGeneralConfig } from "@fdk/BaseGeneralConfig.sol";
 import { Contract } from "./utils/Contract.sol";
 
 contract GeneralConfig is BaseGeneralConfig {
@@ -17,6 +17,7 @@ contract GeneralConfig is BaseGeneralConfig {
     _mapContractName(Contract.OwnedMulticaller);
     _mapContractName(Contract.RNSReverseRegistrar);
     _mapContractName(Contract.RONRegistrarController);
+    _mapContractName(Contract.RNSCommission);
   }
 
   function _mapContractName(Contract contractEnum) internal {

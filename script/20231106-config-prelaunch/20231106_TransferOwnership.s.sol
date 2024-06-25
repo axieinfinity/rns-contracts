@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { Contract } from "script/utils/Contract.sol";
-import { console2 as console } from "forge-std/console2.sol";
+import { console } from "forge-std/console.sol";
 import { Migration } from "script/Migration.s.sol";
 import { RNSUnified } from "@rns-contracts/RNSUnified.sol";
 import { OwnedMulticallerDeploy } from "script/contracts/OwnedMulticallerDeploy.s.sol";

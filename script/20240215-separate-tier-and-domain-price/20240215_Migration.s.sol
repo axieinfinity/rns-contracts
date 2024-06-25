@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { console2 as console } from "forge-std/console2.sol";
-import { JSONParserLib } from "solady/utils/JSONParserLib.sol";
+import { console } from "forge-std/console.sol";
+import { JSONParserLib } from "@solady/utils/JSONParserLib.sol";
 import { Migration, ISharedArgument } from "../Migration.s.sol";
 import { LibRNSDomain } from "@rns-contracts/libraries/LibRNSDomain.sol";
 import { INSDomainPrice } from "@rns-contracts/interfaces/INSDomainPrice.sol";

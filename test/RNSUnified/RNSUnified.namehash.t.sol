@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./RNSUnified.t.sol";
-import { LibString as SoladyLibString } from "solady/utils/LibString.sol";
+import { LibString as SoladyLibString } from "@solady/utils/LibString.sol";
 
 contract RNSUnified_NameHash_Test is RNSUnifiedTest {
   using SoladyLibString for *;
