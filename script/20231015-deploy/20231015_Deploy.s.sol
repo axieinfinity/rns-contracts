@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { console2 as console } from "forge-std/console2.sol";
+import { console } from "forge-std/console.sol";
 import { StdStyle } from "forge-std/StdStyle.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
@@ -109,7 +109,7 @@ contract Migration__20231015_Deploy is Migration {
     console.log(unicode"✅ Controller checks are passed");
   }
 
-  function _validateRNSUnified(uint256 ronId, uint256 addrReverseId) internal logFn("validateRNSUnified") {
+  function _validateRNSUnified(uint256 ronId, uint256 addrReverseId) internal view logFn("validateRNSUnified") {
     assertEq(ronId, LibRNSDomain.RON_ID);
     assertEq(addrReverseId, LibRNSDomain.ADDR_REVERSE_ID);
     assertTrue(_rns.hasRole(_rns.CONTROLLER_ROLE(), address(_auction)), "grant controller role failed");
@@ -119,7 +119,7 @@ contract Migration__20231015_Deploy is Migration {
     console.log(unicode"✅ RNSUnified checks are passed");
   }
 
-  function _validateReverseRegistrar() internal logFn("validateReverseRegistrar") {
+  function _validateReverseRegistrar() internal view logFn("validateReverseRegistrar") {
     assertEq(_rns.getApproved(LibRNSDomain.ADDR_REVERSE_ID), address(_reverseRegistrar));
   }
 
@@ -202,7 +202,7 @@ contract Migration__20231015_Deploy is Migration {
     console.log(unicode"✅ Domain price checks are passed");
   }
 
-  function _validateNameChecker() internal logFn("validateNameChecker") {
+  function _validateNameChecker() internal view logFn("validateNameChecker") {
     string[] memory blacklistedWords = _blacklistedWords;
     (uint8 min, uint8 max) = _nameChecker.getWordRange();
     bool valid;
