@@ -12,9 +12,9 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
   /// @dev Role for accounts that can send RON for this contract.
   bytes32 public constant SENDER_ROLE = keccak256("SENDER_ROLE");
 
-  /// @dev Gap for upgradability.
+  /// @dev Gap for upgradeability.
   uint256[50] private ____gap;
-  /// @dev Array of `Commission` structs that store commissions infomation.
+  /// @dev Array of `Commission` structs that store commissions information.
   Commission[] internal _commissionInfos;
 
   constructor() {
