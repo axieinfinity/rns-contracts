@@ -21,6 +21,7 @@ for dir in */; do
     # Check if soldeer.lock exists
     if [ ! -f "soldeer.lock" ]; then
       echo "soldeer.lock does not exist in: $dir"
+      echo "Skipping update for: $dir"
       cd ..
       continue
     fi
