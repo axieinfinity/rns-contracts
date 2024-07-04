@@ -154,9 +154,9 @@ abstract contract Migration is BaseMigration {
       param.rnsUnified.baseTokenURI = "https://metadata-rns.roninchain.com/ronin/";
 
       // RNSCommission
-      param.rnsCommission.admin = temporaryAdmin;
+      param.rnsCommission.admin = 0x9D05D1F5b0424F8fDE534BC196FFB6Dd211D902a;
       param.rnsCommission.commissionSetters = new address[](1);
-      param.rnsCommission.commissionSetters[0] = temporaryAdmin;
+      param.rnsCommission.commissionSetters[0] = 0x9D05D1F5b0424F8fDE534BC196FFB6Dd211D902a;
 
       param.rnsCommission.allowedSenders = new address[](2);
 
