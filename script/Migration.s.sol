@@ -152,6 +152,22 @@ abstract contract Migration is BaseMigration {
       param.rnsUnified.protectedSettler = temporaryAdmin;
       param.rnsUnified.gracePeriod = 90 days;
       param.rnsUnified.baseTokenURI = "https://metadata-rns.roninchain.com/ronin/";
+
+      // RNSCommission
+      param.rnsCommission.admin = 0x9D05D1F5b0424F8fDE534BC196FFB6Dd211D902a;
+      param.rnsCommission.commissionSetters = new address[](1);
+      param.rnsCommission.commissionSetters[0] = 0x9D05D1F5b0424F8fDE534BC196FFB6Dd211D902a;
+
+      param.rnsCommission.allowedSenders = new address[](2);
+
+      param.rnsCommission.treasuryCommission = new INSCommission.Commission[](2);
+      param.rnsCommission.treasuryCommission[0].recipient = payable(0xFf43f5Ef28EcB7c1f219751fc793deB40ef07A53);
+      param.rnsCommission.treasuryCommission[0].ratio = 70_00;
+      param.rnsCommission.treasuryCommission[0].name = "Sky Mavis";
+
+      param.rnsCommission.treasuryCommission[1].recipient = payable(0x22cEfc91E9b7c0f3890eBf9527EA89053490694e);
+      param.rnsCommission.treasuryCommission[1].ratio = 30_00;
+      param.rnsCommission.treasuryCommission[1].name = "Ronin";
     } else {
       revert("Missing param");
     }
