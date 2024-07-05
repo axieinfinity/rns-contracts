@@ -8,7 +8,7 @@ import {
 import { Contract } from "script/utils/Contract.sol";
 import { Migration } from "script/Migration.s.sol";
 
-contract Migration__20240407_MigrateAuctionAndControllerAdminMainnet is Migration {
+contract Migration__20240507_MigrateAuctionAndControllerAdminMainnet is Migration {
   RONRegistrarController private _controller;
   RNSAuction private _auction;
   address private _currentAdmin;
