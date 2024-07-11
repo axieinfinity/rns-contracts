@@ -9,21 +9,8 @@ contract OwnedMulticaller is Ownable {
   using ErrorHandler for bool;
 
   constructor(address owner_) {
-    require(owner_ != address(0), "owner_ == address(0x0)");
+    require(owner_ != address(0), "OwnedMulticaller: owner_ is null");
     _transferOwnership(owner_);
-  }
-
-  function multiMint(
-    INSUnified rns,
-    uint256 parentId,
-    address resolver,
-    uint64 duration,
-    address[] calldata tos,
-    string[] calldata labels
-  ) external onlyOwner {
-    for (uint256 i; i < labels.length; ++i) {
-      rns.mint(parentId, labels[i], resolver, tos[i], duration);
-    }
   }
 
   function multicall(address[] calldata tos, bytes[] calldata callDatas, uint256[] calldata values)
@@ -33,7 +20,7 @@ contract OwnedMulticaller is Ownable {
     returns (bool[] memory results, bytes[] memory returnDatas)
   {
     uint256 length = tos.length;
-    require(length == callDatas.length && length == values.length, "invalid length");
+    require(length == callDatas.length && length == values.length, "OwnedMulticaller: mismatch length");
     results = new bool[](length);
     returnDatas = new bytes[](length);
 
