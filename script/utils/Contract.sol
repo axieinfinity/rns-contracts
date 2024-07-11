@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { LibString } from "lib/solady/src/utils/LibString.sol";
-import { TContract } from "foundry-deployment-kit/types/Types.sol";
+import { LibString } from "@solady/utils/LibString.sol";
+import { TContract } from "@fdk/types/Types.sol";
 
 enum Contract {
   RNSUnified,
@@ -13,7 +13,8 @@ enum Contract {
   PublicResolver,
   OwnedMulticaller,
   RNSReverseRegistrar,
-  RONRegistrarController
+  RONRegistrarController,
+  RNSCommission
 }
 
 using { key, name } for Contract global;
@@ -32,5 +33,6 @@ function name(Contract contractEnum) pure returns (string memory) {
   if (contractEnum == Contract.OwnedMulticaller) return "OwnedMulticaller";
   if (contractEnum == Contract.RNSReverseRegistrar) return "RNSReverseRegistrar";
   if (contractEnum == Contract.RONRegistrarController) return "RONRegistrarController";
+  if (contractEnum == Contract.RNSCommission) return "RNSCommission";
   revert("Contract: Unknown contract");
 }

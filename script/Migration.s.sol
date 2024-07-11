@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { BaseMigration } from "foundry-deployment-kit/BaseMigration.s.sol";
-import { DefaultNetwork } from "foundry-deployment-kit/utils/DefaultNetwork.sol";
+import { BaseMigration } from "@fdk/BaseMigration.s.sol";
+import { DefaultNetwork } from "@fdk/utils/DefaultNetwork.sol";
 import { GeneralConfig } from "./GeneralConfig.sol";
 import "./interfaces/ISharedArgument.sol";
 
@@ -16,7 +16,7 @@ abstract contract Migration is BaseMigration {
   function _sharedArguments() internal view virtual override returns (bytes memory rawArgs) {
     ISharedArgument.SharedParameter memory param;
 
-    if (network() == DefaultNetwork.RoninTestnet.key()) {
+    if (network() == DefaultNetwork.RoninTestnet.key() || network() == DefaultNetwork.LocalHost.key()) {
       address defaultAdmin = 0x968D0Cd7343f711216817E617d3f92a23dC91c07;
       address defaultPauser = defaultAdmin;
       address defaultOperator = defaultAdmin;
@@ -71,6 +71,22 @@ abstract contract Migration is BaseMigration {
       param.rnsUnified.protectedSettler = defaultAdmin;
       param.rnsUnified.gracePeriod = 90 days;
       param.rnsUnified.baseTokenURI = "https://metadata-rns.skymavis.one/saigon/";
+
+      // RNSCommission
+      param.rnsCommission.admin = defaultAdmin;
+      param.rnsCommission.commissionSetters = new address[](1);
+      param.rnsCommission.commissionSetters[0] = defaultAdmin;
+
+      param.rnsCommission.allowedSenders = new address[](2);
+
+      param.rnsCommission.treasuryCommission = new INSCommission.Commission[](2);
+      param.rnsCommission.treasuryCommission[0].recipient = payable(defaultAdmin);
+      param.rnsCommission.treasuryCommission[0].ratio = 70_00;
+      param.rnsCommission.treasuryCommission[0].name = "Sky Mavis";
+
+      param.rnsCommission.treasuryCommission[1].recipient = payable(defaultAdmin);
+      param.rnsCommission.treasuryCommission[1].ratio = 30_00;
+      param.rnsCommission.treasuryCommission[1].name = "Ronin";
     } else if (network() == DefaultNetwork.RoninMainnet.key()) {
       address duke = 0x0F68eDBE14C8f68481771016d7E2871d6a35DE11;
       address andy = 0xEd4A9F48a62Fb6FdcfB45Bb00C9f61D1A436E58C;
@@ -136,6 +152,22 @@ abstract contract Migration is BaseMigration {
       param.rnsUnified.protectedSettler = temporaryAdmin;
       param.rnsUnified.gracePeriod = 90 days;
       param.rnsUnified.baseTokenURI = "https://metadata-rns.roninchain.com/ronin/";
+
+      // RNSCommission
+      param.rnsCommission.admin = 0x9D05D1F5b0424F8fDE534BC196FFB6Dd211D902a;
+      param.rnsCommission.commissionSetters = new address[](1);
+      param.rnsCommission.commissionSetters[0] = 0x9D05D1F5b0424F8fDE534BC196FFB6Dd211D902a;
+
+      param.rnsCommission.allowedSenders = new address[](2);
+
+      param.rnsCommission.treasuryCommission = new INSCommission.Commission[](2);
+      param.rnsCommission.treasuryCommission[0].recipient = payable(0xFf43f5Ef28EcB7c1f219751fc793deB40ef07A53);
+      param.rnsCommission.treasuryCommission[0].ratio = 70_00;
+      param.rnsCommission.treasuryCommission[0].name = "Sky Mavis";
+
+      param.rnsCommission.treasuryCommission[1].recipient = payable(0x22cEfc91E9b7c0f3890eBf9527EA89053490694e);
+      param.rnsCommission.treasuryCommission[1].ratio = 30_00;
+      param.rnsCommission.treasuryCommission[1].name = "Ronin";
     } else {
       revert("Missing param");
     }

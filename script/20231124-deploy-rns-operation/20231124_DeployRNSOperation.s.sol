@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
-import { console2 as console } from "forge-std/console2.sol";
+import { console } from "forge-std/console.sol";
 import { Contract } from "script/utils/Contract.sol";
 import { Migration } from "script/Migration.s.sol";
 import { RNSUnified } from "@rns-contracts/RNSUnified.sol";
