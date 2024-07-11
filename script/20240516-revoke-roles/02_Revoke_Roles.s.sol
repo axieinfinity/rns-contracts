@@ -46,8 +46,6 @@ contract Migration__01_Revoke_Roles is Migration {
     _ronController = RONRegistrarController(loadContract(Contract.RONRegistrarController.key()));
     _ownedMulticaller = OwnedMulticaller(loadContract(Contract.OwnedMulticaller.key()));
 
-    _upgradeProxy(Contract.RNSUnified.key());
-
     address[] memory contracts = new address[](5);
     contracts[0] = address(_domainPrice);
     contracts[1] = address(_ronController);
@@ -80,10 +78,11 @@ contract Migration__01_Revoke_Roles is Migration {
 
     _ownedMulticaller.multicall(tos, callDatas, values);
 
-    uint256 length;
+    uint256 length = contracts.length;
 
     for (uint256 i; i < length; i++) {
       AccessControlEnumerable(contracts[i]).grantRole(0x0, multisig);
+      console.log("Duke will renounce his admin roles of contract:", vm.getLabel(contracts[i]), "manually");
 
       assertTrue(
         AccessControlEnumerable(contracts[i]).getRoleMemberCount(0x0) > 0,
@@ -93,7 +92,17 @@ contract Migration__01_Revoke_Roles is Migration {
 
     // Duke will do this manually
     // Ownable(loadContract(Contract.OwnedMulticaller.key())).transferOwnership(multisig);
+    console.log(
+      "Duke will renounce his owner role of contract:",
+      vm.getLabel(loadContract(Contract.OwnedMulticaller.key())),
+      "manually"
+    );
     // Ownable(loadContract(Contract.RNSReverseRegistrar.key())).transferOwnership(multisig);
+    console.log(
+      "Duke will renounce his owner role of contract:",
+      vm.getLabel(loadContract(Contract.RNSReverseRegistrar.key())),
+      "manually"
+    );
 
     vm.stopBroadcast();
   }
