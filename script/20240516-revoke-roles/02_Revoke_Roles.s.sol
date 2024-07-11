@@ -93,13 +93,13 @@ contract Migration__01_Revoke_Roles is Migration {
     // Duke will do this manually
     // Ownable(loadContract(Contract.OwnedMulticaller.key())).transferOwnership(multisig);
     console.log(
-      "Duke will renounce his owner role of contract:",
+      "Duke will transfer to multisig his owner role of contract:",
       vm.getLabel(loadContract(Contract.OwnedMulticaller.key())),
       "manually"
     );
     // Ownable(loadContract(Contract.RNSReverseRegistrar.key())).transferOwnership(multisig);
     console.log(
-      "Duke will renounce his owner role of contract:",
+      "Duke will transfer to multisig his owner role of contract:",
       vm.getLabel(loadContract(Contract.RNSReverseRegistrar.key())),
       "manually"
     );
