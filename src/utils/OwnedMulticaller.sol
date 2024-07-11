@@ -13,10 +13,6 @@ contract OwnedMulticaller is Ownable {
     _transferOwnership(owner_);
   }
 
-  function kill() external onlyOwner {
-    selfdestruct(payable(_msgSender()));
-  }
-
   function multiMint(
     INSUnified rns,
     uint256 parentId,
@@ -36,11 +32,12 @@ contract OwnedMulticaller is Ownable {
     onlyOwner
     returns (bool[] memory results, bytes[] memory returnDatas)
   {
-    require(tos.length == callDatas.length && tos.length == values.length, "invalid length");
-    results = new bool[](tos.length);
-    returnDatas = new bytes[](tos.length);
+    uint256 length = tos.length;
+    require(length == callDatas.length && length == values.length, "invalid length");
+    results = new bool[](length);
+    returnDatas = new bytes[](length);
 
-    for (uint256 i; i < tos.length; ++i) {
+    for (uint256 i; i < length; ++i) {
       (results[i], returnDatas[i]) = tos[i].call{ value: values[i] }(callDatas[i]);
       results[i].handleRevert(returnDatas[i]);
     }
