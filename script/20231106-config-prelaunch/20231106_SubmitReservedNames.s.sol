@@ -31,17 +31,6 @@ contract Migration__20231106_SubmitReservedNames is Migration {
     // mintBatch(multicall, duration, rns, resolver, tos, labels);
   }
 
-  // function mintBatch(
-  //   OwnedMulticaller multicall,
-  //   uint64 duration,
-  //   RNSUnified rns,
-  //   address resolver,
-  //   address[] memory tos,
-  //   string[] memory labels
-  // ) public {
-  //   vm.broadcast(config.getSender());
-  //   multicall.multiMint(rns, LibRNSDomain.RON_ID, resolver, duration, tos, labels);
-  // }
 
   function _parseData(string memory path) internal view returns (address[] memory tos, string[] memory labels) {
     string memory raw = vm.readFile(path);
