@@ -58,27 +58,6 @@ contract Migration__02_Revoke_Roles_Mainnet is Migration {
     contracts[3] = address(_rns);
     contracts[4] = address(_auction);
 
-    address multicallOwner = _ownedMulticaller.owner();
-    console.log("Multicaller owner:", multicallOwner);
-
-    vm.startBroadcast(multicallOwner);
-
-    address[] memory tos = new address[](3);
-    bytes[] memory callDatas = new bytes[](3);
-    uint256[] memory values = new uint256[](3);
-
-    tos[0] = address(_rns);
-    tos[1] = address(_rns);
-    tos[2] = address(_rns);
-
-    callDatas[0] = abi.encodeCall(ERC721.setApprovalForAll, (address(_auction), true));
-    callDatas[1] = abi.encodeCall(ERC721.setApprovalForAll, (address(_ronController), true));
-    callDatas[2] = abi.encodeCall(ERC721.setApprovalForAll, (address(_reverseRegistrar), true));
-
-    _ownedMulticaller.multicall(tos, callDatas, values);
-
-    vm.stopBroadcast();
-
     vm.startBroadcast(duke);
     // Transfer .ron domain ownership to owned multicaller
     uint256[] memory ids = new uint256[](3);
