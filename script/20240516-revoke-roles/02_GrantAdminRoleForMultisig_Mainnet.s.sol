@@ -23,7 +23,7 @@ import { OwnedMulticallerDeploy } from "script/contracts/OwnedMulticallerDeploy.
 import { ErrorHandler } from "src/libraries/ErrorHandler.sol";
 import { EventRange } from "src/libraries/LibEventRange.sol";
 
-contract Migration__02_Revoke_Roles_Mainnet is Migration {
+contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
   using Strings for *;
   using ErrorHandler for bool;
   using LibRNSDomain for string;
@@ -49,7 +49,8 @@ contract Migration__02_Revoke_Roles_Mainnet is Migration {
     _publicResolver = PublicResolver(loadContract(Contract.PublicResolver.key()));
     _reverseRegistrar = RNSReverseRegistrar(loadContract(Contract.RNSReverseRegistrar.key()));
     _ronController = RONRegistrarController(loadContract(Contract.RONRegistrarController.key()));
-    _ownedMulticaller = OwnedMulticaller(loadContract(Contract.OwnedMulticaller.key()));
+    // Verify: https://app.roninchain.com/address/0x27876429DB2cDDF017DBb63560D0366E4B4E6f8a
+    _ownedMulticaller = OwnedMulticaller(0x27876429DB2cDDF017DBb63560D0366E4B4E6f8a);
     _batchTransfer = loadContract(Contract.ERC721BatchTransfer.key());
 
     address[] memory contracts = new address[](5);

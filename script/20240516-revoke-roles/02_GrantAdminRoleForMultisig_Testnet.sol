@@ -20,7 +20,7 @@ import { RONRegistrarController } from "src/RONRegistrarController.sol";
 import { OwnedMulticaller } from "src/utils/OwnedMulticaller.sol";
 import { INSDomainPrice } from "src/interfaces/INSDomainPrice.sol";
 
-contract Migration__01_Revoke_Roles_Testnet is Migration {
+contract Migration__02_GrantAdminRoleForMultisig_Testnet is Migration {
   using Strings for *;
   using LibRNSDomain for string;
 
@@ -44,7 +44,8 @@ contract Migration__01_Revoke_Roles_Testnet is Migration {
     _publicResolver = PublicResolver(loadContract(Contract.PublicResolver.key()));
     _reverseRegistrar = RNSReverseRegistrar(loadContract(Contract.RNSReverseRegistrar.key()));
     _ronController = RONRegistrarController(loadContract(Contract.RONRegistrarController.key()));
-    _ownedMulticaller = OwnedMulticaller(loadContract(Contract.OwnedMulticaller.key()));
+    // Verify: https://saigon-app.roninchain.com/address/0xAcC5b257F42A14436B8f231769E2f22E91EE39dc
+    _ownedMulticaller = OwnedMulticaller(0xAcC5b257F42A14436B8f231769E2f22E91EE39dc);
 
     address[] memory contracts = new address[](5);
     contracts[0] = address(_domainPrice);
