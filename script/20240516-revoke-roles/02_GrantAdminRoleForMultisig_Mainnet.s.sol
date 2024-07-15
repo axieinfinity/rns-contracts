@@ -22,6 +22,10 @@ import { INSDomainPrice } from "src/interfaces/INSDomainPrice.sol";
 import { OwnedMulticallerDeploy } from "script/contracts/OwnedMulticallerDeploy.s.sol";
 import { ErrorHandler } from "src/libraries/ErrorHandler.sol";
 import { EventRange } from "src/libraries/LibEventRange.sol";
+import { RNSOperation } from "src/utils/RNSOperation.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import { INSAuction } from "src/interfaces/INSAuction.sol";
+import { INSDomainPrice } from "src/interfaces/INSDomainPrice.sol";
 
 contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
   using Strings for *;
@@ -39,6 +43,7 @@ contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
   RNSReverseRegistrar internal _reverseRegistrar;
   RONRegistrarController internal _ronController;
   OwnedMulticaller internal _ownedMulticaller;
+  RNSOperation internal rnsOperation;
   address internal _batchTransfer;
 
   function run() external onlyOn(DefaultNetwork.RoninMainnet.key()) {
@@ -52,6 +57,8 @@ contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
     // Verify: https://app.roninchain.com/address/0x27876429DB2cDDF017DBb63560D0366E4B4E6f8a
     _ownedMulticaller = OwnedMulticaller(0x27876429DB2cDDF017DBb63560D0366E4B4E6f8a);
     _batchTransfer = loadContract(Contract.ERC721BatchTransfer.key());
+    // Verify: https://app.roninchain.com/address/0xCD245263eDdEE593a5A66f93f74C58c544957339
+    rnsOperation = RNSOperation(0xCD245263eDdEE593a5A66f93f74C58c544957339);
 
     address[] memory contracts = new address[](5);
     contracts[0] = address(_domainPrice);
@@ -74,11 +81,17 @@ contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
     );
     success.handleRevert(returnOrRevertData);
 
+    // Remove approval for batch transfer
     _rns.setApprovalForAll(_batchTransfer, false);
-
     _rns.setApprovalForAll(address(_auction), false);
     _rns.setApprovalForAll(address(_ronController), false);
     _rns.setApprovalForAll(address(_reverseRegistrar), false);
+    // Remove approval for Legacy Owned Multicaller
+    // Verify: https://app.roninchain.com/address/0x8975923D01132bEB6c412F827f63D44712726E13
+    _rns.setApprovalForAll(0x8975923D01132bEB6c412F827f63D44712726E13, false);
+    // Remove approval for Legacy RNS Operation contracts
+    _rns.setApprovalForAll(0xCD245263eDdEE593a5A66f93f74C58c544957339, false);
+    _rns.setApprovalForAll(0xd9b3CC879113C7ABaa7694d25801bFFD8Fae0F27, false);
 
     uint256 length = contracts.length;
 
@@ -97,12 +110,6 @@ contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
     AccessControlEnumerable(address(_domainPrice)).revokeRole(0x0, 0xAdc6a8fEB5C53303323A1D0280c0a0d5F2e1a14D);
 
     // Duke will do this manually
-    // Ownable(loadContract(Contract.OwnedMulticaller.key())).transferOwnership(multisig);
-    console.log(
-      "Duke will transfer to multisig his owner role of contract:",
-      vm.getLabel(loadContract(Contract.OwnedMulticaller.key())),
-      "manually"
-    );
     // Ownable(loadContract(Contract.RNSReverseRegistrar.key())).transferOwnership(multisig);
     console.log(
       "Duke will transfer to multisig his owner role of contract:",
@@ -117,6 +124,107 @@ contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
     _validateAuction();
     _validateController();
     _validateDomainPrice();
+
+    // Validate Functionalities of RNS Operation contract
+    _validateBulkMint();
+    _validateOverriddenTiers();
+    _validateBulkSetProtected();
+    _validateBulkOverrideRenewalFees();
+    _validateReclaimAuctionNames({ searchSize: 20 });
+  }
+
+  function _validateOverriddenTiers() internal logFn("_validateOverriddenTiers") {
+    string[] memory labels = new string[](5);
+    labels[0] = "heidi";
+    labels[1] = "luke";
+    labels[2] = "sophia";
+    labels[3] = "chief";
+    labels[4] = "slim";
+
+    for (uint256 i; i < labels.length; ++i) {
+      assertEq(
+        uint8(_domainPrice.getTier(labels[i])),
+        uint8(INSDomainPrice.Tier.Tier1),
+        string.concat("invalid tier for _auction label ", labels[i])
+      );
+    }
+  }
+
+  function _validateBulkOverrideRenewalFees() internal logFn("_validateBulkOverrideRenewalFees") {
+    string memory label = "tudo-provip-maximum-ultra";
+    string[] memory labels = new string[](1);
+    labels[0] = label;
+    uint256[] memory yearlyUSDPrices = new uint256[](1);
+    // 10 usd per year
+    yearlyUSDPrices[0] = 10;
+
+    vm.prank(rnsOperation.owner());
+    rnsOperation.bulkOverrideRenewalFees(labels, yearlyUSDPrices);
+
+    assertEq(_domainPrice.getOverriddenRenewalFee(label), Math.mulDiv(yearlyUSDPrices[0], 1 ether, 365 days));
+  }
+
+  function _validateReclaimAuctionNames(uint256 searchSize) internal logFn("_validateReclaimAuctionNames") {
+    INSAuction.DomainAuction[] memory domainAuctions = new INSAuction.DomainAuction[](searchSize);
+    uint256[] memory reservedIds = new uint256[](searchSize);
+    for (uint256 i; i < searchSize; ++i) {
+      reservedIds[i] = _rns.tokenOfOwnerByIndex(address(_auction), i);
+      (domainAuctions[i],) = _auction.getAuction(reservedIds[i]);
+    }
+
+    uint256 reclaimableAuctionNameId;
+    for (uint256 i; i < searchSize; ++i) {
+      if (domainAuctions[i].bid.bidder == address(0x0)) {
+        reclaimableAuctionNameId = reservedIds[i];
+        break;
+      }
+    }
+
+    address to = makeAddr("to");
+    address[] memory tos = new address[](1);
+    tos[0] = to;
+    string memory label = _rns.getRecord(reclaimableAuctionNameId).immut.label;
+    console.log("reclaimable _auction label", label);
+    string[] memory labels = new string[](1);
+    labels[0] = label;
+
+    vm.prank(rnsOperation.owner());
+    rnsOperation.reclaimUnbiddedNames({ tos: tos, labels: labels, allowFailure: false });
+  }
+
+  function _validateBulkMint() internal logFn("_validateBulkMint") {
+    address to = makeAddr("to");
+    address[] memory tos = new address[](1);
+    tos[0] = to;
+    string[] memory labels = new string[](1);
+    labels[0] = "tudo-provip-maximum-utra";
+    uint64 duration = uint64(3 days);
+
+    vm.prank(rnsOperation.owner());
+    rnsOperation.bulkMint(tos, labels, duration);
+
+    uint256 id = uint256(string.concat(labels[0], ".ron").namehash());
+    assertEq(_rns.ownerOf(id), to);
+  }
+
+  function _validateBulkSetProtected() internal logFn("_validateBulkSetProtected") {
+    string[] memory labels = new string[](1);
+    labels[0] = "tudo-provip-maximum-utra";
+
+    bool shouldProtect = true;
+
+    vm.prank(rnsOperation.owner());
+    rnsOperation.bulkSetProtected(labels, shouldProtect);
+
+    uint256 id = uint256(string.concat(labels[0], ".ron").namehash());
+    assertTrue(_rns.getRecord(id).mut.protected);
+
+    shouldProtect = false;
+
+    vm.prank(rnsOperation.owner());
+    rnsOperation.bulkSetProtected(labels, shouldProtect);
+
+    assertFalse(_rns.getRecord(id).mut.protected);
   }
 
   function _validateAuction() internal logFn("_validateAuction") {
