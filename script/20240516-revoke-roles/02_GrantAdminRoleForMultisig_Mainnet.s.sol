@@ -133,7 +133,7 @@ contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
     _validateReclaimAuctionNames({ searchSize: 20 });
   }
 
-  function _validateOverriddenTiers() internal logFn("_validateOverriddenTiers") {
+  function _validateOverriddenTiers() internal view logFn("_validateOverriddenTiers") {
     string[] memory labels = new string[](5);
     labels[0] = "heidi";
     labels[1] = "luke";
