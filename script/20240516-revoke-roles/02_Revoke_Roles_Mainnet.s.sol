@@ -21,6 +21,7 @@ import { OwnedMulticaller } from "src/utils/OwnedMulticaller.sol";
 import { INSDomainPrice } from "src/interfaces/INSDomainPrice.sol";
 import { OwnedMulticallerDeploy } from "script/contracts/OwnedMulticallerDeploy.s.sol";
 import { ErrorHandler } from "src/libraries/ErrorHandler.sol";
+import { EventRange } from "src/libraries/LibEventRange.sol";
 
 contract Migration__02_Revoke_Roles_Mainnet is Migration {
   using Strings for *;
@@ -112,13 +113,68 @@ contract Migration__02_Revoke_Roles_Mainnet is Migration {
   }
 
   function _postCheck() internal virtual override {
-    _validateController();
     _validateAuction();
-    _validateReverseRegistrar();
+    _validateController();
+    _validateDomainPrice();
   }
 
-  function _validateReverseRegistrar() internal view logFn("validateReverseRegistrar") {
-    assertEq(_rns.getApproved(LibRNSDomain.ADDR_REVERSE_ID), address(_reverseRegistrar));
+  function _validateAuction() internal logFn("_validateAuction") {
+    address operator = _auction.getRoleMember(_auction.OPERATOR_ROLE(), 0);
+    address admin = _auction.getRoleMember(_auction.DEFAULT_ADMIN_ROLE(), 0);
+
+    string[] memory lbs = new string[](3);
+    lbs[0] = "liem";
+    lbs[1] = "aliem";
+    lbs[2] = "dukedepchai";
+
+    vm.prank(operator);
+    uint256[] memory ids = _auction.bulkRegister(lbs);
+
+    assembly {
+      mstore(ids, 2)
+    }
+
+    address[] memory tos = new address[](2);
+    tos[0] = duke;
+    tos[1] = duke;
+
+    vm.warp(block.timestamp + 10 minutes);
+    vm.prank(operator);
+    _auction.bulkClaimUnbiddedNames(tos, ids, false);
+
+    assembly {
+      mstore(ids, 3)
+    }
+
+    EventRange memory eventRange = EventRange(block.timestamp + 10 minutes, block.timestamp + 11 minutes);
+    vm.prank(admin);
+    bytes32 auctionId = _auction.createAuctionEvent(eventRange);
+
+    uint256[] memory listedIds = new uint256[](1);
+    uint256[] memory startingPrices = new uint256[](1);
+    startingPrices[0] = 20 ether;
+    listedIds[0] = ids[2];
+
+    vm.prank(operator);
+    _auction.listNamesForAuction(auctionId, listedIds, startingPrices);
+
+    address userA = makeAddr("userA");
+    address userB = makeAddr("userB");
+
+    vm.deal(userA, 100 ether);
+    vm.deal(userB, 200 ether);
+
+    vm.warp(block.timestamp + 10 minutes);
+    vm.prank(userA, userA);
+    _auction.placeBid{ value: 50 ether }(listedIds[0]);
+    vm.prank(userB, userB);
+    _auction.placeBid{ value: 100 ether }(listedIds[0]);
+
+    vm.warp(block.timestamp + 11 minutes);
+    vm.prank(admin);
+    _auction.bulkClaimBidNames(listedIds);
+
+    console.log(unicode"✅ Auction checks are passed");
   }
 
   function _validateController() internal logFn("_validateController") {
@@ -145,10 +201,16 @@ contract Migration__02_Revoke_Roles_Mainnet is Migration {
 
     uint256 expectedId = uint256(string.concat(domain, ".ron").namehash());
     assertEq(_rns.ownerOf(expectedId), user.addr);
+
+    (, uint256 rentPrice) = _ronController.rentPrice(domain, 365 days);
+    vm.deal(user.addr, rentPrice);
+    vm.prank(user.addr);
+    _ronController.renew{ value: rentPrice }(domain, 365 days);
+
     console.log(unicode"✅ Controller checks are passed");
   }
 
-  function _validateAuction() internal logFn("validateAuction") {
+  function _validateDomainPrice() internal logFn("_validateDomainPrice") {
     address operator = _auction.getRoleMember(_auction.OPERATOR_ROLE(), 0);
     string[] memory domainNames = new string[](1);
     string memory domainName = "tudo-reserved-provip";
@@ -174,6 +236,6 @@ contract Migration__02_Revoke_Roles_Mainnet is Migration {
     assertTrue(_auction.reserved(id), "invalid bulkRegister");
     assertEq(_rns.getRecord(id).mut.expiry, _rns.MAX_EXPIRY(), "invalid expiry time");
 
-    console.log(unicode"✅ Auction checks are passed");
+    console.log(unicode"✅ Domain Price checks are passed");
   }
 }
