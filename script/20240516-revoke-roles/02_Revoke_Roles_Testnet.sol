@@ -20,12 +20,12 @@ import { RONRegistrarController } from "src/RONRegistrarController.sol";
 import { OwnedMulticaller } from "src/utils/OwnedMulticaller.sol";
 import { INSDomainPrice } from "src/interfaces/INSDomainPrice.sol";
 
-contract Migration__01_Revoke_Roles is Migration {
+contract Migration__01_Revoke_Roles_Testnet is Migration {
   using Strings for *;
   using LibRNSDomain for string;
 
-  address duke = 0x0F68eDBE14C8f68481771016d7E2871d6a35DE11;
-  address multisig = 0x1FF1edE0242317b8C4229fC59E64DD93952019ef;
+  address duke = 0x968D0Cd7343f711216817E617d3f92a23dC91c07;
+  address multisig = 0x792428597158d73fF55333659957057f93362dfc;
 
   RNSUnified internal _rns;
   RNSAuction internal _auction;
@@ -36,7 +36,7 @@ contract Migration__01_Revoke_Roles is Migration {
   RONRegistrarController internal _ronController;
   OwnedMulticaller internal _ownedMulticaller;
 
-  function run() external onlyOn(DefaultNetwork.RoninMainnet.key()) {
+  function run() external onlyOn(DefaultNetwork.RoninTestnet.key()) {
     _rns = RNSUnified(loadContract(Contract.RNSUnified.key()));
     _auction = RNSAuction(loadContract(Contract.RNSAuction.key()));
     _nameChecker = NameChecker(loadContract(Contract.NameChecker.key()));
@@ -85,7 +85,7 @@ contract Migration__01_Revoke_Roles is Migration {
       console.log("Duke will renounce his admin roles of contract:", vm.getLabel(contracts[i]), "manually");
 
       assertTrue(
-        AccessControlEnumerable(contracts[i]).getRoleMemberCount(0x0) > 0,
+        AccessControlEnumerable(contracts[i]).getRoleMemberCount(0x0) > 1,
         string.concat("Role is empty", "contract: ", vm.toString(contracts[i]))
       );
     }
@@ -109,7 +109,7 @@ contract Migration__01_Revoke_Roles is Migration {
 
   function _postCheck() internal virtual override {
     _validateController();
-    _validateAuction();
+    _validateDomainPrice();
     _validateReverseRegistrar();
   }
 
@@ -144,7 +144,7 @@ contract Migration__01_Revoke_Roles is Migration {
     console.log(unicode"✅ Controller checks are passed");
   }
 
-  function _validateAuction() internal logFn("validateAuction") {
+  function _validateDomainPrice() internal logFn("_validateDomainPrice") {
     address operator = _auction.getRoleMember(_auction.OPERATOR_ROLE(), 0);
     string[] memory domainNames = new string[](1);
     string memory domainName = "tudo-reserved-provip";
