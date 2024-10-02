@@ -33,7 +33,7 @@ contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
   using LibRNSDomain for string;
 
   address duke = 0x0F68eDBE14C8f68481771016d7E2871d6a35DE11;
-  address multisig = 0x1FF1edE0242317b8C4229fC59E64DD93952019ef;
+  address multisig = 0x9d05d1f5b0424f8fde534bc196ffb6dd211d902a;
 
   RNSUnified internal _rns;
   RNSAuction internal _auction;
