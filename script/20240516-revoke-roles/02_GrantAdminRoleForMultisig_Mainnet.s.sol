@@ -109,6 +109,18 @@ contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
     // Remove another admin roles: https://sky-mavis.slack.com/archives/C06C3HW1HS7/p1712812933009569
     AccessControlEnumerable(address(_domainPrice)).revokeRole(0x0, 0xAdc6a8fEB5C53303323A1D0280c0a0d5F2e1a14D);
 
+    // Remove operator role for RNS Unified
+    AccessControlEnumerable(address(_rns)).revokeRole(_rns.PAUSER_ROLE(), duke);
+    AccessControlEnumerable(address(_rns)).revokeRole(_rns.PROTECTED_SETTLER_ROLE(), duke);
+
+    // Remove operator role for RNS Auction
+    AccessControlEnumerable(address(_auction)).revokeRole(_auction.OPERATOR_ROLE(), duke);
+    // Remove operator role for RNS Domain Price
+    AccessControlEnumerable(address(_domainPrice)).revokeRole(_domainPrice.OVERRIDER_ROLE(), duke);
+    // Remove operator role for RNS Registrar Controller
+    AccessControlEnumerable(address(_ronController)).revokeRole(_ronController.OPERATOR_ROLE(), duke);
+    AccessControlEnumerable(address(_ronController)).revokeRole(_ronController.PAUSER_ROLE(), duke);
+
     // Duke will do this manually
     // Ownable(loadContract(Contract.RNSReverseRegistrar.key())).transferOwnership(multisig);
     console.log(
