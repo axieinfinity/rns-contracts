@@ -1,17 +1,20 @@
 [[dependencies]]
-name = "@fdk"
-version = "0.3.0-beta"
-source = "https://github.com/axieinfinity/foundry-deployment-kit/archive/refs/tags/v0.3.0-beta.zip"
-checksum = "aabeda6cc1fe02227d26f3edd86d4af6c91e2167e8b9f1971cc1ea7ce33d34f9"
+name = "fdk"
+version = "0.3.1-beta"
+source = "https://github.com/axieinfinity/foundry-deployment-kit/archive/refs/tags/v0.3.1-beta.zip"
+checksum = "53cb5bf15abdc909d177c64e78070387af24ef39b2a4b408651836ac9de059c4"
+integrity = "967cb0aee7c770a82c4708ff50b2b6ffc529aaa1c800bca250cb96eeb98f806b"
 
 [[dependencies]]
-name = "@pythnetwork-pyth-sdk-solidity"
-version = "2.2.0"
-source = "https://soldeer-revisions.s3.amazonaws.com/@pythnetwork-pyth-sdk-solidity/2_2_0_15-04-2024_18:50:54_pyth-sdk-solidity.zip"
-checksum = "54e3bda3b27467f84c1605722f58e1d2b5a19d6ca3c24840550f1d6cf3bc2231"
-
-[[dependencies]]
-name = "@openzeppelin-contracts"
+name = "openzeppelin"
 version = "4.9.3"
-source = "https://soldeer-revisions.s3.amazonaws.com/@openzeppelin-contracts/4_9_3_22-01-2024_13:13:53_contracts.zip"
-checksum = "95886307069cf73310b41396c49df51801a73f31f18f62e7d05adfc2031e7725"
+source = "https://github.com/OpenZeppelin/openzeppelin-contracts/archive/refs/tags/v4.9.3.zip"
+checksum = "94270990c32ff2d00c06a9dabaf5b7a8e36773e017254acbb39d13733eb82960"
+integrity = "5cca086987dbce97760f8a337c0d29e6383fcafaffa9662897695f17566756d0"
+
+[[dependencies]]
+name = "pyth-sdk-solidity"
+version = "2.2.0"
+source = "https://github.com/pyth-network/pyth-sdk-solidity/archive/refs/tags/v2.2.0.zip"
+checksum = "71431ac3fe4e61ce2b8abd649d3e741277ca4dba287c2a4291d040190b8fb8da"
+integrity = "845f9e662935eb347e9189da9b156f0062bcab1d372c7397777dbda609776a5c"
