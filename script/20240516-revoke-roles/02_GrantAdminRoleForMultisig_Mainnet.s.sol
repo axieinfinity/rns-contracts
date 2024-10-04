@@ -33,7 +33,8 @@ contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
   using LibRNSDomain for string;
 
   address duke = 0x0F68eDBE14C8f68481771016d7E2871d6a35DE11;
-  address multisig = 0x9d05d1f5b0424f8fde534bc196ffb6dd211d902a;
+  address multisig = 0x9D05D1F5b0424F8fDE534BC196FFB6Dd211D902a;
+  address dukeRotated = 0x35558cFFB77C6BdEeD90Cb582eF9404F2032F069;
 
   RNSUnified internal _rns;
   RNSAuction internal _auction;
@@ -47,6 +48,10 @@ contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
   address internal _batchTransfer;
 
   function run() external onlyOn(DefaultNetwork.RoninMainnet.key()) {
+    vm.label(duke, "Duke");
+    vm.label(multisig, "Multisig");
+    vm.label(dukeRotated, "Duke Rotated");
+
     _rns = RNSUnified(loadContract(Contract.RNSUnified.key()));
     _auction = RNSAuction(loadContract(Contract.RNSAuction.key()));
     _nameChecker = NameChecker(loadContract(Contract.NameChecker.key()));
@@ -69,11 +74,12 @@ contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
 
     vm.startBroadcast(duke);
     // Transfer .ron domain ownership to owned multicaller
-    uint256[] memory ids = new uint256[](3);
+    uint256[] memory ids = new uint256[](4);
     ids[0] = 0x0;
     ids[1] = LibRNSDomain.RON_ID;
     ids[2] = LibRNSDomain.ADDR_REVERSE_ID;
-    _rns.setApprovalForAll(_batchTransfer, true);
+    ids[3] = LibRNSDomain.toId(0x0, "reverse");
+    // _rns.setApprovalForAll(_batchTransfer, true); Already approved on mainnet
 
     // Bulk transfer .ron domain ownership to owned multicaller
     (bool success, bytes memory returnOrRevertData) = _batchTransfer.call(
@@ -82,7 +88,7 @@ contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
     success.handleRevert(returnOrRevertData);
 
     // Remove approval for batch transfer
-    _rns.setApprovalForAll(_batchTransfer, false);
+    // _rns.setApprovalForAll(_batchTransfer, false); Revoke manually
     _rns.setApprovalForAll(address(_auction), false);
     _rns.setApprovalForAll(address(_ronController), false);
     _rns.setApprovalForAll(address(_reverseRegistrar), false);
@@ -109,7 +115,19 @@ contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
     // Remove another admin roles: https://sky-mavis.slack.com/archives/C06C3HW1HS7/p1712812933009569
     AccessControlEnumerable(address(_domainPrice)).revokeRole(0x0, 0xAdc6a8fEB5C53303323A1D0280c0a0d5F2e1a14D);
 
-    // Remove operator role for RNS Unified
+    // Add operator role for RNS Unified
+    AccessControlEnumerable(address(_rns)).grantRole(_rns.PAUSER_ROLE(), dukeRotated);
+    AccessControlEnumerable(address(_rns)).grantRole(_rns.PROTECTED_SETTLER_ROLE(), dukeRotated);
+
+    // Add operator role for RNS Auction
+    AccessControlEnumerable(address(_auction)).grantRole(_auction.OPERATOR_ROLE(), dukeRotated);
+    // Add operator role for RNS Domain Price
+    AccessControlEnumerable(address(_domainPrice)).grantRole(_domainPrice.OVERRIDER_ROLE(), dukeRotated);
+    // Add operator role for RNS Registrar Controller
+    AccessControlEnumerable(address(_ronController)).grantRole(_ronController.OPERATOR_ROLE(), dukeRotated);
+    AccessControlEnumerable(address(_ronController)).grantRole(_ronController.PAUSER_ROLE(), dukeRotated);
+
+    // Add operator role for RNS Unified
     AccessControlEnumerable(address(_rns)).revokeRole(_rns.PAUSER_ROLE(), duke);
     AccessControlEnumerable(address(_rns)).revokeRole(_rns.PROTECTED_SETTLER_ROLE(), duke);
 
@@ -124,7 +142,7 @@ contract Migration__02_GrantAdminRoleForMultisig_Mainnet is Migration {
     // Duke will do this manually
     // Ownable(loadContract(Contract.RNSReverseRegistrar.key())).transferOwnership(multisig);
     console.log(
-      "Duke will transfer to multisig his owner role of contract:",
+      "Duke will transfer his ownership to multisig of contract:",
       vm.getLabel(loadContract(Contract.RNSReverseRegistrar.key())),
       "manually"
     );
