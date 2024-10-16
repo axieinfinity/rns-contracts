@@ -185,7 +185,7 @@ interface IRONRegistrarController {
    * - The caller must provide enough value to cover the total renewal cost.
    * - `names` must be sorted in ascending order.
    * @param names The array of names to be renewed.
-   * @param duration The array of durations for the renewal.
+   * @param durations The array of durations for the renewal.
    */
   function bulkRenew(string[] calldata names, uint64[] calldata durations) external payable;
 
