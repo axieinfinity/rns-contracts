@@ -244,7 +244,7 @@ contract RONRegistrarController is
       totalPrice += ronPrice;
 
       // Require id to be > previous id to prevent duplicate names
-      require(id < (id = computeId(names[i])), "BulkRenew: Invalid order of names");
+      if (id >= (id = computeId(names[i]))) revert InvalidOrderOfNames();
 
       expiryTime = _rnsUnified.renew(id, durations[i]);
       emit NameRenewed(names[i], id, ronPrice, expiryTime);
