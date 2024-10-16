@@ -231,6 +231,35 @@ contract RONRegistrarController is
   /**
    * @inheritdoc IRONRegistrarController
    */
+  function bulkRenew(string[] calldata names, uint64[] calldata durations) external payable whenNotPaused nonReentrant {
+    uint256 length = names.length;
+    if (length == 0 || length != durations.length) revert InvalidArrayLength();
+
+    uint256 id;
+    uint256 totalPrice;
+    uint64 expiryTime;
+
+    for (uint256 i; i < length; ++i) {
+      (, uint256 ronPrice) = rentPrice(names[i], durations[i]);
+      totalPrice += ronPrice;
+
+      // Require id to be > previous id to prevent duplicate names
+      require(id < (id = computeId(names[i])), "BulkRenew: Invalid order of names");
+
+      expiryTime = _rnsUnified.renew(id, durations[i]);
+      emit NameRenewed(names[i], id, ronPrice, expiryTime);
+    }
+
+    if (msg.value < totalPrice) revert InsufficientValue();
+    uint256 remainAmount = msg.value - totalPrice;
+
+    if (remainAmount != 0) RONTransferHelper.safeTransfer(payable(_msgSender()), remainAmount);
+    _transferRONToTreasury();
+  }
+
+  /**
+   * @inheritdoc IRONRegistrarController
+   */
   function registerProtectedName(
     string memory name,
     address owner,

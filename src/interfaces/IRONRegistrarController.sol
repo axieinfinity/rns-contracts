@@ -40,6 +40,8 @@ interface IRONRegistrarController {
   error InvalidArrayLength();
   /// @dev Thrown when treasury address is set to null
   error NullAddress();
+  /// @dev Thrown when the names is not sorted in ascending order
+  error InvalidOrderOfNames();
 
   /**
    * @dev Emitted when the min registration duration is updated.
@@ -175,6 +177,17 @@ interface IRONRegistrarController {
    * @param duration The duration of the renewal.
    */
   function renew(string calldata name, uint64 duration) external payable;
+
+  /**
+   * @dev Renew multiple names in a single transaction.
+   * Requirements:
+   * - `names` and `duration` arrays must have the same length.
+   * - The caller must provide enough value to cover the total renewal cost.
+   * - `names` must be sorted in ascending order.
+   * @param names The array of names to be renewed.
+   * @param duration The duration of the renewal.
+   */
+  function bulkRenew(string[] calldata names, uint64 duration) external payable;
 
   /**
    * @dev Registers a protected name.
