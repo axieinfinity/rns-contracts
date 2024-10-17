@@ -40,8 +40,6 @@ interface IRONRegistrarController {
   error InvalidArrayLength();
   /// @dev Thrown when treasury address is set to null
   error NullAddress();
-  /// @dev Thrown when the names is not sorted in ascending order
-  error InvalidOrderOfNames();
 
   /**
    * @dev Emitted when the min registration duration is updated.
