@@ -5,14 +5,14 @@ on:
     branches:
       - mainnet
       - testnet
-      - 'feature/*'
-      - 'features/*'
+      - "feature/*"
+      - "features/*"
   pull_request:
     branches:
       - mainnet
       - testnet
-      - 'feature/*'
-      - 'features/*'
+      - "feature/*"
+      - "features/*"
 
 env:
   FOUNDRY_PROFILE: ci
@@ -36,11 +36,6 @@ jobs:
 
       - name: Update package with soldeer
         run: forge soldeer update
-
-      - name: Recursively update dependencies
-        run: |
-          chmod +x ./update-deps.sh
-          ./update-deps.sh
 
       - name: Run Forge build
         run: |

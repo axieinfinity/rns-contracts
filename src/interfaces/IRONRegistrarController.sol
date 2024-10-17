@@ -177,6 +177,17 @@ interface IRONRegistrarController {
   function renew(string calldata name, uint64 duration) external payable;
 
   /**
+   * @dev Renew multiple names in a single transaction.
+   * Requirements:
+   * - `names` and `durations` arrays must have the same length.
+   * - The caller must provide enough value to cover the total renewal cost.
+   * WARNING: The function does not check for duplicate names.
+   * @param names The array of names to be renewed.
+   * @param durations The array of durations for the renewal.
+   */
+  function bulkRenew(string[] calldata names, uint64[] calldata durations) external payable;
+
+  /**
    * @dev Registers a protected name.
    *
    * Requirements:
