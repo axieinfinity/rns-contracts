@@ -241,12 +241,11 @@ contract RONRegistrarController is
 
     for (uint256 i; i < length; ++i) {
       (, uint256 ronPrice) = rentPrice(names[i], durations[i]);
+
       totalPrice += ronPrice;
-
-      // Require next id to be > previous id to prevent duplicate names
-      if (id >= (id = computeId(names[i]))) revert InvalidOrderOfNames();
-
+      id = computeId(names[i]);
       expiryTime = _rnsUnified.renew(id, durations[i]);
+
       emit NameRenewed(names[i], id, ronPrice, expiryTime);
     }
 
