@@ -7,7 +7,7 @@ ffi = true
 
 solc = '0.8.21'
 extra_output = ["devdoc", "userdoc", "storagelayout"]
-evm_version = 'istanbul'
+evm_version = 'london'
 use_literal_content = true
 fs_permissions = [{ access = "read-write", path = "./" }]
 
