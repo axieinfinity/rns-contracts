@@ -20,38 +20,43 @@ console.log(`Current nonce: ${nonce}`);
 const account = wallet.address;
 const shouldSimulate = true;
 // Assert the list is unique
-if (new Set(renewList).size !== renewList.length) {
-	console.error("List is not unique");
-	process.exit(1);
-}
+// if (new Set(renewList).size !== renewList.length) {
+// 	console.error("List is not unique");
+// 	process.exit(1);
+// }
+const contract = new ethers.Contract(ronRegistrarControllerAddr, abi, provider);
+const chunkSize = 20;
 
 async function bulkRenew() {
-	const contract = new ethers.Contract(ronRegistrarControllerAddr, abi, provider);
+	for (let i = 0; i < renewList.length; i += chunkSize) {
+		const chunk = renewList.slice(i, i + chunkSize);
+		console.log(`Processing chunk ${i / chunkSize + 1} - ${chunk.length} labels`);
 
-	const promises = renewList.map(async (label) => {
-		if (shouldSimulate) {
-			console.log(`nonce: ${nonce++}`);
-			try {
-				await contract.renew.staticCall(label, defaultRenewDuration, {
-					from: account,
-				});
-			} catch (error) {
-				console.error(`Failed to simulate renew for ${label} - ${defaultRenewDuration}`, error);
+		const promises = chunk.map(async (label) => {
+			if (shouldSimulate) {
+				console.log(`nonce: ${nonce++}`);
+				try {
+					await contract.renew.staticCall(label, defaultRenewDuration, {
+						from: account,
+					});
+				} catch (error) {
+					console.error(`Failed to simulate renew for ${label} - ${defaultRenewDuration}`, error);
+				}
+			} else {
+				console.log(`nonce: ${nonce}`);
+				try {
+					await contract.connect(wallet).renew(label, defaultRenewDuration, {
+						nonce: nonce++,
+					});
+					console.log(`Renew for label ${label} - duration: ${defaultRenewDuration} success`);
+				} catch (error) {
+					console.error(`Failed to renew label ${label} - duration ${defaultRenewDuration}:`, error);
+				}
 			}
-		} else {
-			console.log(`nonce: ${nonce}`);
-			try {
-				await contract.connect(wallet).renew(label, defaultRenewDuration, {
-					nonce: nonce++,
-				});
-				console.log(`Renew for label ${label} - duration: ${defaultRenewDuration} success`);
-			} catch (error) {
-				console.error(`Failed to renew label ${label} - duration ${defaultRenewDuration}:`, error);
-			}
-		}
-	});
+		});
 
-	await Promise.all(promises);
+		await Promise.all(promises);
+	}
 }
 
 bulkRenew();
