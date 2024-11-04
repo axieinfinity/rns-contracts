@@ -31,8 +31,8 @@ runs = 256
 
 [dependencies]
 "@fdk" = { version = "0.3.4-beta", url = "https://github.com/axieinfinity/foundry-deployment-kit/archive/refs/tags/v0.3.4-beta.zip" }
-"@pythnetwork-pyth-sdk-solidity" = { version = "2.2.0" }
-"@openzeppelin-contracts" = { version = "4.9.3" }
+"@pythnetwork-pyth-sdk-solidity" = { version = "2.2.0", url = "https://github.com/pyth-network/pyth-sdk-solidity/archive/refs/tags/v2.2.0.zip" }
+"@openzeppelin-contracts" = { version = "4.9.3", url = "https://github.com/OpenZeppelin/openzeppelin-contracts/archive/refs/tags/v4.9.3.zip" }
 
 [soldeer]
 # whether soldeer manages remappings
