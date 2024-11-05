@@ -44,31 +44,39 @@ contract Migration__20241105_UpgradeRNSCommissionMainnet is Migration {
     internal
     logFn("_validateSendMoneyFromSenders_NonZeroRonAmount")
   {
+    bool sent;
     vm.deal(address(_auction), 100 ether);
     vm.prank(address(_auction));
-    address(_rnsCommission).call{ value: 100 ether }("");
+    (sent,) = address(_rnsCommission).call{ value: 100 ether }("");
+    assertTrue(sent);
 
     vm.deal(address(_controller), 100 ether);
     vm.prank(address(_controller));
-    address(_rnsCommission).call{ value: 100 ether }("");
+    (sent,) = address(_rnsCommission).call{ value: 100 ether }("");
+    assertTrue(sent);
 
     assertEq(address(_rnsCommission).balance, 0 ether);
 
     address randomAddr = makeAddr("random address");
     vm.deal(address(randomAddr), 100 ether);
     vm.prank(randomAddr);
-    address(_rnsCommission).call{ value: 100 ether }("");
+    (sent,) = address(_rnsCommission).call{ value: 100 ether }("");
+    assertTrue(sent);
 
     assertEq(address(_rnsCommission).balance, 100 ether);
   }
 
   function _validateSendMoneyFromSenders_ZeroRonAmount() internal logFn("_validateSendMoneyFromSenders_ZeroRonAmount") {
+    bool sent;
     uint256 balanceBefore = address(_rnsCommission).balance;
 
     vm.prank(address(_auction));
-    address(_rnsCommission).call{ value: 0 }("");
+    (sent,) = address(_rnsCommission).call{ value: 0 }("");
+    assertTrue(sent);
+
     vm.prank(address(_controller));
-    address(_rnsCommission).call{ value: 0 }("");
+    (sent,) = address(_rnsCommission).call{ value: 0 }("");
+    assertTrue(sent);
 
     assertEq(address(_rnsCommission).balance, balanceBefore);
   }
