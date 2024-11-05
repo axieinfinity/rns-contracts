@@ -13,7 +13,6 @@ const abi = ["function renew(string calldata name, uint64 duration) external pay
 const defaultRenewDuration = 5 * 365 * 24 * 60 * 60; // 5 years
 // Structure of data.json is assumed to be like this:
 // ["label1", "label2", "label3", ...]
-const durations = renewList.map(() => defaultRenewDuration);
 // Get current nonce of account
 let nonce = await wallet.getNonce();
 console.log(`Current nonce: ${nonce}`);
