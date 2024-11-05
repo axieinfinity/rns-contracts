@@ -71,12 +71,16 @@ contract RNSCommisson__allocateCommissionAndTransferToRecipient_Test is RNSCommi
     assertEq(random.balance, 0);
   }
 
-  function test_RevertWhen_RonAmount_is_zero() external {
+  function testConcrete_Success_When_RonAmount_is_zero() external {
     vm.deal(_senders[0], 1e18);
 
     bool sent;
-    vm.expectRevert(INSCommission.InvalidAmountOfRON.selector);
     vm.prank(_senders[0]);
     (sent,) = address(_rnsCommission).call{ value: 0 }(new bytes(0));
+
+    assertEq(_skyMavisTreasuryAddr.balance, 0);
+    assertEq(_roninNetworkTreasuryAddr.balance, 0);
+    assertEq(address(_rnsCommission).balance, 0);
+    assertEq(_senders[0].balance, 1e18);
   }
 }
