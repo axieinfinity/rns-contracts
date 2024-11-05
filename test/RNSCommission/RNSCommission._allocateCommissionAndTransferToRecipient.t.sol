@@ -78,6 +78,7 @@ contract RNSCommisson__allocateCommissionAndTransferToRecipient_Test is RNSCommi
     vm.prank(_senders[0]);
     (sent,) = address(_rnsCommission).call{ value: 0 }(new bytes(0));
 
+    assertTrue(sent);
     assertEq(_skyMavisTreasuryAddr.balance, 0);
     assertEq(_roninNetworkTreasuryAddr.balance, 0);
     assertEq(address(_rnsCommission).balance, 0);
