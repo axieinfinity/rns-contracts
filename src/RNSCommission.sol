@@ -67,7 +67,7 @@ contract RNSCommission is Initializable, AccessControlEnumerable, INSCommission 
    * @dev Helper method to allocate commission and take fee into recipient address.
    */
   function _allocateCommissionAndTransferToRecipient(uint256 ronAmount) internal {
-    if (ronAmount == 0) revert InvalidAmountOfRON();
+    if (ronAmount == 0) return;
 
     uint256 length = _commissionInfos.length;
     if (length == 0) revert InvalidArrayLength();
