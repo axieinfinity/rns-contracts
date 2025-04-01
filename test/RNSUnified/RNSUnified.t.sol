@@ -243,7 +243,7 @@ abstract contract RNSUnifiedTest is Test {
     INSUnified.MutableRecord memory filledMut,
     INSUnified.MutableRecord memory mutRecordBefore,
     INSUnified.MutableRecord memory mutRecordAfter
-  ) internal {
+  ) internal view {
     if (indicator.hasAny(ModifyingField.Owner.indicator())) {
       assertEq(mutRecordAfter.owner, filledMut.owner);
       if (mutRecordAfter.expiry >= block.timestamp) {
@@ -278,7 +278,7 @@ abstract contract RNSUnifiedTest is Test {
     }
   }
 
-  function _assertMint(uint256 parentId, uint256 id, MintParam memory mintParam) internal {
+  function _assertMint(uint256 parentId, uint256 id, MintParam memory mintParam) internal view {
     string memory domain = _rns.getDomain(id);
     string memory parentDomain = _rns.getDomain(parentId);
     INSUnified.Record memory record = _rns.getRecord(id);

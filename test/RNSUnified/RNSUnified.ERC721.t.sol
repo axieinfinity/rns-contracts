@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import "./RNSUnified.t.sol";
 
 contract RNSUnified_ERC721_Test is RNSUnifiedTest {
-  function test_TokenMetadata() external {
+  function test_TokenMetadata() external view {
     assertEq(_rns.name(), "Ronin Name Service");
     assertEq(_rns.symbol(), "RNS");
   }
