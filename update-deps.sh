@@ -27,7 +27,7 @@ for dir in */; do
     fi
 
     # Run soldeer update
-    forge soldeer update
+    $HOME/.cargo/bin/soldeer update
 
     # Return to the dependencies folder
     cd ..

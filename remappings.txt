@@ -1,10 +1,8 @@
 @rns-contracts/=src/
-ds-test/=lib/forge-std/lib/ds-test/src/
-forge-std/=dependencies/@fdk-0.3.0-beta/dependencies/forge-std-1.8.2/src/
-@openzeppelin/contracts/=dependencies/@openzeppelin-contracts-4.9.3/
-contract-template/=lib/contract-template/src/
-@solady/=dependencies/@fdk-0.3.0-beta/dependencies/solady-0.0.206/src/
+forge-std/=dependencies/fdk-0.3.1-beta/dependencies/@forge-std-1.9.1/src/
+@openzeppelin/=dependencies/openzeppelin-4.9.3/
+@solady/=dependencies/fdk-0.3.1-beta/dependencies/@solady-0.0.228/src/
 @ensdomains/ens-contracts/=lib/ens-contracts/contracts/
 @ensdomains/buffer/=lib/buffer/
-@pythnetwork/=dependencies/@pythnetwork-pyth-sdk-solidity-2.2.0/
-@fdk/=dependencies/@fdk-0.3.0-beta/script
+@pythnetwork/=dependencies/pyth-sdk-solidity-2.2.0/
+@fdk/=dependencies/fdk-0.3.1-beta/script
