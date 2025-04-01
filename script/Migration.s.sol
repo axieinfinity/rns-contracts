@@ -60,7 +60,7 @@ abstract contract Migration is BaseMigration {
       param.rnsDomainPrice.renewalFees[2] = INSDomainPrice.RenewalFee(3, uint256(300e18) / 365 days);
       param.rnsDomainPrice.taxRatio = 1500; // 15%
       param.rnsDomainPrice.maxAcceptableAge = 24 hours;
-      param.rnsDomainPrice.aggregator = 0xA2aa501b19aff244D90cc15a4Cf739D2725B5729;
+      param.rnsDomainPrice.aggregator = 0xBaA0AfA2f390349e0074bE787509a098e3044fc8;
       param.rnsDomainPrice.domainPriceScaleRule = PeriodScaler({ ratio: 500, period: 30 days * 3 });
 
       // RNSUnified
@@ -140,7 +140,7 @@ abstract contract Migration is BaseMigration {
       param.rnsDomainPrice.renewalFees[3] = INSDomainPrice.RenewalFee(2, uint256(300e18) / 365 days);
       param.rnsDomainPrice.taxRatio = 1500; // 15%
       param.rnsDomainPrice.maxAcceptableAge = 24 hours;
-      param.rnsDomainPrice.aggregator = 0x2880aB155794e7179c9eE2e38200202908C17B43;
+      param.rnsDomainPrice.aggregator = 0x0B6074F21488B95945989E513EFEA070096d931D;
       param.rnsDomainPrice.domainPriceScaleRule = PeriodScaler({ ratio: 500, period: 30 days * 3 });
 
       // RNSUnified
