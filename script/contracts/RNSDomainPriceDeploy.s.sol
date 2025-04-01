@@ -21,12 +21,11 @@ contract RNSDomainPriceDeploy is Migration {
         param.renewalFees,
         param.taxRatio,
         param.domainPriceScaleRule,
-        param.pyth,
+        param.aggregator,
         address(param.rnsAuction) == address(0x0)
           ? RNSAuction(loadContractOrDeploy(Contract.RNSAuction.key()))
           : param.rnsAuction,
-        param.maxAcceptableAge,
-        param.pythIdForRONUSD
+        param.maxAcceptableAge
       )
     );
   }
