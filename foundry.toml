@@ -7,7 +7,7 @@ ffi = true
 
 solc = '0.8.21'
 extra_output = ["devdoc", "userdoc", "storagelayout"]
-evm_version = 'istanbul'
+evm_version = 'london'
 use_literal_content = true
 fs_permissions = [{ access = "read-write", path = "./" }]
 
@@ -33,7 +33,6 @@ runs = 256
 fdk = { version = "0.3.1-beta", url = "https://github.com/axieinfinity/foundry-deployment-kit/archive/refs/tags/v0.3.1-beta.zip" }
 openzeppelin = { version = "4.9.3", url = "https://github.com/OpenZeppelin/openzeppelin-contracts/archive/refs/tags/v4.9.3.zip" }
 pyth-sdk-solidity = { version = "2.2.0", url = "https://github.com/pyth-network/pyth-sdk-solidity/archive/refs/tags/v2.2.0.zip" }
-
 
 [soldeer]
 # whether soldeer manages remappings
