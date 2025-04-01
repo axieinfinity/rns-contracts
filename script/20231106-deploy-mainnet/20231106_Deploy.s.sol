@@ -101,7 +101,7 @@ contract Migration__20231106_Deploy is Migration {
     console.log(unicode"✅ Controller checks are passed");
   }
 
-  function _validateRNSUnified(uint256 ronId, uint256 addrReverseId) internal logFn("validateRNSUnified") {
+  function _validateRNSUnified(uint256 ronId, uint256 addrReverseId) internal view logFn("validateRNSUnified") {
     assertEq(ronId, LibRNSDomain.RON_ID);
     assertEq(addrReverseId, LibRNSDomain.ADDR_REVERSE_ID);
     assertTrue(_rns.hasRole(_rns.CONTROLLER_ROLE(), address(_auction)), "grant controller role failed");
@@ -111,7 +111,7 @@ contract Migration__20231106_Deploy is Migration {
     console.log(unicode"✅ RNSUnified checks are passed");
   }
 
-  function _validateReverseRegistrar() internal logFn("validateReverseRegistrar") {
+  function _validateReverseRegistrar() internal view logFn("validateReverseRegistrar") {
     assertEq(_rns.getApproved(LibRNSDomain.ADDR_REVERSE_ID), address(_reverseRegistrar));
   }
 
@@ -185,7 +185,7 @@ contract Migration__20231106_Deploy is Migration {
     console.log(unicode"✅ Domain price checks are passed");
   }
 
-  function _validateNameChecker() internal logFn("validateNameChecker") {
+  function _validateNameChecker() internal view logFn("validateNameChecker") {
     string[] memory blacklistedWords = _blacklistedWords;
     (uint8 min, uint8 max) = _nameChecker.getWordRange();
     bool valid;

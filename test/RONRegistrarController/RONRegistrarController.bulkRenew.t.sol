@@ -178,12 +178,12 @@ contract RONRegistrarControllerBulkRenewTest is RONRegistrarControllerTest {
     _controller.bulkRenew{ value: 10 ether }(names, durations);
   }
 
-  function _calFee(string memory name, uint64 duration) internal returns (uint256) {
+  function _calFee(string memory name, uint64 duration) internal view returns (uint256) {
     (, uint256 ronPrice) = _controller.rentPrice(name, duration);
     return ronPrice;
   }
 
-  function _sortNames(string[] memory names) internal returns (uint256[] memory, string[] memory) {
+  function _sortNames(string[] memory names) internal view returns (uint256[] memory, string[] memory) {
     uint256[] memory ids = new uint256[](names.length);
     for (uint256 i = 0; i < names.length; i++) {
       ids[i] = _controller.computeId(names[i]);

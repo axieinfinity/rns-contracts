@@ -11,7 +11,7 @@ import { OwnedMulticaller, OwnedMulticallerDeploy } from "script/contracts/Owned
 contract Migration__20231106_SubmitReservedNames is Migration {
   using JSONParserLib for *;
 
-  function run() public {
+  function run() public view {
     // default duration is 1 year
     uint64 duration = uint64(365 days);
 
@@ -30,7 +30,6 @@ contract Migration__20231106_SubmitReservedNames is Migration {
     (tos, labels) = _parseData("./script/20231106-param-prelaunch/data/finalReservedNames.json");
     // mintBatch(multicall, duration, rns, resolver, tos, labels);
   }
-
 
   function _parseData(string memory path) internal view returns (address[] memory tos, string[] memory labels) {
     string memory raw = vm.readFile(path);

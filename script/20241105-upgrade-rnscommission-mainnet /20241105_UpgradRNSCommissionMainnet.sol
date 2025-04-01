@@ -27,7 +27,7 @@ contract Migration__20241105_UpgradeRNSCommissionMainnet is Migration {
     _validateSendMoneyFromSenders_ZeroRonAmount();
   }
 
-  function _validateCommissionInfo() internal logFn("_validateSetCommissionInfo") {
+  function _validateCommissionInfo() internal view logFn("_validateSetCommissionInfo") {
     assertEq(_rnsCommission.getCommissions().length, 2);
 
     assertEq(_rnsCommission.getCommissions()[0].recipient, payable(0xFf43f5Ef28EcB7c1f219751fc793deB40ef07A53));
@@ -81,7 +81,7 @@ contract Migration__20241105_UpgradeRNSCommissionMainnet is Migration {
     assertEq(address(_rnsCommission).balance, balanceBefore);
   }
 
-  function _validateSendersAddress() internal logFn("_validateSendersAddress") {
+  function _validateSendersAddress() internal view logFn("_validateSendersAddress") {
     bytes32 SENDER_ROLE = keccak256("SENDER_ROLE");
 
     require(_rnsCommission.hasRole(SENDER_ROLE, address(_auction)));
