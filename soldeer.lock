@@ -10,7 +10,7 @@ name = "@openzeppelin-contracts"
 version = "4.9.3"
 url = "https://github.com/OpenZeppelin/openzeppelin-contracts/archive/refs/tags/v4.9.3.zip"
 checksum = "94270990c32ff2d00c06a9dabaf5b7a8e36773e017254acbb39d13733eb82960"
-integrity = "5cca086987dbce97760f8a337c0d29e6383fcafaffa9662897695f17566756d0"
+integrity = "5038b50ec02f34fe736aa65e36259a19e7cdb3e36c8fad0e06b23da3f0b19797"
 
 [[dependencies]]
 name = "@pythnetwork-pyth-sdk-solidity"
