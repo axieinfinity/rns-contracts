@@ -74,10 +74,13 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, ChainlinkPric
     RenewalFee[] calldata renewalFees,
     uint256 taxRatio,
     PeriodScaler calldata domainPriceScaleRule,
-    address aggregator,
-    INSAuction auction,
-    uint64 maxAcceptableAge
-  ) external initializer {
+    /* address aggregator, */
+    INSAuction auction
+  )
+    /* uint64 maxAcceptableAge */
+    external
+    initializer
+  {
     uint256 length = operators.length;
     bytes32 operatorRole = OPERATOR_ROLE;
 
@@ -93,12 +96,6 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, ChainlinkPric
     _setRenewalFeeByLengths(renewalFees);
     _setTaxRatio(taxRatio);
     _setDomainPriceScaleRule(domainPriceScaleRule);
-    _updatePriceFeed({
-      aggregator: aggregator,
-      tokenInDecimal: RON_DECIMALS,
-      tokenOutDecimal: USD_DECIMALS,
-      maxAcceptableAge: maxAcceptableAge
-    });
   }
 
   function initializeV2(address aggregator, uint64 maxAcceptableAge) external reinitializer(2) {
