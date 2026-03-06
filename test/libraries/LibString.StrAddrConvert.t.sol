@@ -6,13 +6,13 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { LibString } from "@rns-contracts/libraries/LibString.sol";
 
 contract LibString_StrAddrConvert_Test is Test {
-  function test_AddressToString(address addr) public {
+  function test_AddressToString(address addr) public pure {
     string memory expected = withoutHexPrefix(Strings.toHexString(addr));
     string memory actual = LibString.toString(addr);
     assertEq(expected, actual);
   }
 
-  function test_StringToAddress(address expected) public {
+  function test_StringToAddress(address expected) public pure {
     string memory stringifiedAddr = withoutHexPrefix(Strings.toHexString(expected));
     address actual = LibString.parseAddr(stringifiedAddr);
     assertEq(expected, actual);

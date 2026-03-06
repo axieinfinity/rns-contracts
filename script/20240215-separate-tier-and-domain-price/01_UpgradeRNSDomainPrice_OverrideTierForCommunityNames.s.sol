@@ -54,7 +54,7 @@ contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNS
       _domainPrice.bulkOverrideTiers(batchHashes, batchTiers);
     }
 
-    _validateOverridenTiers();
+    _validateOverriddenTiers();
     _validateOtherDomainTiers();
   }
 
@@ -73,7 +73,7 @@ contract Migration__01_UpgradeRNSDomainPriceAndOverrideTierForCommunityNames_RNS
     }
   }
 
-  function _validateOverridenTiers() internal logFn("_validating overriden tiers ...") {
+  function _validateOverriddenTiers() internal logFn("_validating overriden tiers ...") {
     IMulticall3.Call[] memory calls = new IMulticall3.Call[](_lbHashes.length);
 
     for (uint256 i; i < _lbHashes.length; ++i) {

@@ -2,12 +2,12 @@
 pragma solidity ^0.8.0;
 
 import { PeriodScaler } from "../libraries/math/PeriodScalingUtils.sol";
-import { IPyth } from "@pythnetwork/IPyth.sol";
+import { ChainlinkPriceFeed } from "@contract-libs/price-feeds/chainlink/LibChainlinkPriceFeed.sol";
 
 interface INSDomainPrice {
   error InvalidArrayLength();
-  error RenewalFeeIsNotOverriden();
-  error TierIsNotOverriden();
+  error RenewalFeeIsNotOverridden();
+  error TierIsNotOverridden();
   error ExceedAuctionDomainExpiry();
 
   /// @dev The tier of a domain.
@@ -46,25 +46,21 @@ interface INSDomainPrice {
   /// @dev Emitted when the rule to rescale domain price is updated.
   event DomainPriceScaleRuleUpdated(address indexed operator, uint192 ratio, uint64 period);
 
-  /// @dev Emitted when the Pyth Oracle config is updated.
-  event PythOracleConfigUpdated(
-    address indexed operator, IPyth indexed pyth, uint256 maxAcceptableAge, bytes32 indexed pythIdForRONUSD
-  );
-
   /**
-   * @dev Returns the Pyth oracle config.
+   * @dev Returns the Chainlink oracle config.
    */
-  function getPythOracleConfig() external view returns (IPyth pyth, uint256 maxAcceptableAge, bytes32 pythIdForRONUSD);
+  function getPriceFeedData() external view returns (ChainlinkPriceFeed memory);
 
   /**
-   * @dev Sets the Pyth oracle config.
+   * @dev Sets the Chainlink oracle config.
    *
    * Requirements:
    * - The method caller is admin.
    *
-   * Emits events {PythOracleConfigUpdated}.
+   * Emits events {ChainlinkPriceFeedUpdated}.
    */
-  function setPythOracleConfig(IPyth pyth, uint256 maxAcceptableAge, bytes32 pythIdForRONUSD) external;
+  function setPriceFeedData(address aggregator, uint8 tokenInDecimal, uint8 tokenOutDecimal, uint64 maxAcceptableAge)
+    external;
 
   /**
    * @dev Returns the percentage to scale from domain price each period.
@@ -252,4 +248,9 @@ interface INSDomainPrice {
    * @dev Decimal for USD.
    */
   function USD_DECIMALS() external pure returns (uint8);
+
+  /**
+   * @dev Decimal for RON.
+   */
+  function RON_DECIMALS() external pure returns (uint8);
 }

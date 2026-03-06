@@ -60,9 +60,8 @@ abstract contract Migration is BaseMigration {
       param.rnsDomainPrice.renewalFees[2] = INSDomainPrice.RenewalFee(3, uint256(300e18) / 365 days);
       param.rnsDomainPrice.taxRatio = 1500; // 15%
       param.rnsDomainPrice.maxAcceptableAge = 24 hours;
-      param.rnsDomainPrice.pyth = IPyth(0xA2aa501b19aff244D90cc15a4Cf739D2725B5729);
+      param.rnsDomainPrice.aggregator = 0xBaA0AfA2f390349e0074bE787509a098e3044fc8;
       param.rnsDomainPrice.domainPriceScaleRule = PeriodScaler({ ratio: 500, period: 30 days * 3 });
-      param.rnsDomainPrice.pythIdForRONUSD = 0x4cb9d530b042004b042e165ee0904b12fe534d40dac5fe1c71dfcdb522e6e3c2;
 
       // RNSUnified
       param.rnsUnified.admin = defaultAdmin;
@@ -141,9 +140,8 @@ abstract contract Migration is BaseMigration {
       param.rnsDomainPrice.renewalFees[3] = INSDomainPrice.RenewalFee(2, uint256(300e18) / 365 days);
       param.rnsDomainPrice.taxRatio = 1500; // 15%
       param.rnsDomainPrice.maxAcceptableAge = 24 hours;
-      param.rnsDomainPrice.pyth = IPyth(0x2880aB155794e7179c9eE2e38200202908C17B43);
+      param.rnsDomainPrice.aggregator = 0x0B6074F21488B95945989E513EFEA070096d931D;
       param.rnsDomainPrice.domainPriceScaleRule = PeriodScaler({ ratio: 500, period: 30 days * 3 });
-      param.rnsDomainPrice.pythIdForRONUSD = 0x97cfe19da9153ef7d647b011c5e355142280ddb16004378573e6494e499879f3;
 
       // RNSUnified
       param.rnsUnified.admin = temporaryAdmin;
