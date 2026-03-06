@@ -5,6 +5,7 @@ import { console2, Test } from "forge-std/Test.sol";
 
 contract RNSCommisson_SetTreasuryInfo_Test is RNSCommissionTest {
   function test_setCommissionInfo_Success(address payable newAddr, uint256 id) external {
+    vm.assume(newAddr != address(0));
     uint256 treasuryCount = _rnsCommission.getCommissions().length;
 
     vm.assume(id < treasuryCount);

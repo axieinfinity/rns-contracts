@@ -8,7 +8,6 @@ import {
   ChainlinkPriceFeed,
   ChainlinkPriceFeedConsumer
 } from "@contract-libs/price-feeds/chainlink/ChainlinkPriceFeedConsumer.sol";
-import { INSUnified } from "./interfaces/INSUnified.sol";
 import { INSAuction } from "./interfaces/INSAuction.sol";
 import { INSDomainPrice } from "./interfaces/INSDomainPrice.sol";
 import { PeriodScaler, LibPeriodScaler, Math } from "./libraries/math/PeriodScalingUtils.sol";
@@ -455,13 +454,6 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, ChainlinkPric
       uint256 id = LibRNSDomain.toId(LibRNSDomain.RON_ID, label);
       INSAuction auction = _auction;
       if (auction.reserved(id)) {
-        INSUnified rns = auction.getRNSUnified();
-        uint256 expiry = LibSafeRange.addWithUpperbound(rns.getRecord(id).mut.expiry, duration, type(uint64).max);
-        (INSAuction.DomainAuction memory domainAuction,) = auction.getAuction(id);
-        uint256 claimedAt = domainAuction.bid.claimedAt;
-        if (claimedAt != 0 && expiry - claimedAt > auction.MAX_AUCTION_DOMAIN_EXPIRY()) {
-          return (basePrice, tax, ExceedAuctionDomainExpiry.selector);
-        }
         // Tax is added to the name reserved for the auction
         tax.usd = Math.mulDiv(_taxRatio, _getDomainPrice(lbHash), MAX_PERCENTAGE);
       }

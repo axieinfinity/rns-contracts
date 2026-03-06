@@ -1,11 +1,12 @@
 [profile.default]
 src = "src"
 out = "out"
-libs = ["lib"]
+libs = ["lib", "dependencies"]
 ffi = true
+script_execution_protection = false
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
-solc = '0.8.22'
+solc = '0.8.29'
 extra_output = ["devdoc", "userdoc", "storagelayout"]
 evm_version = 'cancun'
 optimizer = true
@@ -23,7 +24,7 @@ bracket_spacing = true
 ethereum = "https://eth.llamarpc.com"
 goerli = "https://ethereum-goerli.publicnode.com"
 ronin-mainnet = "https://api-partner.roninchain.com/rpc"
-ronin-testnet = "https://saigon-archive.roninchain.com/rpc"
+ronin-testnet = "https://saigon-testnet.roninchain.com/rpc"
 localhost = "http://localhost:8545"
 
 [fuzz]
@@ -33,7 +34,7 @@ runs = 256
 runs = 256
 
 [dependencies]
-"fdk" = { version = "0.3.5-rc", url = "https://github.com/axieinfinity/foundry-deployment-kit/archive/refs/tags/v0.3.5-rc.zip" }
+"fdk" = { version = "0.3.6", url = "https://github.com/axieinfinity/foundry-deployment-kit/archive/refs/tags/v0.3.6-gamma.1.zip" }
 "openzeppelin" = { version = "4.9.3", url = "https://github.com/OpenZeppelin/openzeppelin-contracts/archive/refs/tags/v4.9.3.zip" }
 "contract-libs" = { version = "0.1.3", url = "https://github.com/axieinfinity/contract-libs/archive/refs/tags/release-v0.1.3.zip" }
 

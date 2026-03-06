@@ -1,8 +1,8 @@
 @rns-contracts/=src/
-forge-std/=dependencies/fdk-0.3.5-rc/dependencies/forge-std-1.9.5/src/
+forge-std/=dependencies/fdk-0.3.6/dependencies/forge-std-1.9.5/src/
 @openzeppelin/contracts/=dependencies/openzeppelin-4.9.3/contracts/
-@solady/=dependencies/fdk-0.3.5-rc/dependencies/solady-0.0.228/src/
+@solady/=dependencies/fdk-0.3.6/dependencies/solady-0.0.228/src/
 @ensdomains/ens-contracts/=lib/ens-contracts/contracts/
 @ensdomains/buffer/=lib/buffer/
-@fdk/=dependencies/fdk-0.3.5-rc/script
+@fdk/=dependencies/fdk-0.3.6/script
 @contract-libs/=dependencies/contract-libs-0.1.3/src/

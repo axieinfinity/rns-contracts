@@ -55,11 +55,6 @@ interface INSAuction {
   function MAX_EXPIRY() external pure returns (uint64);
 
   /**
-   * @dev The maximum expiry duration of a domain after transferring to bidder.
-   */
-  function MAX_AUCTION_DOMAIN_EXPIRY() external pure returns (uint64);
-
-  /**
    * @dev Returns the operator role.
    */
   function OPERATOR_ROLE() external pure returns (bytes32);

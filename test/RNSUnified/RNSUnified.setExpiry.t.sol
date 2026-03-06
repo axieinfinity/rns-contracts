@@ -61,7 +61,7 @@ contract RNSUnified_SetExpiry_Test is RNSUnifiedTest {
     external
     mintAs(_controller)
   {
-    vm.assume(any != _controller && any != _admin);
+    vm.assume(any != _controller && any != _admin && any != address(0) && any != _proxyAdmin);
     vm.assume(renewDuration > mintParam.duration);
     (, uint256 id) = _mint(_ronId, mintParam, _noError);
 
@@ -81,7 +81,7 @@ contract RNSUnified_SetExpiry_Test is RNSUnifiedTest {
     mintAs(_controller)
   {
     vm.assume(renewExpiry > block.timestamp + mintParam.duration);
-    vm.assume(any != _controller && any != _admin);
+    vm.assume(any != _controller && any != _admin && any != address(0) && any != _proxyAdmin);
     (, uint256 id) = _mint(_ronId, mintParam, _noError);
 
     bytes memory revertMessage = bytes(
