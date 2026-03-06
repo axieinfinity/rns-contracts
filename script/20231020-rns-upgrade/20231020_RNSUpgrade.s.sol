@@ -6,6 +6,6 @@ import { Migration } from "script/Migration.s.sol";
 
 contract Migration__20231020_RNSUpgrade is Migration {
   function run() public {
-    _upgradeProxy(Contract.RNSUnified.key());
+    _upgradeProxy(Contract.RNSDomainPrice.key());
   }
 }

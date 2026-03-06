@@ -7,10 +7,10 @@ integrity = "11e56f048cda4dcefe820fd408a321d70812082f8970a8cadca6c7a0ce87a497"
 
 [[dependencies]]
 name = "fdk"
-version = "0.3.5-rc"
-url = "https://github.com/axieinfinity/foundry-deployment-kit/archive/refs/tags/v0.3.5-rc.zip"
-checksum = "1b2a5c4cb7836463d821d79483d45594fcab2f96f0200641da52d14ccdd6ccbc"
-integrity = "a9a42316943b53d68a2dd135906632a264175585a0d4f9f50927228061a35b82"
+version = "0.3.6"
+url = "https://github.com/axieinfinity/foundry-deployment-kit/archive/refs/tags/v0.3.6-gamma.1.zip"
+checksum = "c03a263dcc04dfc02f9de685a21c31e8d63c2a57e3c068fa70d3325031b68263"
+integrity = "8dc148795fbbe00966ab633f20f8a0b66df51844afda2017e029ac990f015c48"
 
 [[dependencies]]
 name = "openzeppelin"
