@@ -1,16 +1,16 @@
 [[dependencies]]
 name = "@fdk"
-version = "0.3.4-beta"
-url = "https://github.com/axieinfinity/foundry-deployment-kit/archive/refs/tags/v0.3.4-beta.zip"
-checksum = "d93cfa76dee3a227b2ee24d41c4afe2141fb25498eed9352d036ab13bbc16c13"
-integrity = "4f0417853a563024747cba0dd88d501717c13d4387132e5b1b854da69b7486b2"
+version = "0.3.6"
+url = "https://github.com/axieinfinity/foundry-deployment-kit/archive/refs/tags/v0.3.6-gamma.1.zip"
+checksum = "c03a263dcc04dfc02f9de685a21c31e8d63c2a57e3c068fa70d3325031b68263"
+integrity = "8dc148795fbbe00966ab633f20f8a0b66df51844afda2017e029ac990f015c48"
 
 [[dependencies]]
 name = "@openzeppelin-contracts"
 version = "4.9.3"
 url = "https://github.com/OpenZeppelin/openzeppelin-contracts/archive/refs/tags/v4.9.3.zip"
 checksum = "94270990c32ff2d00c06a9dabaf5b7a8e36773e017254acbb39d13733eb82960"
-integrity = "5038b50ec02f34fe736aa65e36259a19e7cdb3e36c8fad0e06b23da3f0b19797"
+integrity = "be2160bbca74b40c3ce2000d2d979f009e1d0566dce785656a8b1ebae9831d55"
 
 [[dependencies]]
 name = "@pythnetwork-pyth-sdk-solidity"

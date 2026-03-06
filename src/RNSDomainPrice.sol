@@ -5,7 +5,6 @@ import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable
 import { AccessControlEnumerable } from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { IPyth, PythStructs } from "@pythnetwork/IPyth.sol";
-import { INSUnified } from "./interfaces/INSUnified.sol";
 import { INSAuction } from "./interfaces/INSAuction.sol";
 import { INSDomainPrice } from "./interfaces/INSDomainPrice.sol";
 import { PeriodScaler, LibPeriodScaler, Math } from "./libraries/math/PeriodScalingUtils.sol";
@@ -318,22 +317,16 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
    * @inheritdoc INSDomainPrice
    */
   function convertUSDToRON(uint256 usdWei) public view returns (uint256 ronWei) {
-    return _pyth.getPriceNoOlderThan(_pythIdForRONUSD, _maxAcceptableAge).inverse({ expo: -18 }).mul({
-      inpWei: usdWei,
-      inpDecimals: int32(uint32(USD_DECIMALS)),
-      outDecimals: 18
-    });
+    return _pyth.getPriceNoOlderThan(_pythIdForRONUSD, _maxAcceptableAge).inverse({ expo: -18 })
+      .mul({ inpWei: usdWei, inpDecimals: int32(uint32(USD_DECIMALS)), outDecimals: 18 });
   }
 
   /**
    * @inheritdoc INSDomainPrice
    */
   function convertRONToUSD(uint256 ronWei) public view returns (uint256 usdWei) {
-    return _pyth.getPriceNoOlderThan(_pythIdForRONUSD, _maxAcceptableAge).mul({
-      inpWei: ronWei,
-      inpDecimals: 18,
-      outDecimals: int32(uint32(USD_DECIMALS))
-    });
+    return _pyth.getPriceNoOlderThan(_pythIdForRONUSD, _maxAcceptableAge)
+      .mul({ inpWei: ronWei, inpDecimals: 18, outDecimals: int32(uint32(USD_DECIMALS)) });
   }
 
   /**
@@ -462,13 +455,6 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
       uint256 id = LibRNSDomain.toId(LibRNSDomain.RON_ID, label);
       INSAuction auction = _auction;
       if (auction.reserved(id)) {
-        INSUnified rns = auction.getRNSUnified();
-        uint256 expiry = LibSafeRange.addWithUpperbound(rns.getRecord(id).mut.expiry, duration, type(uint64).max);
-        (INSAuction.DomainAuction memory domainAuction,) = auction.getAuction(id);
-        uint256 claimedAt = domainAuction.bid.claimedAt;
-        if (claimedAt != 0 && expiry - claimedAt > auction.MAX_AUCTION_DOMAIN_EXPIRY()) {
-          return (basePrice, tax, ExceedAuctionDomainExpiry.selector);
-        }
         // Tax is added to the name reserved for the auction
         tax.usd = Math.mulDiv(_taxRatio, _getDomainPrice(lbHash), MAX_PERCENTAGE);
       }
