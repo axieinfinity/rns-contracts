@@ -24,7 +24,7 @@ bracket_spacing = true
 ethereum = "https://eth.llamarpc.com"
 goerli = "https://ethereum-goerli.publicnode.com"
 ronin-mainnet = "https://api-partner.roninchain.com/rpc"
-ronin-testnet = "https://saigon-testnet.roninchain.com/rpc"
+ronin-testnet = "https://rpc-saigon-testnet-cc58e966ql.t.conduit.xyz/ChMGzCr3oXbdRm1M7sP6Um51S6Wzf9T4r"
 localhost = "http://localhost:8545"
 
 [fuzz]
