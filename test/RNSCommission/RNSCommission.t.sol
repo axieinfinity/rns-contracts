@@ -67,7 +67,7 @@ contract RNSCommissionTest is Test {
     address payable[] memory treasuriesAddress,
     uint256[] memory ratio,
     string[] memory names
-  ) internal returns (INSCommission.Commission[] memory commissionInfo) {
+  ) internal view returns (INSCommission.Commission[] memory commissionInfo) {
     require(treasuriesAddress.length == ratio.length, "Invalid Length");
 
     uint256 length = treasuriesAddress.length;
@@ -79,7 +79,7 @@ contract RNSCommissionTest is Test {
     }
   }
 
-  function test_getCommissions() external {
+  function test_getCommissions() external view {
     RNSCommission.Commission[] memory commissionInfo = _rnsCommission.getCommissions();
     assert(commissionInfo.length == 2);
   }

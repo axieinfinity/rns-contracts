@@ -41,7 +41,7 @@ contract Migration__02_ResetCommunityNamesRenewalFees_RNSDomainPrice is Migratio
     RNSDomainPrice rnsDomainPrice = RNSDomainPrice(loadContract(Contract.RNSDomainPrice.key()));
 
     for (uint256 i; i < _lbHashes.length; ++i) {
-      vm.expectRevert(INSDomainPrice.RenewalFeeIsNotOverriden.selector);
+      vm.expectRevert(INSDomainPrice.RenewalFeeIsNotOverridden.selector);
       rnsDomainPrice.getOverriddenRenewalFee(_labels[i]);
     }
   }

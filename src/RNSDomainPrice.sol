@@ -4,7 +4,10 @@ pragma solidity ^0.8.19;
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { AccessControlEnumerable } from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
-import { IPyth, PythStructs } from "@pythnetwork/IPyth.sol";
+import {
+  ChainlinkPriceFeed,
+  ChainlinkPriceFeedConsumer
+} from "@contract-libs/price-feeds/chainlink/ChainlinkPriceFeedConsumer.sol";
 import { INSUnified } from "./interfaces/INSUnified.sol";
 import { INSAuction } from "./interfaces/INSAuction.sol";
 import { INSDomainPrice } from "./interfaces/INSDomainPrice.sol";
@@ -13,13 +16,11 @@ import { TimestampWrapper } from "./libraries/TimestampWrapperUtils.sol";
 import { LibSafeRange } from "./libraries/math/LibSafeRange.sol";
 import { LibString } from "./libraries/LibString.sol";
 import { LibRNSDomain } from "./libraries/LibRNSDomain.sol";
-import { PythConverter } from "./libraries/pyth/PythConverter.sol";
 
-contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPrice {
+contract RNSDomainPrice is Initializable, AccessControlEnumerable, ChainlinkPriceFeedConsumer, INSDomainPrice {
   using LibString for *;
   using LibRNSDomain for string;
   using LibPeriodScaler for PeriodScaler;
-  using PythConverter for PythStructs.Price;
 
   /// @dev The threshold tier value (in USD) for Tier 1: > $200
   uint256 private constant TIER_1_FROM_EXCLUDED_THRESHOLD = 200e18;
@@ -27,6 +28,8 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   uint256 private constant TIER_2_FROM_EXCLUDED_THRESHOLD = 50e18;
   /// @inheritdoc INSDomainPrice
   uint8 public constant USD_DECIMALS = 18;
+  /// @inheritdoc INSDomainPrice
+  uint8 public constant RON_DECIMALS = 18;
   /// @inheritdoc INSDomainPrice
   uint64 public constant MAX_PERCENTAGE = 100_00;
   /// @inheritdoc INSDomainPrice
@@ -37,18 +40,18 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   /// @dev Gap for upgradeability.
   uint256[50] private ____gap;
 
-  /// @dev Pyth oracle contract
-  IPyth internal _pyth;
+  /// @custom:oz-renamed-from _pyth
+  uint256 private __deprecatedPyth;
   /// @dev RNSAuction contract
   INSAuction internal _auction;
   /// @dev Extra fee for renewals based on the current domain price.
   uint256 internal _taxRatio;
   /// @dev Max length of the renewal fee
   uint256 internal _rnfMaxLength;
-  /// @dev Max acceptable age of the price oracle request
-  uint256 internal _maxAcceptableAge;
-  /// @dev Price feed ID on Pyth for RON/USD
-  bytes32 internal _pythIdForRONUSD;
+  /// @custom:oz-renamed-from _maxAcceptableAge
+  uint256 private __deprecatedMaxAcceptableAge;
+  /// @custom:oz-renamed-from _pythIdForRONUSD
+  uint256 private __deprecatedPythIdForRONUSD;
   /// @dev The percentage scale from domain price each period
   PeriodScaler internal _dpDownScaler;
 
@@ -58,7 +61,7 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
   mapping(bytes32 lbHash => TimestampWrapper usdPrice) internal _dp;
   /// @dev Mapping from name => inverse bitwise of renewal fee overriding.
   mapping(bytes32 lbHash => uint256 usdPrice) internal _rnFeeOverriding;
-  /// @dev Mapping from label hash to overriden tier
+  /// @dev Mapping from label hash to overridden tier
   mapping(bytes32 lbHash => uint8 tier) internal _tierOverriding;
 
   constructor() payable {
@@ -71,11 +74,13 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
     RenewalFee[] calldata renewalFees,
     uint256 taxRatio,
     PeriodScaler calldata domainPriceScaleRule,
-    IPyth pyth,
-    INSAuction auction,
-    uint256 maxAcceptableAge,
-    bytes32 pythIdForRONUSD
-  ) external initializer {
+    /* address aggregator, */
+    INSAuction auction
+  )
+    /* uint64 maxAcceptableAge */
+    external
+    initializer
+  {
     uint256 length = operators.length;
     bytes32 operatorRole = OPERATOR_ROLE;
 
@@ -91,24 +96,32 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
     _setRenewalFeeByLengths(renewalFees);
     _setTaxRatio(taxRatio);
     _setDomainPriceScaleRule(domainPriceScaleRule);
-    _setPythOracleConfig(pyth, maxAcceptableAge, pythIdForRONUSD);
+  }
+
+  function initializeV2(address aggregator, uint64 maxAcceptableAge) external reinitializer(2) {
+    _updatePriceFeed({
+      aggregator: aggregator,
+      tokenInDecimal: RON_DECIMALS,
+      tokenOutDecimal: USD_DECIMALS,
+      maxAcceptableAge: maxAcceptableAge
+    });
   }
 
   /**
    * @inheritdoc INSDomainPrice
    */
-  function getPythOracleConfig() external view returns (IPyth pyth, uint256 maxAcceptableAge, bytes32 pythIdForRONUSD) {
-    return (_pyth, _maxAcceptableAge, _pythIdForRONUSD);
+  function getPriceFeedData() external view returns (ChainlinkPriceFeed memory) {
+    return _getPriceFeed();
   }
 
   /**
    * @inheritdoc INSDomainPrice
    */
-  function setPythOracleConfig(IPyth pyth, uint256 maxAcceptableAge, bytes32 pythIdForRONUSD)
+  function setPriceFeedData(address aggregator, uint8 tokenInDecimal, uint8 tokenOutDecimal, uint64 maxAcceptableAge)
     external
     onlyRole(DEFAULT_ADMIN_ROLE)
   {
-    _setPythOracleConfig(pyth, maxAcceptableAge, pythIdForRONUSD);
+    _updatePriceFeed(aggregator, tokenInDecimal, tokenOutDecimal, maxAcceptableAge);
   }
 
   /**
@@ -169,7 +182,7 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
    */
   function getOverriddenRenewalFee(string calldata label) external view returns (uint256 usdFee) {
     usdFee = _rnFeeOverriding[label.hashLabel()];
-    if (usdFee == 0) revert RenewalFeeIsNotOverriden();
+    if (usdFee == 0) revert RenewalFeeIsNotOverridden();
     return ~usdFee;
   }
 
@@ -178,7 +191,7 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
    */
   function getOverriddenTier(string calldata label) external view returns (Tier tier) {
     uint8 tierValue = _tierOverriding[label.hashLabel()];
-    if (tierValue == 0) revert TierIsNotOverriden();
+    if (tierValue == 0) revert TierIsNotOverridden();
     return Tier(~tierValue);
   }
 
@@ -318,22 +331,14 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
    * @inheritdoc INSDomainPrice
    */
   function convertUSDToRON(uint256 usdWei) public view returns (uint256 ronWei) {
-    return _pyth.getPriceNoOlderThan(_pythIdForRONUSD, _maxAcceptableAge).inverse({ expo: -18 }).mul({
-      inpWei: usdWei,
-      inpDecimals: int32(uint32(USD_DECIMALS)),
-      outDecimals: 18
-    });
+    return _getPriceFeed().convertTokenOut2TokenIn({ tokenOutAmount: usdWei });
   }
 
   /**
    * @inheritdoc INSDomainPrice
    */
   function convertRONToUSD(uint256 ronWei) public view returns (uint256 usdWei) {
-    return _pyth.getPriceNoOlderThan(_pythIdForRONUSD, _maxAcceptableAge).mul({
-      inpWei: ronWei,
-      inpDecimals: 18,
-      outDecimals: int32(uint32(USD_DECIMALS))
-    });
+    return _getPriceFeed().convertTokenIn2TokenOut({ tokenInAmount: ronWei });
   }
 
   /**
@@ -422,18 +427,6 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, INSDomainPric
       _rnfMaxLength = maxRenewalFeeLength;
       emit MaxRenewalFeeLengthUpdated(operator, maxRenewalFeeLength);
     }
-  }
-
-  /**
-   * @dev Sets Pyth Oracle config.
-   *
-   * Emits events {PythOracleConfigUpdated}.
-   */
-  function _setPythOracleConfig(IPyth pyth, uint256 maxAcceptableAge, bytes32 pythIdForRONUSD) internal {
-    _pyth = pyth;
-    _maxAcceptableAge = maxAcceptableAge;
-    _pythIdForRONUSD = pythIdForRONUSD;
-    emit PythOracleConfigUpdated(_msgSender(), pyth, maxAcceptableAge, pythIdForRONUSD);
   }
 
   /**

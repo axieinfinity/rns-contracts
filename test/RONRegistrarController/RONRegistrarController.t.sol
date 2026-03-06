@@ -87,8 +87,8 @@ contract RONRegistrarControllerTest is Test {
 
 contract PriceOracleMock {
   function getRenewalFee(string calldata label, uint256 duration)
-    external
-    view
+    public
+    pure
     returns (INSDomainPrice.UnitPrice memory basePrice, INSDomainPrice.UnitPrice memory tax)
   {
     basePrice = INSDomainPrice.UnitPrice({ usd: 1.5 ether, ron: 1 ether });

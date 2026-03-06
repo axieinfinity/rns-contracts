@@ -44,7 +44,7 @@ contract OwnedMulticaller is Ownable, IERC721Receiver, IERC1155Receiver {
   /**
    * @dev See {IERC165-supportsInterface}.
    */
-  function supportsInterface(bytes4 interfaceId) external view returns (bool) {
+  function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
     return interfaceId == type(IERC165).interfaceId || interfaceId == type(IERC721Receiver).interfaceId
       || interfaceId == type(IERC1155Receiver).interfaceId;
   }

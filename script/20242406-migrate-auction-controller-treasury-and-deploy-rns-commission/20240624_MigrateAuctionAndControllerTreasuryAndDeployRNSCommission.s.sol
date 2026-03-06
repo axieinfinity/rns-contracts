@@ -36,7 +36,7 @@ contract Migration__20240624_MigrateAuctionAndControllerTreasuryAndDeployRNSComm
     _validateCommissionInfo();
   }
 
-  function _validateTreasuryAddress() internal logFn("_validateTreasuryAddress") {
+  function _validateTreasuryAddress() internal view logFn("_validateTreasuryAddress") {
     address auctionTreasury = _auction.getTreasury();
     address controllerTreasury = _controller.getTreasury();
 

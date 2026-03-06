@@ -46,13 +46,13 @@ contract Migration_03_DeployNewRNSOperation_RNSOperation is Migration {
 
   function _postCheck() internal override {
     _validateBulkMint();
-    _validateOverridenTiers();
+    _validateOverriddenTiers();
     _validateBulkSetProtected();
     _validateBulkOverrideRenewalFees();
     _validateReclaimAuctionNames({ searchSize: 20 });
   }
 
-  function _validateOverridenTiers() internal logFn("_validateOverridenTiers") {
+  function _validateOverriddenTiers() internal view logFn("_validateOverridenTiers") {
     string[] memory labels = new string[](5);
     labels[0] = "heidi";
     labels[1] = "luke";

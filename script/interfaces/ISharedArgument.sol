@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { IGeneralConfig } from "@fdk/interfaces/IGeneralConfig.sol";
-import { IPyth, INSDomainPrice, PeriodScaler } from "@rns-contracts/RNSDomainPrice.sol";
+import { INSDomainPrice, PeriodScaler } from "@rns-contracts/RNSDomainPrice.sol";
 import { NameChecker } from "@rns-contracts/NameChecker.sol";
 import { PublicResolver } from "@rns-contracts/resolvers/PublicResolver.sol";
 import { RNSAuction } from "@rns-contracts/RNSAuction.sol";
@@ -45,10 +45,9 @@ interface ISharedArgument is IGeneralConfig {
     INSDomainPrice.RenewalFee[] renewalFees;
     uint256 taxRatio;
     PeriodScaler domainPriceScaleRule;
-    IPyth pyth;
+    address aggregator;
     RNSAuction rnsAuction;
-    uint256 maxAcceptableAge;
-    bytes32 pythIdForRONUSD;
+    uint64 maxAcceptableAge;
   }
 
   struct RNSOperationParam {

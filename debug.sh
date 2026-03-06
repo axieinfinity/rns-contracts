@@ -1,1 +1,1 @@
-source dependencies/@fdk-0.3.0-beta/debug.sh
+source dependencies/fdk-0.3.5-rc/debug.sh
