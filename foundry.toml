@@ -13,6 +13,7 @@ optimizer_runs = 1000
 use_literal_content = true
 via_ir = false
 fs_permissions = [{ access = "read-write", path = "./" }]
+script_execution_protection = false
 
 [fmt]
 line_length = 120
