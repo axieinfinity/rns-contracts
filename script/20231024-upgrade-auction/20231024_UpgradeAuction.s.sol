@@ -8,4 +8,6 @@ contract Migration__20231024_UpgradeAuction is Migration {
   function run() public {
     _upgradeProxy(Contract.RNSAuction.key());
   }
+
+  function _afterRunningScript() internal override { }
 }

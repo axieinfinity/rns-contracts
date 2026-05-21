@@ -10,7 +10,7 @@ dotenv.config();
 const { TESTNET_URL, MAINNET_URL } = process.env;
 
 const testnet: NetworkUserConfig = {
-	chainId: 2021,
+	chainId: 202601,
 	url: TESTNET_URL || "https://saigon-testnet.roninchain.com/rpc",
 };
 

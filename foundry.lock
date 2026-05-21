@@ -1,0 +1,11 @@
+{
+  "lib/buffer": {
+    "rev": "688aa09e9ad241a94609e6af539e65f229912b16"
+  },
+  "lib/contract-template": {
+    "rev": "e2a2fadc1034eec37214e571c9db4e56319b681c"
+  },
+  "lib/ens-contracts": {
+    "rev": "0c75ba23fae76165d51c9c80d76d22261e06179d"
+  }
+}
