@@ -61,6 +61,8 @@ abstract contract Migration is BaseMigration {
       param.rnsDomainPrice.taxRatio = 1500; // 15%
       param.rnsDomainPrice.maxAcceptableAge = 24 hours;
       param.rnsDomainPrice.aggregator = 0xBaA0AfA2f390349e0074bE787509a098e3044fc8;
+      param.rnsDomainPrice.priceFeedRegistry = 0xd3Aa8f60553cE9Cb9FDE7dDC3F796D15dc8B87B3;
+      param.rnsDomainPrice.ronUsdFeedId = 0x000348db760241ba2b0c3a81e6da756208d658ac20ebd82e291c2f08d1d33f96;
       param.rnsDomainPrice.domainPriceScaleRule = PeriodScaler({ ratio: 500, period: 30 days * 3 });
 
       // RNSUnified
@@ -141,6 +143,8 @@ abstract contract Migration is BaseMigration {
       param.rnsDomainPrice.taxRatio = 1500; // 15%
       param.rnsDomainPrice.maxAcceptableAge = 24 hours;
       param.rnsDomainPrice.aggregator = 0x0B6074F21488B95945989E513EFEA070096d931D;
+      param.rnsDomainPrice.priceFeedRegistry = 0x7D21f62Da4ab252159bD865F3E3144B1D94E544D;
+      param.rnsDomainPrice.ronUsdFeedId = 0x0003892129eeb6c0d5d33bd734b0ca0d409130f5984d6051452a777f103ce628;
       param.rnsDomainPrice.domainPriceScaleRule = PeriodScaler({ ratio: 500, period: 30 days * 3 });
 
       // RNSUnified

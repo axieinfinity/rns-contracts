@@ -4,10 +4,7 @@ pragma solidity ^0.8.19;
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { AccessControlEnumerable } from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
-import {
-  ChainlinkPriceFeed,
-  ChainlinkPriceFeedConsumer
-} from "@contract-libs/price-feeds/chainlink/ChainlinkPriceFeedConsumer.sol";
+import { PriceFeedRegistryConsumerUpgradeable } from "./extensions/PriceFeedRegistryConsumerUpgradeable.sol";
 import { INSUnified } from "./interfaces/INSUnified.sol";
 import { INSAuction } from "./interfaces/INSAuction.sol";
 import { INSDomainPrice } from "./interfaces/INSDomainPrice.sol";
@@ -17,7 +14,12 @@ import { LibSafeRange } from "./libraries/math/LibSafeRange.sol";
 import { LibString } from "./libraries/LibString.sol";
 import { LibRNSDomain } from "./libraries/LibRNSDomain.sol";
 
-contract RNSDomainPrice is Initializable, AccessControlEnumerable, ChainlinkPriceFeedConsumer, INSDomainPrice {
+contract RNSDomainPrice is
+  Initializable,
+  AccessControlEnumerable,
+  PriceFeedRegistryConsumerUpgradeable,
+  INSDomainPrice
+{
   using LibString for *;
   using LibRNSDomain for string;
   using LibPeriodScaler for PeriodScaler;
@@ -98,30 +100,31 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, ChainlinkPric
     _setDomainPriceScaleRule(domainPriceScaleRule);
   }
 
-  function initializeV2(address aggregator, uint64 maxAcceptableAge) external reinitializer(2) {
+  /**
+   * @dev Kept as a no-op: the deployment kit requires the number of `initialize*` functions to equal the current
+   * initialized version. Both live proxies are already at version 2, so this can no longer be executed on them.
+   */
+  function initializeV2(address, uint64) external reinitializer(2) { }
+
+  function initializeV3(address registry, bytes32 feedId, uint64 maxAcceptableAge) external reinitializer(3) {
+    _updatePriceFeedRegistry(registry);
     _updatePriceFeed({
-      aggregator: aggregator,
-      tokenInDecimal: RON_DECIMALS,
-      tokenOutDecimal: USD_DECIMALS,
-      maxAcceptableAge: maxAcceptableAge
+      feedId: feedId, tokenInDecimal: RON_DECIMALS, tokenOutDecimal: USD_DECIMALS, maxAcceptableAge: maxAcceptableAge
     });
   }
 
   /**
    * @inheritdoc INSDomainPrice
    */
-  function getPriceFeedData() external view returns (ChainlinkPriceFeed memory) {
-    return _getPriceFeed();
-  }
-
-  /**
-   * @inheritdoc INSDomainPrice
-   */
-  function setPriceFeedData(address aggregator, uint8 tokenInDecimal, uint8 tokenOutDecimal, uint64 maxAcceptableAge)
-    external
-    onlyRole(DEFAULT_ADMIN_ROLE)
-  {
-    _updatePriceFeed(aggregator, tokenInDecimal, tokenOutDecimal, maxAcceptableAge);
+  function setPriceFeedRegistry(
+    address registry,
+    bytes32 feedId,
+    uint8 tokenInDecimal,
+    uint8 tokenOutDecimal,
+    uint64 maxAcceptableAge
+  ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    _updatePriceFeedRegistry(registry);
+    _updatePriceFeed(feedId, tokenInDecimal, tokenOutDecimal, maxAcceptableAge);
   }
 
   /**
@@ -331,14 +334,14 @@ contract RNSDomainPrice is Initializable, AccessControlEnumerable, ChainlinkPric
    * @inheritdoc INSDomainPrice
    */
   function convertUSDToRON(uint256 usdWei) public view returns (uint256 ronWei) {
-    return _getPriceFeed().convertTokenOut2TokenIn({ tokenOutAmount: usdWei });
+    return _convertTokenOut2TokenIn(usdWei);
   }
 
   /**
    * @inheritdoc INSDomainPrice
    */
   function convertRONToUSD(uint256 ronWei) public view returns (uint256 usdWei) {
-    return _getPriceFeed().convertTokenIn2TokenOut({ tokenInAmount: ronWei });
+    return _convertTokenIn2TokenOut(ronWei);
   }
 
   /**

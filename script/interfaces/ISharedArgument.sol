@@ -46,6 +46,8 @@ interface ISharedArgument is IGeneralConfig {
     uint256 taxRatio;
     PeriodScaler domainPriceScaleRule;
     address aggregator;
+    address priceFeedRegistry;
+    bytes32 ronUsdFeedId;
     RNSAuction rnsAuction;
     uint64 maxAcceptableAge;
   }
