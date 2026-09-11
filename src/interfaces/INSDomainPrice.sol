@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import { PeriodScaler } from "../libraries/math/PeriodScalingUtils.sol";
-import { ChainlinkPriceFeed } from "@contract-libs/price-feeds/chainlink/LibChainlinkPriceFeed.sol";
 
 interface INSDomainPrice {
   error InvalidArrayLength();
@@ -47,20 +46,21 @@ interface INSDomainPrice {
   event DomainPriceScaleRuleUpdated(address indexed operator, uint192 ratio, uint64 period);
 
   /**
-   * @dev Returns the Chainlink oracle config.
-   */
-  function getPriceFeedData() external view returns (ChainlinkPriceFeed memory);
-
-  /**
-   * @dev Sets the Chainlink oracle config.
+   * @dev Sets the PriceFeedRegistry (Chainlink Data Streams) and the RON/USD feed config.
+   * The current config is readable via `priceRegistryData()`.
    *
    * Requirements:
    * - The method caller is admin.
    *
-   * Emits events {ChainlinkPriceFeedUpdated}.
+   * Emits events {PriceFeedRegistryUpdated} and {PriceFeedUpdated}.
    */
-  function setPriceFeedData(address aggregator, uint8 tokenInDecimal, uint8 tokenOutDecimal, uint64 maxAcceptableAge)
-    external;
+  function setPriceFeedRegistry(
+    address registry,
+    bytes32 feedId,
+    uint8 tokenInDecimal,
+    uint8 tokenOutDecimal,
+    uint64 maxAcceptableAge
+  ) external;
 
   /**
    * @dev Returns the percentage to scale from domain price each period.
